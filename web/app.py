@@ -36,11 +36,9 @@ CONFIG_FILE = Path("config/config.yaml")
 @app.route('/')
 def index():
     """Main dashboard."""
-    # Check if license is activated
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
     license_data = load_license()
-    
-    if not license_data:
-        return redirect(url_for('activate'))
     
     # Get pipeline status
     status = get_pipeline_status()
@@ -191,7 +189,7 @@ def login():
 def logout():
     """Logout."""
     session.clear()
-    return redirect(url_for('activate'))
+    return redirect(url_for('login'))
 
 @app.route('/api/status')
 def api_status():
