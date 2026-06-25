@@ -7,6 +7,7 @@ argv into service calls + presenter output.
 from __future__ import annotations
 
 import sys
+from pathlib import Path
 
 from ..application.service import PipelineService
 from ..domain import stages
@@ -198,6 +199,24 @@ def main(argv: list[str] | None = None) -> int:
         else:
             print(f"❌ License inactive: {info.get('error', 'unknown')}")
         return 0
+
+    elif cmd == "analyze" and rest:
+        from ..seo import analyze_draft, format_report
+        task_id = rest[0]
+        draft_path = f"workspace/drafts/{task_id}/draft.md"
+        if not Path(draft_path).exists():
+            print(f"❌ Draft not found: {draft_path}")
+            return 1
+
+        result = analyze_draft(draft_path)
+        report = format_report(task_id, result)
+        report_path = f"workspace/drafts/{task_id}/analysis-report.md"
+        Path(report_path).parent.mkdir(parents=True, exist_ok=True)
+        Path(report_path).write_text(report)
+
+        print(report)
+        print(f"\n📄 Report saved: {report_path}")
+        return 0 if result.verdict == "PASS" else 1
 
     else:
         print(USAGE)
