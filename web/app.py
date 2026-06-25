@@ -137,15 +137,27 @@ def settings():
     config = load_config()
     return render_template('settings.html', license=license_data, config=config)
 
-@app.route('/research', methods=['POST'])
+@app.route('/research', methods=['GET', 'POST'])
 def research():
     """Start research for a topic."""
-    topic = request.form.get('topic', '').strip()
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
+    
+    # Get topic from GET or POST
+    topic = request.args.get('topic', '') or request.form.get('topic', '')
+    topic = topic.strip()
+    
     if not topic:
         return jsonify({"error": "Please enter a topic"}), 400
     
     # Run research (simplified)
     idea_id = slugify(topic)
+    
+    # Add to idea bank
+    idea_bank = WORKSPACE / 'idea-bank.md'
+    with open(idea_bank, 'a') as f:
+        entry = f"\n### [H] {topic}\n- idea_id: {idea_id}\n- category: general\n- source: smart-suggestion\n- status: idea\n"
+        f.write(entry)
     
     return jsonify({
         "success": True,
