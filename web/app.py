@@ -159,11 +159,7 @@ def research():
         entry = f"\n### [H] {topic}\n- idea_id: {idea_id}\n- category: general\n- source: smart-suggestion\n- status: idea\n"
         f.write(entry)
     
-    return jsonify({
-        "success": True,
-        "idea_id": idea_id,
-        "message": f"Research started for: {topic}"
-    })
+    return redirect(url_for('articles'))
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -212,13 +208,13 @@ def logout():
 def api_add_topic():
     """Add a new topic to idea bank."""
     if not session.get('logged_in'):
-        return jsonify({'success': False, 'error': 'Not logged in'}), 401
+        return redirect(url_for('login'))
     
     title = request.form.get('title', '').strip()
     category = request.form.get('category', 'general')
     
     if not title:
-        return jsonify({'success': False, 'error': 'Title required'}), 400
+        return redirect(url_for('articles'))
     
     # Add to idea bank
     idea_bank = WORKSPACE / 'idea-bank.md'
@@ -226,7 +222,7 @@ def api_add_topic():
         entry = f"\n### [M] {title}\n- category: {category}\n- status: idea\n"
         f.write(entry)
     
-    return jsonify({'success': True, 'title': title, 'category': category})
+    return redirect(url_for('articles'))
     return jsonify({'success': True, 'title': title, 'category': category})
 
 
