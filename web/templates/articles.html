@@ -3,62 +3,89 @@
 {% block title %}ContentPilot — Articles{% endblock %}
 
 {% block content %}
-<div x-data="{ filter: 'all' }">
+<div x-data="{ filter: 'all', search: '' }">
     
     <!-- Header -->
-    <div class="flex items-center justify-between mb-8">
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
         <div>
             <h1 class="text-3xl font-bold text-white">📚 Articles</h1>
-            <p class="text-surface-400 mt-1">Manage your blog content</p>
+            <p class="text-surface-400 mt-1">Manage your blog content pipeline</p>
         </div>
-        <a href="/trending" class="inline-flex items-center gap-2 px-4 py-2 bg-primary-500 text-white rounded-xl hover:bg-primary-600 transition-colors font-medium">
+        <a href="/trending" class="inline-flex items-center gap-2 px-4 py-2 bg-primary-500 text-white rounded-xl hover:bg-primary-600 transition-colors font-medium text-sm">
             <i data-lucide="plus" class="w-4 h-4"></i> New Article
         </a>
     </div>
     
-    <!-- Filters -->
-    <div class="flex flex-wrap gap-2 mb-6">
-        <button @click="filter = 'all'" :class="filter === 'all' ? 'bg-primary-500 text-white' : 'bg-surface-800 text-surface-400 hover:text-white'" class="px-4 py-2 rounded-lg text-sm font-medium transition-colors">
-            All
-        </button>
-        <button @click="filter = 'published'" :class="filter === 'published' ? 'bg-green-500 text-white' : 'bg-surface-800 text-surface-400 hover:text-white'" class="px-4 py-2 rounded-lg text-sm font-medium transition-colors">
-            Published
-        </button>
-        <button @click="filter = 'draft'" :class="filter === 'draft' ? 'bg-yellow-500 text-white' : 'bg-surface-800 text-surface-400 hover:text-white'" class="px-4 py-2 rounded-lg text-sm font-medium transition-colors">
-            Draft
-        </button>
-        <button @click="filter = 'reviewing'" :class="filter === 'reviewing' ? 'bg-blue-500 text-white' : 'bg-surface-800 text-surface-400 hover:text-white'" class="px-4 py-2 rounded-lg text-sm font-medium transition-colors">
-            Reviewing
-        </button>
-        <button @click="filter = 'researching'" :class="filter === 'researching' ? 'bg-purple-500 text-white' : 'bg-surface-800 text-surface-400 hover:text-white'" class="px-4 py-2 rounded-lg text-sm font-medium transition-colors">
-            Researching
-        </button>
+    <!-- Filters + Search -->
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+        <div class="flex flex-wrap gap-2">
+            <button @click="filter = 'all'" 
+                    :class="filter === 'all' ? 'bg-primary-500 text-white' : 'bg-surface-800 text-surface-400 hover:text-white'"
+                    class="px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                All
+            </button>
+            <button @click="filter = 'researching'" 
+                    :class="filter === 'researching' ? 'bg-purple-500 text-white' : 'bg-surface-800 text-surface-400 hover:text-white'"
+                    class="px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                <i data-lucide="search" class="w-3 h-3 inline mr-1"></i> Researching
+            </button>
+            <button @click="filter = 'drafted'" 
+                    :class="filter === 'drafted' ? 'bg-blue-500 text-white' : 'bg-surface-800 text-surface-400 hover:text-white'"
+                    class="px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                <i data-lucide="pen-tool" class="w-3 h-3 inline mr-1"></i> Drafted
+            </button>
+            <button @click="filter = 'gated'" 
+                    :class="filter === 'gated' ? 'bg-yellow-500 text-white' : 'bg-surface-800 text-surface-400 hover:text-white'"
+                    class="px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                <i data-lucide="shield-check" class="w-3 h-3 inline mr-1"></i> SEO Checked
+            </button>
+            <button @click="filter = 'published'" 
+                    :class="filter === 'published' ? 'bg-green-500 text-white' : 'bg-surface-800 text-surface-400 hover:text-white'"
+                    class="px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                <i data-lucide="rocket" class="w-3 h-3 inline mr-1"></i> Published
+            </button>
+        </div>
+        
+        <!-- Search -->
+        <div class="relative w-full sm:w-64">
+            <i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-surface-500"></i>
+            <input type="text" 
+                   x-model="search"
+                   placeholder="Search articles..."
+                   class="w-full pl-10 pr-4 py-2 bg-surface-800 border border-surface-700 rounded-lg text-white text-sm placeholder-surface-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+        </div>
     </div>
     
     <!-- Articles List -->
     {% if articles %}
     <div class="space-y-3">
         {% for article in articles %}
-        <div x-show="filter === 'all' || filter === '{{ article.stage }}'"
-             class="bg-surface-900/50 border border-surface-700/50 rounded-xl p-5 hover:border-surface-600 transition-colors">
-            <div class="flex items-center justify-between">
-                <div class="flex items-center gap-4">
-                    <div class="w-12 h-12 bg-primary-500/10 rounded-xl flex items-center justify-center">
-                        <i data-lucide="file-text" class="w-6 h-6 text-primary-400"></i>
+        <div x-show="(filter === 'all' || filter === '{{ article.stage }}') && (search === '' || '{{ article.title|default(article.idea_id) }}'.toLowerCase().includes(search.toLowerCase()))"
+             x-transition
+             class="bg-surface-900/50 border border-surface-700/50 rounded-2xl p-5 hover:border-surface-600 transition-all">
+            <div class="flex items-center justify-between gap-4">
+                <div class="flex items-center gap-4 flex-1 min-w-0">
+                    <div class="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0
+                        {% if article.stage == 'published' %}bg-green-500/10
+                        {% elif article.stage == 'gated' %}bg-yellow-500/10
+                        {% elif article.stage == 'drafted' %}bg-primary-500/10
+                        {% elif article.stage == 'researching' %}bg-purple-500/10
+                        {% else %}bg-surface-700{% endif %}">
+                        <i data-lucide="{% if article.stage == 'published' %}check-circle{% elif article.stage == 'drafted' %}pen-tool{% elif article.stage == 'researching' %}search{% else %}file-text{% endif %}" 
+                           class="w-6 h-6 {% if article.stage == 'published' %}text-green-400{% elif article.stage == 'drafted' %}text-primary-400{% elif article.stage == 'researching' %}text-purple-400{% else %}text-surface-400{% endif %}"></i>
                     </div>
-                    <div>
-                        <h3 class="font-medium text-white">{{ article.title }}</h3>
-                        <p class="text-sm text-surface-400 mt-1">
-                            {{ article.idea_id }} • 
-                            <span class="text-surface-500">{{ article.updated_at|default('Recently') }}</span>
+                    <div class="min-w-0">
+                        <h3 class="font-medium text-white truncate">{{ article.title|default(article.idea_id) }}</h3>
+                        <p class="text-sm text-surface-400 mt-0.5 truncate">
+                            {{ article.idea_id }} • {{ article.updated_at|default('Recently') }}
                         </p>
                     </div>
                 </div>
-                <div class="flex items-center gap-3">
+                <div class="flex items-center gap-3 flex-shrink-0">
                     <span class="px-3 py-1 text-xs font-medium rounded-full
                         {% if article.stage == 'published' %}bg-green-500/20 text-green-400
                         {% elif article.stage == 'gated' %}bg-yellow-500/20 text-yellow-400
-                        {% elif article.stage == 'reviewing' %}bg-blue-500/20 text-blue-400
+                        {% elif article.stage == 'drafted' %}bg-primary-500/20 text-primary-400
                         {% elif article.stage == 'researching' %}bg-purple-500/20 text-purple-400
                         {% else %}bg-surface-700 text-surface-300{% endif %}">
                         {{ article.stage }}
@@ -72,13 +99,20 @@
         {% endfor %}
     </div>
     {% else %}
-    <div class="bg-surface-900/50 border border-surface-700/50 rounded-xl p-12 text-center">
-        <i data-lucide="inbox" class="w-16 h-16 text-surface-600 mx-auto mb-4"></i>
+    <div class="bg-surface-900/50 border border-surface-700/50 rounded-2xl p-12 text-center">
+        <div class="w-16 h-16 bg-surface-800 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <i data-lucide="file-text" class="w-8 h-8 text-surface-600"></i>
+        </div>
         <h3 class="text-lg font-semibold text-white mb-2">No articles yet</h3>
-        <p class="text-surface-400 mb-6">Start by finding trending topics or writing a new article</p>
-        <a href="/trending" class="inline-flex items-center gap-2 px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors">
-            <i data-lucide="plus" class="w-4 h-4"></i> Find Topics
-        </a>
+        <p class="text-surface-400 text-sm mb-6 max-w-sm mx-auto">Start by finding trending topics or creating a new article from your idea bank</p>
+        <div class="flex items-center justify-center gap-3">
+            <a href="/trending" class="inline-flex items-center gap-2 px-4 py-2 bg-primary-500 text-white text-sm rounded-lg hover:bg-primary-600 transition-colors">
+                <i data-lucide="trending-up" class="w-4 h-4"></i> Find Topics
+            </a>
+            <a href="/articles" class="inline-flex items-center gap-2 px-4 py-2 bg-surface-800 text-surface-300 text-sm rounded-lg hover:bg-surface-700 transition-colors">
+                <i data-lucide="plus" class="w-4 h-4"></i> Add Manual
+            </a>
+        </div>
     </div>
     {% endif %}
 </div>

@@ -5,210 +5,230 @@
 {% block content %}
 <!-- Welcome Header -->
 <div class="mb-8">
-    <h1 class="text-3xl font-bold text-white">Welcome back! 👋</h1>
-    <p class="text-surface-400 mt-1">Here's what's happening with your content today.</p>
+    <h1 class="text-3xl font-bold text-white">Dashboard</h1>
+    <p class="text-surface-400 mt-1">Overview of your blog automation pipeline</p>
 </div>
 
 <!-- Stats Grid -->
 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
     
-    <!-- Total Articles -->
-    <div class="bg-surface-900/50 border border-surface-700/50 rounded-xl p-5">
+    <!-- Total Ideas -->
+    <div class="bg-surface-900/50 border border-surface-700/50 rounded-2xl p-5 hover:border-primary-500/30 transition-colors">
         <div class="flex items-center justify-between">
             <div>
-                <p class="text-sm text-surface-400">Total Articles</p>
-                <p class="text-3xl font-bold text-white mt-1">{{ status.total|default(0) }}</p>
+                <p class="text-sm text-surface-400">Ideas in Bank</p>
+                <p class="text-3xl font-bold text-white mt-1">{{ stats.ideas|default(0) }}</p>
             </div>
             <div class="w-12 h-12 bg-primary-500/10 rounded-xl flex items-center justify-center">
-                <i data-lucide="file-text" class="w-6 h-6 text-primary-400"></i>
+                <i data-lucide="lightbulb" class="w-6 h-6 text-primary-400"></i>
             </div>
         </div>
+        <p class="text-xs text-surface-500 mt-3">Ready to be researched</p>
     </div>
     
     <!-- In Progress -->
-    <div class="bg-surface-900/50 border border-surface-700/50 rounded-xl p-5">
+    <div class="bg-surface-900/50 border border-surface-700/50 rounded-2xl p-5 hover:border-yellow-500/30 transition-colors">
         <div class="flex items-center justify-between">
             <div>
                 <p class="text-sm text-surface-400">In Progress</p>
-                <p class="text-3xl font-bold text-white mt-1">{{ status.wip|default(0) }}</p>
+                <p class="text-3xl font-bold text-white mt-1">{{ stats.in_progress|default(0) }}</p>
             </div>
             <div class="w-12 h-12 bg-yellow-500/10 rounded-xl flex items-center justify-center">
                 <i data-lucide="loader" class="w-6 h-6 text-yellow-400"></i>
             </div>
         </div>
+        <p class="text-xs text-surface-500 mt-3">Currently in pipeline</p>
     </div>
     
     <!-- Published -->
-    <div class="bg-surface-900/50 border border-surface-700/50 rounded-xl p-5">
+    <div class="bg-surface-900/50 border border-surface-700/50 rounded-2xl p-5 hover:border-green-500/30 transition-colors">
         <div class="flex items-center justify-between">
             <div>
                 <p class="text-sm text-surface-400">Published</p>
-                <p class="text-3xl font-bold text-white mt-1">{{ status.stages.get("published", 0) }}</p>
+                <p class="text-3xl font-bold text-white mt-1">{{ stats.published|default(0) }}</p>
             </div>
             <div class="w-12 h-12 bg-green-500/10 rounded-xl flex items-center justify-center">
                 <i data-lucide="check-circle" class="w-6 h-6 text-green-400"></i>
             </div>
         </div>
+        <p class="text-xs text-surface-500 mt-3">Live on your blog</p>
     </div>
     
-    <!-- Total Views -->
-    <div class="bg-surface-900/50 border border-surface-700/50 rounded-xl p-5">
+    <!-- SEO Score -->
+    <div class="bg-surface-900/50 border border-surface-700/50 rounded-2xl p-5 hover:border-purple-500/30 transition-colors">
         <div class="flex items-center justify-between">
             <div>
-                <p class="text-sm text-surface-400">Total Views</p>
-                <p class="text-3xl font-bold text-white mt-1">0</p>
+                <p class="text-sm text-surface-400">Avg SEO Score</p>
+                <p class="text-3xl font-bold text-white mt-1">{{ stats.avg_seo|default(0) }}</p>
             </div>
             <div class="w-12 h-12 bg-purple-500/10 rounded-xl flex items-center justify-center">
-                <i data-lucide="eye" class="w-6 h-6 text-purple-400"></i>
+                <i data-lucide="bar-chart" class="w-6 h-6 text-purple-400"></i>
             </div>
+        </div>
+        <p class="text-xs text-surface-500 mt-3">Quality indicator</p>
+    </div>
+</div>
+
+<!-- Pipeline Status -->
+<div class="bg-surface-900/50 border border-surface-700/50 rounded-2xl p-6 mb-8">
+    <div class="flex items-center justify-between mb-6">
+        <h2 class="text-lg font-semibold text-white">Pipeline Status</h2>
+        <a href="/articles" class="text-sm text-primary-400 hover:text-primary-300 transition-colors">View All →</a>
+    </div>
+    
+    <div class="flex items-center justify-between gap-2 overflow-x-auto pb-2">
+        <!-- Research -->
+        <div class="flex-1 min-w-[100px]">
+            <div class="flex items-center gap-2 mb-2">
+                <div class="w-8 h-8 rounded-lg bg-surface-800 flex items-center justify-center">
+                    <i data-lucide="search" class="w-4 h-4 text-surface-400"></i>
+                </div>
+                <span class="text-sm text-surface-400">Research</span>
+            </div>
+            <p class="text-2xl font-bold text-white">{{ pipeline.researching|default(0) }}</p>
+        </div>
+        
+        <i data-lucide="chevron-right" class="w-5 h-5 text-surface-600 flex-shrink-0"></i>
+        
+        <!-- Draft -->
+        <div class="flex-1 min-w-[100px]">
+            <div class="flex items-center gap-2 mb-2">
+                <div class="w-8 h-8 rounded-lg bg-primary-500/10 flex items-center justify-center">
+                    <i data-lucide="pen-tool" class="w-4 h-4 text-primary-400"></i>
+                </div>
+                <span class="text-sm text-surface-400">Draft</span>
+            </div>
+            <p class="text-2xl font-bold text-white">{{ pipeline.drafted|default(0) }}</p>
+        </div>
+        
+        <i data-lucide="chevron-right" class="w-5 h-5 text-surface-600 flex-shrink-0"></i>
+        
+        <!-- SEO Analyze -->
+        <div class="flex-1 min-w-[100px]">
+            <div class="flex items-center gap-2 mb-2">
+                <div class="w-8 h-8 rounded-lg bg-surface-800 flex items-center justify-center">
+                    <i data-lucide="scan" class="w-4 h-4 text-surface-400"></i>
+                </div>
+                <span class="text-sm text-surface-400">SEO Check</span>
+            </div>
+            <p class="text-2xl font-bold text-white">{{ pipeline.gated|default(0) }}</p>
+        </div>
+        
+        <i data-lucide="chevron-right" class="w-5 h-5 text-surface-600 flex-shrink-0"></i>
+        
+        <!-- Quality Gate -->
+        <div class="flex-1 min-w-[100px]">
+            <div class="flex items-center gap-2 mb-2">
+                <div class="w-8 h-8 rounded-lg bg-surface-800 flex items-center justify-center">
+                    <i data-lucide="shield-check" class="w-4 h-4 text-surface-400"></i>
+                </div>
+                <span class="text-sm text-surface-400">Quality</span>
+            </div>
+            <p class="text-2xl font-bold text-white">{{ pipeline.reviewing|default(0) }}</p>
+        </div>
+        
+        <i data-lucide="chevron-right" class="w-5 h-5 text-surface-600 flex-shrink-0"></i>
+        
+        <!-- Published -->
+        <div class="flex-1 min-w-[100px]">
+            <div class="flex items-center gap-2 mb-2">
+                <div class="w-8 h-8 rounded-lg bg-green-500/10 flex items-center justify-center">
+                    <i data-lucide="rocket" class="w-4 h-4 text-green-400"></i>
+                </div>
+                <span class="text-sm text-surface-400">Published</span>
+            </div>
+            <p class="text-2xl font-bold text-white">{{ pipeline.published|default(0) }}</p>
         </div>
     </div>
 </div>
 
-<!-- Main Content Grid -->
+<!-- Quick Actions + Recent -->
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
     
-    <!-- Pipeline Status (2 cols) -->
-    <div class="lg:col-span-2 bg-surface-900/50 border border-surface-700/50 rounded-xl p-6">
-        <div class="flex items-center justify-between mb-6">
-            <h2 class="text-lg font-semibold text-white">Pipeline Status</h2>
-            <a href="/articles" class="text-sm text-primary-400 hover:text-primary-300">View All →</a>
-        </div>
-        
-        <div class="grid grid-cols-5 gap-4">
-            <!-- Research -->
-            <div class="text-center">
-                <div class="w-16 h-16 mx-auto rounded-full border-4 border-surface-700 flex items-center justify-center mb-2">
-                    <i data-lucide="search" class="w-6 h-6 text-surface-500"></i>
-                </div>
-                <p class="text-sm text-surface-400">Research</p>
-                <p class="text-lg font-semibold text-white">{{ status.stages.get("researching", 0) }}</p>
-            </div>
-            
-            <!-- Drafting -->
-            <div class="text-center">
-                <div class="w-16 h-16 mx-auto rounded-full border-4 border-primary-500 flex items-center justify-center mb-2">
-                    <i data-lucide="pen-tool" class="w-6 h-6 text-primary-400"></i>
-                </div>
-                <p class="text-sm text-surface-400">Drafting</p>
-                <p class="text-lg font-semibold text-white">{{ status.stages.get("drafted", 0) }}</p>
-            </div>
-            
-            <!-- Reviewing -->
-            <div class="text-center">
-                <div class="w-16 h-16 mx-auto rounded-full border-4 border-surface-700 flex items-center justify-center mb-2">
-                    <i data-lucide="eye" class="w-6 h-6 text-surface-500"></i>
-                </div>
-                <p class="text-sm text-surface-400">Reviewing</p>
-                <p class="text-lg font-semibold text-white">{{ status.stages.get("reviewing", 0) }}</p>
-            </div>
-            
-            <!-- Ready -->
-            <div class="text-center">
-                <div class="w-16 h-16 mx-auto rounded-full border-4 border-surface-700 flex items-center justify-center mb-2">
-                    <i data-lucide="check" class="w-6 h-6 text-surface-500"></i>
-                </div>
-                <p class="text-sm text-surface-400">Ready</p>
-                <p class="text-lg font-semibold text-white">{{ status.stages.get("gated", 0) }}</p>
-            </div>
-            
-            <!-- Published -->
-            <div class="text-center">
-                <div class="w-16 h-16 mx-auto rounded-full border-4 border-green-500 flex items-center justify-center mb-2">
-                    <i data-lucide="rocket" class="w-6 h-6 text-green-400"></i>
-                </div>
-                <p class="text-sm text-surface-400">Published</p>
-                <p class="text-lg font-semibold text-white">{{ status.stages.get("published", 0) }}</p>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Quick Actions (1 col) -->
-    <div class="bg-surface-900/50 border border-surface-700/50 rounded-xl p-6">
-        <h2 class="text-lg font-semibold text-white mb-6">Quick Actions</h2>
+    <!-- Quick Actions -->
+    <div class="bg-surface-900/50 border border-surface-700/50 rounded-2xl p-6">
+        <h2 class="text-lg font-semibold text-white mb-4">Quick Actions</h2>
         
         <div class="space-y-3">
-            <a href="/trending" class="flex items-center gap-4 p-4 bg-surface-800/50 hover:bg-surface-800 border border-surface-700/50 rounded-xl transition-all group">
+            <a href="/trending" class="flex items-center gap-4 p-4 bg-surface-800/50 hover:bg-surface-800 border border-surface-700/30 rounded-xl transition-all group">
                 <div class="w-10 h-10 bg-orange-500/10 rounded-lg flex items-center justify-center group-hover:bg-orange-500/20 transition-colors">
                     <i data-lucide="flame" class="w-5 h-5 text-orange-400"></i>
                 </div>
-                <div>
-                    <p class="font-medium text-white">Find Trending Topics</p>
-                    <p class="text-xs text-surface-400">Discover what's hot right now</p>
+                <div class="flex-1">
+                    <p class="font-medium text-white text-sm">Find Trending Topics</p>
+                    <p class="text-xs text-surface-400">Discover what's hot</p>
                 </div>
+                <i data-lucide="arrow-right" class="w-4 h-4 text-surface-500 group-hover:text-white transition-colors"></i>
             </a>
             
-            <a href="/articles" class="flex items-center gap-4 p-4 bg-surface-800/50 hover:bg-surface-800 border border-surface-700/50 rounded-xl transition-all group">
+            <a href="/articles" class="flex items-center gap-4 p-4 bg-surface-800/50 hover:bg-surface-800 border border-surface-700/30 rounded-xl transition-all group">
                 <div class="w-10 h-10 bg-primary-500/10 rounded-lg flex items-center justify-center group-hover:bg-primary-500/20 transition-colors">
-                    <i data-lucide="plus" class="w-5 h-5 text-primary-400"></i>
+                    <i data-lucide="file-plus" class="w-5 h-5 text-primary-400"></i>
                 </div>
-                <div>
-                    <p class="font-medium text-white">New Article</p>
-                    <p class="text-xs text-surface-400">Start writing something new</p>
+                <div class="flex-1">
+                    <p class="font-medium text-white text-sm">New Article</p>
+                    <p class="text-xs text-surface-400">Start writing</p>
                 </div>
+                <i data-lucide="arrow-right" class="w-4 h-4 text-surface-500 group-hover:text-white transition-colors"></i>
             </a>
             
-            <a href="/articles" class="flex items-center gap-4 p-4 bg-surface-800/50 hover:bg-surface-800 border border-surface-700/50 rounded-xl transition-all group">
-                <div class="w-10 h-10 bg-blue-500/10 rounded-lg flex items-center justify-center group-hover:bg-blue-500/20 transition-colors">
-                    <i data-lucide="book-open" class="w-5 h-5 text-blue-400"></i>
-                </div>
-                <div>
-                    <p class="font-medium text-white">View Articles</p>
-                    <p class="text-xs text-surface-400">Manage your content</p>
-                </div>
-            </a>
-            
-            <a href="/settings" class="flex items-center gap-4 p-4 bg-surface-800/50 hover:bg-surface-800 border border-surface-700/50 rounded-xl transition-all group">
+            <a href="/settings" class="flex items-center gap-4 p-4 bg-surface-800/50 hover:bg-surface-800 border border-surface-700/30 rounded-xl transition-all group">
                 <div class="w-10 h-10 bg-surface-600/10 rounded-lg flex items-center justify-center group-hover:bg-surface-600/20 transition-colors">
                     <i data-lucide="settings" class="w-5 h-5 text-surface-400"></i>
                 </div>
-                <div>
-                    <p class="font-medium text-white">Settings</p>
-                    <p class="text-xs text-surface-400">Configure your account</p>
+                <div class="flex-1">
+                    <p class="font-medium text-white text-sm">Settings</p>
+                    <p class="text-xs text-surface-400">Configure pipeline</p>
                 </div>
+                <i data-lucide="arrow-right" class="w-4 h-4 text-surface-500 group-hover:text-white transition-colors"></i>
             </a>
         </div>
     </div>
-</div>
-
-<!-- Recent Articles -->
-<div class="mt-6 bg-surface-900/50 border border-surface-700/50 rounded-xl p-6">
-    <div class="flex items-center justify-between mb-6">
-        <h2 class="text-lg font-semibold text-white">Recent Articles</h2>
-        <a href="/articles" class="text-sm text-primary-400 hover:text-primary-300">View All →</a>
-    </div>
     
-    {% if articles %}
-    <div class="space-y-3">
-        {% for article in articles[:5] %}
-        <div class="flex items-center justify-between p-4 bg-surface-800/50 rounded-xl">
-            <div class="flex items-center gap-4">
-                <div class="w-10 h-10 bg-primary-500/10 rounded-lg flex items-center justify-center">
-                    <i data-lucide="file-text" class="w-5 h-5 text-primary-400"></i>
-                </div>
-                <div>
-                    <p class="font-medium text-white">{{ article.title }}</p>
-                    <p class="text-sm text-surface-400">{{ article.stage }}</p>
-                </div>
-            </div>
-            <span class="px-3 py-1 text-xs font-medium rounded-full
-                {% if article.stage == 'published' %}bg-green-500/20 text-green-400
-                {% elif article.stage == 'gated' %}bg-yellow-500/20 text-yellow-400
-                {% else %}bg-surface-700 text-surface-300{% endif %}">
-                {{ article.stage }}
-            </span>
+    <!-- Recent Articles -->
+    <div class="lg:col-span-2 bg-surface-900/50 border border-surface-700/50 rounded-2xl p-6">
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="text-lg font-semibold text-white">Recent Articles</h2>
+            <a href="/articles" class="text-sm text-primary-400 hover:text-primary-300 transition-colors">View All →</a>
         </div>
-        {% endfor %}
+        
+        {% if articles %}
+        <div class="space-y-3">
+            {% for article in articles[:5] %}
+            <div class="flex items-center justify-between p-4 bg-surface-800/50 rounded-xl hover:bg-surface-800 transition-colors">
+                <div class="flex items-center gap-4">
+                    <div class="w-10 h-10 rounded-lg flex items-center justify-center
+                        {% if article.stage == 'published' %}bg-green-500/10
+                        {% elif article.stage == 'gated' %}bg-yellow-500/10
+                        {% elif article.stage == 'drafted' %}bg-primary-500/10
+                        {% else %}bg-surface-700{% endif %}">
+                        <i data-lucide="{% if article.stage == 'published' %}check-circle{% elif article.stage == 'drafted' %}pen-tool{% else %}file-text{% endif %}" 
+                           class="w-5 h-5 {% if article.stage == 'published' %}text-green-400{% elif article.stage == 'drafted' %}text-primary-400{% else %}text-surface-400{% endif %}"></i>
+                    </div>
+                    <div>
+                        <p class="font-medium text-white text-sm">{{ article.title|default(article.idea_id) }}</p>
+                        <p class="text-xs text-surface-500">{{ article.stage }} • {{ article.updated_at|default('') }}</p>
+                    </div>
+                </div>
+                <span class="px-3 py-1 text-xs font-medium rounded-full
+                    {% if article.stage == 'published' %}bg-green-500/20 text-green-400
+                    {% elif article.stage == 'gated' %}bg-yellow-500/20 text-yellow-400
+                    {% elif article.stage == 'drafted' %}bg-primary-500/20 text-primary-400
+                    {% else %}bg-surface-700 text-surface-300{% endif %}">
+                    {{ article.stage }}
+                </span>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center py-8">
+            <i data-lucide="inbox" class="w-12 h-12 text-surface-600 mx-auto mb-3"></i>
+            <p class="text-surface-400 text-sm">No articles yet</p>
+            <a href="/trending" class="inline-flex items-center gap-2 mt-3 px-4 py-2 bg-primary-500 text-white text-sm rounded-lg hover:bg-primary-600 transition-colors">
+                <i data-lucide="plus" class="w-4 h-4"></i> Get Started
+            </a>
+        </div>
+        {% endif %}
     </div>
-    {% else %}
-    <div class="text-center py-12">
-        <i data-lucide="inbox" class="w-12 h-12 text-surface-600 mx-auto mb-4"></i>
-        <p class="text-surface-400">No articles yet</p>
-        <p class="text-sm text-surface-500 mt-1">Start by finding trending topics or writing a new article</p>
-        <a href="/trending" class="inline-flex items-center gap-2 mt-4 px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors">
-            <i data-lucide="plus" class="w-4 h-4"></i> Get Started
-        </a>
-    </div>
-    {% endif %}
 </div>
 {% endblock %}

@@ -3,70 +3,113 @@
 {% block title %}ContentPilot — Trending{% endblock %}
 
 {% block content %}
-<div x-data="{ filter: 'all' }">
+<div x-data="{ filter: 'all', search: '' }">
     
     <!-- Header -->
-    <div class="mb-8">
-        <h1 class="text-3xl font-bold text-white">🔥 Trending Topics</h1>
-        <p class="text-surface-400 mt-1">Discover what's popular right now</p>
-    </div>
-    
-    <!-- Filters -->
-    <div class="flex flex-wrap gap-2 mb-6">
-        <button @click="filter = 'all'" :class="filter === 'all' ? 'bg-primary-500 text-white' : 'bg-surface-800 text-surface-400 hover:text-white'" class="px-4 py-2 rounded-lg text-sm font-medium transition-colors">
-            All
-        </button>
-        <button @click="filter = 'devops'" :class="filter === 'devops' ? 'bg-orange-500 text-white' : 'bg-surface-800 text-surface-400 hover:text-white'" class="px-4 py-2 rounded-lg text-sm font-medium transition-colors">
-            DevOps
-        </button>
-        <button @click="filter = 'ai'" :class="filter === 'ai' ? 'bg-purple-500 text-white' : 'bg-surface-800 text-surface-400 hover:text-white'" class="px-4 py-2 rounded-lg text-sm font-medium transition-colors">
-            AI/Tech
-        </button>
-        <button @click="filter = 'webdev'" :class="filter === 'webdev' ? 'bg-blue-500 text-white' : 'bg-surface-800 text-surface-400 hover:text-white'" class="px-4 py-2 rounded-lg text-sm font-medium transition-colors">
-            Web Dev
-        </button>
-        <button @click="filter = 'security'" :class="filter === 'security' ? 'bg-red-500 text-white' : 'bg-surface-800 text-surface-400 hover:text-white'" class="px-4 py-2 rounded-lg text-sm font-medium transition-colors">
-            Security
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
+        <div>
+            <h1 class="text-3xl font-bold text-white">🔥 Trending Topics</h1>
+            <p class="text-surface-400 mt-1">Discover what's popular and start writing</p>
+        </div>
+        <button class="inline-flex items-center gap-2 px-4 py-2 bg-surface-800 text-surface-300 rounded-xl hover:bg-surface-700 transition-colors text-sm font-medium">
+            <i data-lucide="refresh-cw" class="w-4 h-4"></i> Refresh
         </button>
     </div>
     
-    <!-- Trending Topics -->
-    <div class="space-y-4">
+    <!-- Filters + Search -->
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+        <div class="flex flex-wrap gap-2">
+            <button @click="filter = 'all'" 
+                    :class="filter === 'all' ? 'bg-primary-500 text-white' : 'bg-surface-800 text-surface-400 hover:text-white'"
+                    class="px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                All
+            </button>
+            <button @click="filter = 'devops'" 
+                    :class="filter === 'devops' ? 'bg-orange-500 text-white' : 'bg-surface-800 text-surface-400 hover:text-white'"
+                    class="px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                <i data-lucide="server" class="w-3 h-3 inline mr-1"></i> DevOps
+            </button>
+            <button @click="filter = 'ai'" 
+                    :class="filter === 'ai' ? 'bg-purple-500 text-white' : 'bg-surface-800 text-surface-400 hover:text-white'"
+                    class="px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                <i data-lucide="brain" class="w-3 h-3 inline mr-1"></i> AI/Tech
+            </button>
+            <button @click="filter = 'webdev'" 
+                    :class="filter === 'webdev' ? 'bg-blue-500 text-white' : 'bg-surface-800 text-surface-400 hover:text-white'"
+                    class="px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                <i data-lucide="code" class="w-3 h-3 inline mr-1"></i> Web Dev
+            </button>
+            <button @click="filter = 'security'" 
+                    :class="filter === 'security' ? 'bg-red-500 text-white' : 'bg-surface-800 text-surface-400 hover:text-white'"
+                    class="px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                <i data-lucide="shield" class="w-3 h-3 inline mr-1"></i> Security
+            </button>
+        </div>
+        
+        <!-- Search -->
+        <div class="relative w-full sm:w-64">
+            <i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-surface-500"></i>
+            <input type="text" 
+                   x-model="search"
+                   placeholder="Search topics..."
+                   class="w-full pl-10 pr-4 py-2 bg-surface-800 border border-surface-700 rounded-lg text-white text-sm placeholder-surface-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+        </div>
+    </div>
+    
+    <!-- Topics Grid -->
+    {% if topics %}
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         {% for topic in topics %}
-        <div x-show="filter === 'all' || filter === '{{ topic.category|default('all') }}'"
-             class="bg-surface-900/50 border border-surface-700/50 rounded-xl p-5 hover:border-surface-600 transition-colors">
-            <div class="flex items-center justify-between">
-                <div class="flex items-center gap-4">
-                    <div class="w-12 h-12 bg-gradient-to-br from-orange-500/20 to-red-500/20 rounded-xl flex items-center justify-center">
-                        <i data-lucide="trending-up" class="w-6 h-6 text-orange-400"></i>
+        <div x-show="(filter === 'all' || filter === '{{ topic.category|default('all') }}') && (search === '' || '{{ topic.title }}'.toLowerCase().includes(search.toLowerCase()))"
+             x-transition
+             class="bg-surface-900/50 border border-surface-700/50 rounded-2xl p-5 hover:border-surface-600 transition-all group">
+            
+            <div class="flex items-start justify-between gap-4">
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="px-2 py-0.5 text-xs font-medium rounded
+                            {% if topic.category == 'devops' %}bg-orange-500/20 text-orange-400
+                            {% elif topic.category == 'ai' %}bg-purple-500/20 text-purple-400
+                            {% elif topic.category == 'webdev' %}bg-blue-500/20 text-blue-400
+                            {% elif topic.category == 'security' %}bg-red-500/20 text-red-400
+                            {% else %}bg-surface-700 text-surface-300{% endif %}">
+                            {{ topic.category|default('General') }}
+                        </span>
+                        {% if topic.trending %}
+                        <span class="px-2 py-0.5 text-xs font-medium rounded bg-orange-500/20 text-orange-400">
+                            <i data-lucide="trending-up" class="w-3 h-3 inline"></i> Trending
+                        </span>
+                        {% endif %}
                     </div>
-                    <div>
-                        <h3 class="font-medium text-white">{{ topic.title }}</h3>
-                        <p class="text-sm text-surface-400 mt-1">
-                            {{ topic.category|default('General') }} • 
-                            <span class="text-surface-500">{{ topic.source|default('') }}</span>
-                        </p>
-                    </div>
+                    <h3 class="font-semibold text-white mb-1">{{ topic.title }}</h3>
+                    {% if topic.description %}
+                    <p class="text-sm text-surface-400 line-clamp-2">{{ topic.description }}</p>
+                    {% endif %}
                 </div>
-                <div class="flex items-center gap-2">
-                    <a href="/research?topic={{ topic.title|urlencode }}" 
-                       class="px-4 py-2 bg-primary-500 text-white text-sm font-medium rounded-lg hover:bg-primary-600 transition-colors">
-                        <i data-lucide="pen-tool" class="w-4 h-4 inline mr-1"></i> Write
-                    </a>
-                    <button class="px-4 py-2 bg-surface-800 text-surface-300 text-sm font-medium rounded-lg hover:bg-surface-700 transition-colors">
-                        <i data-lucide="bookmark" class="w-4 h-4 inline mr-1"></i> Save
-                    </button>
-                </div>
+            </div>
+            
+            <div class="flex items-center gap-2 mt-4">
+                <a href="/research?topic={{ topic.title|urlencode }}" 
+                   class="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2 bg-primary-500 text-white text-sm font-medium rounded-lg hover:bg-primary-600 transition-colors">
+                    <i data-lucide="pen-tool" class="w-4 h-4"></i> Write
+                </a>
+                <button class="px-4 py-2 bg-surface-800 text-surface-300 text-sm font-medium rounded-lg hover:bg-surface-700 transition-colors">
+                    <i data-lucide="bookmark" class="w-4 h-4"></i>
+                </button>
             </div>
         </div>
         {% endfor %}
     </div>
-    
-    {% if not topics %}
-    <div class="bg-surface-900/50 border border-surface-700/50 rounded-xl p-12 text-center">
-        <i data-lucide="sparkles" class="w-16 h-16 text-surface-600 mx-auto mb-4"></i>
+    {% else %}
+    <div class="bg-surface-900/50 border border-surface-700/50 rounded-2xl p-12 text-center">
+        <div class="w-16 h-16 bg-surface-800 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <i data-lucide="sparkles" class="w-8 h-8 text-surface-600"></i>
+        </div>
         <h3 class="text-lg font-semibold text-white mb-2">No trending topics yet</h3>
-        <p class="text-surface-400">Topics will appear here based on your niche and interests</p>
+        <p class="text-surface-400 text-sm mb-6 max-w-sm mx-auto">Topics will appear here based on your niche and interests. Configure your blog in Settings to get personalized suggestions.</p>
+        <a href="/settings" class="inline-flex items-center gap-2 px-4 py-2 bg-primary-500 text-white text-sm rounded-lg hover:bg-primary-600 transition-colors">
+            <i data-lucide="settings" class="w-4 h-4"></i> Configure Blog
+        </a>
     </div>
     {% endif %}
 </div>

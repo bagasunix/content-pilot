@@ -78,7 +78,26 @@ def dashboard():
         return redirect(url_for('activate'))
     
     status = get_pipeline_status()
-    return render_template('dashboard.html', license=license_data, status=status)
+    articles_list = get_articles()
+    
+    # Build stats from status
+    stats = {
+        'ideas': status.get('stages', {}).get('idea', 0),
+        'in_progress': status.get('wip', 0),
+        'published': status.get('stages', {}).get('published', 0),
+        'avg_seo': 0,
+    }
+    
+    # Build pipeline from status
+    pipeline = {
+        'researching': status.get('stages', {}).get('researching', 0),
+        'drafted': status.get('stages', {}).get('drafted', 0),
+        'gated': status.get('stages', {}).get('gated', 0),
+        'reviewing': status.get('stages', {}).get('reviewing', 0),
+        'published': status.get('stages', {}).get('published', 0),
+    }
+    
+    return render_template('dashboard.html', license=license_data, stats=stats, pipeline=pipeline, articles=articles_list)
 
 @app.route('/articles')
 def articles():
