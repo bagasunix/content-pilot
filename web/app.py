@@ -223,15 +223,61 @@ import urllib.request
 import json
 
 def fetch_trending_topics():
-    """Fetch trending topics from multiple sources."""
-    topics = []
+    """Fetch smart topic suggestions based on user's blog."""
+    import sys
+    sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
     
-    # Source 1: Hacker News (top stories)
+    from contentpilot.blogger import BloggerClient, ContentAnalyzer
+    
+    # Get blog config
+    config = load_config()
+    blog_id = config.get("blog_id", "")
+    domain = config.get("domain", "")
+    
+    if not blog_id:
+        # No blog connected — return curated topics
+        return [
+            {"title": "Cara Install Docker di Ubuntu 24.04", "source": "Curated", "category": "devops", "type": "curated"},
+            {"title": "Tutorial Kubernetes untuk Pemula", "source": "Curated", "category": "devops", "type": "curated"},
+            {"title": "React vs Vue vs Angular 2024", "source": "Curated", "category": "webdev", "type": "curated"},
+            {"title": "Python AI Automation Tools", "source": "Curated", "category": "ai", "type": "curated"},
+            {"title": "Linux Security Best Practices", "source": "Curated", "category": "security", "type": "curated"},
+        ]
+    
+    # Fetch existing posts from blog
+    blogger = BloggerClient(blog_id=blog_id, domain=domain)
+    posts = blogger.fetch_posts(max_results=20)
+    
+    # Get trending topics
+    trending = _fetch_raw_trending()
+    
+    # Generate smart suggestions
+    analyzer = ContentAnalyzer()
+    suggestions = analyzer.suggest_topics(posts, trending)
+    
+    # Convert to template format
+    topics = []
+    for s in suggestions:
+        topics.append({
+            "title": s["title"],
+            "source": s["type"].replace("_", " ").title(),
+            "category": s["category"],
+            "type": s["type"],
+            "reason": s["reason"],
+            "priority": s["priority"],
+        })
+    
+    return topics[:15]
+
+
+def _fetch_raw_trending():
+    """Fetch raw trending data from HackerNews."""
+    topics = []
     try:
         url = "https://hacker-news.firebaseio.com/v0/topstories.json"
         req = urllib.request.Request(url, headers={"User-Agent": "ContentPilot/1.0"})
         with urllib.request.urlopen(req, timeout=5) as resp:
-            story_ids = json.loads(resp.read())[:10]
+            story_ids = json.loads(resp.read())[:15]
             
             for story_id in story_ids:
                 story_url = f"https://hacker-news.firebaseio.com/v0/item/{story_id}.json"
@@ -239,26 +285,35 @@ def fetch_trending_topics():
                 with urllib.request.urlopen(story_req, timeout=3) as story_resp:
                     story = json.loads(story_resp.read())
                     if story.get("title"):
+                        title_lower = story["title"].lower()
+                        if any(kw in title_lower for kw in ["ai", "gpt", "llm", "machine learning", "openai"]):
+                            category = "ai"
+                        elif any(kw in title_lower for kw in ["docker", "kubernetes", "linux", "server", "cloud", "devops"]):
+                            category = "devops"
+                        elif any(kw in title_lower for kw in ["react", "vue", "angular", "javascript", "web", "node"]):
+                            category = "webdev"
+                        elif any(kw in title_lower for kw in ["hack", "security", "cyber", "vulnerability"]):
+                            category = "security"
+                        else:
+                            category = "general"
+                        
                         topics.append({
                             "title": story["title"],
                             "source": "HackerNews",
-                            "category": "ai" if any(kw in story["title"].lower() for kw in ["ai", "gpt", "llm", "machine learning"]) else "devops" if any(kw in story["title"].lower() for kw in ["docker", "kubernetes", "linux", "server"]) else "webdev" if any(kw in story["title"].lower() for kw in ["react", "vue", "angular", "javascript"]) else "general",
-                            "url": story.get("url", f"https://news.ycombinator.com/item?id={story_id}")
+                            "category": category,
                         })
     except Exception:
         pass
     
-    # Fallback: hardcoded if API fails
-    if not topics:
-        topics = [
-            {"title": "Cara Install Docker di Ubuntu 24.04", "source": "Trending", "category": "devops"},
-            {"title": "Tutorial Kubernetes untuk Pemula", "source": "Trending", "category": "devops"},
-            {"title": "React vs Vue vs Angular 2024", "source": "Trending", "category": "webdev"},
-            {"title": "Python AI Automation Tools", "source": "Trending", "category": "ai"},
-            {"title": "Linux Security Best Practices", "source": "Trending", "category": "security"},
-        ]
+    # Curated fallback
+    if len(topics) < 5:
+        topics.extend([
+            {"title": "Docker Best Practices", "source": "Curated", "category": "devops"},
+            {"title": "Python Automation Scripts", "source": "Curated", "category": "ai"},
+            {"title": "React Hooks Guide", "source": "Curated", "category": "webdev"},
+        ])
     
-    return topics[:10]
+    return topics
 
 
 @app.route('/api/status')
@@ -410,7 +465,28 @@ def trending():
         return redirect(url_for('login'))
     license_data = load_license()
     topics = fetch_trending_topics()
-    return render_template('trending.html', license=license_data, topics=topics)
+    
+    # Get blog analysis
+    import sys
+    sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
+    from contentpilot.blogger import BloggerClient, ContentAnalyzer
+    
+    config = load_config()
+    blog_id = config.get("blog_id", "")
+    blog_analysis = {"connected": bool(blog_id), "post_count": 0, "categories": {}}
+    
+    if blog_id:
+        blogger = BloggerClient(blog_id=blog_id, domain=config.get("domain", ""))
+        posts = blogger.fetch_posts(max_results=20)
+        analyzer = ContentAnalyzer()
+        blog_analysis = {
+            "connected": True,
+            "post_count": len(posts),
+            "categories": analyzer.extract_categories(posts),
+            "style": analyzer.analyze_writing_style(posts),
+        }
+    
+    return render_template('trending.html', license=license_data, topics=topics, blog_analysis=blog_analysis)
 
 @app.route('/publish/<idea_id>')
 def publish_page(idea_id):
