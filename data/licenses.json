@@ -1,0 +1,112 @@
+{
+  "SB-8365-4792-F60A2B3E": {
+    "key": "SB-8365-4792-F60A2B3E",
+    "email": "user1@example.com",
+    "tier": "free",
+    "created_at": "2026-06-25T15:58:26.606419",
+    "expires_at": "2027-06-25T15:58:26.606475",
+    "articles_limit": 10,
+    "activated": false,
+    "activation_date": null,
+    "machine_id": null
+  },
+  "SB-C096-96AA-F5469E69": {
+    "key": "SB-C096-96AA-F5469E69",
+    "email": "user2@example.com",
+    "tier": "free",
+    "created_at": "2026-06-25T15:58:26.607145",
+    "expires_at": "2027-06-25T15:58:26.607155",
+    "articles_limit": 10,
+    "activated": false,
+    "activation_date": null,
+    "machine_id": null
+  },
+  "SB-D41B-06F5-C8B60AB1": {
+    "key": "SB-D41B-06F5-C8B60AB1",
+    "email": "user3@example.com",
+    "tier": "free",
+    "created_at": "2026-06-25T15:58:26.607478",
+    "expires_at": "2027-06-25T15:58:26.607485",
+    "articles_limit": 10,
+    "activated": false,
+    "activation_date": null,
+    "machine_id": null
+  },
+  "SB-9796-E58A-9E40D8AB": {
+    "key": "SB-9796-E58A-9E40D8AB",
+    "email": "user4@example.com",
+    "tier": "free",
+    "created_at": "2026-06-25T15:58:26.608219",
+    "expires_at": "2027-06-25T15:58:26.608227",
+    "articles_limit": 10,
+    "activated": false,
+    "activation_date": null,
+    "machine_id": null
+  },
+  "SB-4F69-B9AE-75550AD1": {
+    "key": "SB-4F69-B9AE-75550AD1",
+    "email": "user5@example.com",
+    "tier": "free",
+    "created_at": "2026-06-25T15:58:26.608827",
+    "expires_at": "2027-06-25T15:58:26.608833",
+    "articles_limit": 10,
+    "activated": false,
+    "activation_date": null,
+    "machine_id": null
+  },
+  "SB-7F59-889A-638E9CE5": {
+    "key": "SB-7F59-889A-638E9CE5",
+    "email": "user6@example.com",
+    "tier": "free",
+    "created_at": "2026-06-25T15:58:26.609329",
+    "expires_at": "2027-06-25T15:58:26.609338",
+    "articles_limit": 10,
+    "activated": false,
+    "activation_date": null,
+    "machine_id": null
+  },
+  "SB-819E-002E-53D0BEA8": {
+    "key": "SB-819E-002E-53D0BEA8",
+    "email": "user7@example.com",
+    "tier": "free",
+    "created_at": "2026-06-25T15:58:26.609908",
+    "expires_at": "2027-06-25T15:58:26.609915",
+    "articles_limit": 10,
+    "activated": false,
+    "activation_date": null,
+    "machine_id": null
+  },
+  "SB-B11A-26CA-A5685529": {
+    "key": "SB-B11A-26CA-A5685529",
+    "email": "user8@example.com",
+    "tier": "free",
+    "created_at": "2026-06-25T15:58:26.611227",
+    "expires_at": "2027-06-25T15:58:26.611235",
+    "articles_limit": 10,
+    "activated": false,
+    "activation_date": null,
+    "machine_id": null
+  },
+  "SB-5FFC-3D7E-331B1851": {
+    "key": "SB-5FFC-3D7E-331B1851",
+    "email": "user9@example.com",
+    "tier": "free",
+    "created_at": "2026-06-25T15:58:26.611780",
+    "expires_at": "2027-06-25T15:58:26.611788",
+    "articles_limit": 10,
+    "activated": false,
+    "activation_date": null,
+    "machine_id": null
+  },
+  "SB-9C0E-D021-477140D4": {
+    "key": "SB-9C0E-D021-477140D4",
+    "email": "user10@example.com",
+    "tier": "free",
+    "created_at": "2026-06-25T15:58:26.612266",
+    "expires_at": "2027-06-25T15:58:26.612272",
+    "articles_limit": 10,
+    "activated": false,
+    "activation_date": null,
+    "machine_id": null
+  }
+}

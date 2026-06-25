@@ -1,0 +1,16 @@
+# Blog Lifecycle Pro — Standalone
+# Requirements for running without Hermes
+
+# Core
+pyyaml>=6.0
+requests>=2.28.0
+
+# Optional: Image processing
+# Pillow>=9.0.0
+
+# Optional: Browser automation
+# playwright>=1.30.0
+
+# Development
+# pytest>=7.0.0
+# pytest-cov>=4.0.0

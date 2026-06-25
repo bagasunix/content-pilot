@@ -1,0 +1,31 @@
+# Blog Lifecycle Pro — Standalone Config
+# Copy this to config/config.yaml and fill in your values
+
+# === BLOG CONFIGURATION ===
+domain: "myblog.com"
+platform: blogger
+blog_id: "1234567890"
+language: id
+
+# === AI PROVIDER ===
+# Pilih salah satu: openai, deepseek, ollama
+ai:
+  provider: openai  # openai | deepseek | ollama
+  model: gpt-4      # Model name
+  api_key: ""       # API key (atau set OPENAI_API_KEY env var)
+  # base_url: ""    # Custom base URL (untuk ollama/custom)
+
+# === PIPELINE SETTINGS ===
+pipeline:
+  wip_limit: 3      # Max articles in-flight
+  publish_mode: draft  # draft | live
+  autonomy: gated   # gated = butuh approval manual
+
+# === WORKSPACE ===
+workspace:
+  path: workspace
+
+# === PUBLISHING (Optional) ===
+# blogger:
+#   credentials_path: "credentials.json"
+#   token_path: "token.json"

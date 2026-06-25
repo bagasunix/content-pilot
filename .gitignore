@@ -1,0 +1,44 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+*.egg-info/
+dist/
+build/
+
+# Hermes
+workspace/credentials.json
+workspace/token.json
+credentials-backup/
+*.env
+.env
+
+# Logs
+*.log
+workspace/logs/
+
+# Temp
+/tmp/
+*.tmp
+*.bak
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# User config (contains real values)
+workspace/config.yaml
+
+# Generated output (filled by generate_souls.py from variables.json)
+# Do NOT commit — these contain deployment-specific hardcoded values
+SOUL.md
+AGENTS.md
+profiles/*-SOUL.md
+profiles/*-config.yaml

@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ContentPilot — Connect Blogger</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        .logo { text-align: center; font-size: 48px; margin-bottom: 10px; }
+        h1 { text-align: center; color: #333; margin-bottom: 10px; }
+        .subtitle { text-align: center; color: #666; margin-bottom: 30px; }
+        .connect-btn {
+            width: 100%;
+            padding: 15px;
+            background: #4285f4;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .connect-btn:hover { background: #357abd; }
+        .divider { text-align: center; margin: 20px 0; color: #999; }
+        .manual-input { margin-top: 20px; }
+        .manual-input label { display: block; margin-bottom: 5px; color: #333; }
+        .manual-input input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        .manual-input input:focus { border-color: #667eea; outline: none; }
+        .btn-secondary {
+            width: 100%;
+            padding: 12px;
+            background: #6c757d;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .status { text-align: center; margin-top: 20px; padding: 10px; border-radius: 8px; }
+        .status.success { background: #d4edda; color: #155724; }
+        .status.error { background: #f8d7da; color: #721c24; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="logo">📝</div>
+        <h1>Connect Blogger</h1>
+        <p class="subtitle">Hubungkan akun Google kamu untuk publish artikel</p>
+        
+        {% if not connected %}
+        <a href="/auth/blogger" class="connect-btn">
+            <svg width="20" height="20" viewBox="0 0 24 24"><path fill="currentColor" d="M12.545,10.239v3.821h5.445c-0.712,2.315-2.647,3.972-5.445,3.972c-3.332,0-6.033-2.701-6.033-6.032s2.701-6.032,6.033-6.032c1.498,0,2.866,0.549,3.921,1.453l2.814-2.814C17.503,2.988,15.139,2,12.545,2C7.021,2,2.543,6.477,2.543,12s4.478,10,10.002,10c8.396,0,10.249-7.85,9.426-11.748L12.545,10.239z"/></svg>
+            Connect Google Account
+        </a>
+        
+        <div class="divider">atau</div>
+        
+        <div class="manual-input">
+            <label>Masukkan Blog ID manual:</label>
+            <input type="text" id="blog_id" placeholder="Contoh: 1234567890">
+            <button class="btn-secondary" onclick="saveBlogId()">Simpan Blog ID</button>
+        </div>
+        {% else %}
+        <div class="status success">
+            ✅ Blogger sudah terhubung!
+            <br><strong>{{ blog_name }}</strong> (ID: {{ blog_id }})
+        </div>
+        <button class="btn-secondary" onclick="disconnect()">Disconnect</button>
+        {% endif %}
+        
+        <div id="blog-select" style="display:none; margin-top: 20px;">
+            <label>Pilih blog yang mau dipakai:</label>
+            <div id="blog-list"></div>
+            <button class="btn-secondary" onclick="saveSelectedBlog()">Simpan Pilihan</button>
+        </div>
+    </div>
+
+    <script>
+        // Check if user has multiple blogs
+        fetch('/api/blogs')
+            .then(r => r.json())
+            .then(data => {
+                if (data.blogs && data.blogs.length > 1) {
+                    document.getElementById('blog-select').style.display = 'block';
+                    const list = document.getElementById('blog-list');
+                    data.blogs.forEach(blog => {
+                        list.innerHTML += `
+                            <label style="display:block; padding:10px; margin:5px 0; background:#f5f5f5; border-radius:8px; cursor:pointer;">
+                                <input type="radio" name="blog" value="${blog.id}"> ${blog.name} (ID: ${blog.id})
+                            </label>
+                        `;
+                    });
+                }
+            });
+        
+        function saveBlogId() {
+            const blogId = document.getElementById('blog_id').value;
+            fetch('/api/blogs/select', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({blog_id: blogId})
+            }).then(r => r.json()).then(data => {
+                if (data.success) location.reload();
+            });
+        }
+        
+        function saveSelectedBlog() {
+            const selected = document.querySelector('input[name="blog"]:checked');
+            if (selected) {
+                fetch('/api/blogs/select', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({blog_id: selected.value})
+                }).then(r => r.json()).then(data => {
+                    if (data.success) location.reload();
+                });
+            }
+        }
+        
+        function disconnect() {
+            fetch('/api/blogs/disconnect', {method: 'POST'})
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) location.reload();
+                });
+        }
+    </script>
+</body>
+</html>
