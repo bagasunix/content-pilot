@@ -7,7 +7,7 @@
 ## 🔗 Base URL
 
 ```
-https://api.smartblogger.dev
+https://api.contentpilot.dev
 ```
 
 ---
@@ -17,7 +17,7 @@ https://api.smartblogger.dev
 ### License Key Validation
 
 ```bash
-curl -X POST https://api.smartblogger.dev/api/validate \
+curl -X POST https://api.contentpilot.dev/api/validate \
   -H "Content-Type: application/json" \
   -d '{"key": "SB-XXXX-XXXX-XXXX", "machine_id": "abc123"}'
 ```
@@ -34,7 +34,7 @@ curl -X POST https://api.smartblogger.dev/api/validate \
 ### License Activation
 
 ```bash
-curl -X POST https://api.smartblogger.dev/api/activate \
+curl -X POST https://api.contentpilot.dev/api/activate \
   -H "Content-Type: application/json" \
   -d '{"key": "SB-XXXX-XXXX-XXXX", "machine_id": "abc123"}'
 ```
@@ -54,7 +54,7 @@ curl -X POST https://api.smartblogger.dev/api/activate \
 ### Track Event
 
 ```bash
-curl -X POST https://api.smartblogger.dev/api/track \
+curl -X POST https://api.contentpilot.dev/api/track \
   -H "Content-Type: application/json" \
   -d '{"key": "SB-XXXX-XXXX-XXXX", "event": {"type": "research"}}'
 ```
@@ -62,7 +62,7 @@ curl -X POST https://api.smartblogger.dev/api/track \
 ### Get Usage Stats
 
 ```bash
-curl https://api.smartblogger.dev/api/usage/SB-XXXX-XXXX-XXXX
+curl https://api.contentpilot.dev/api/usage/SB-XXXX-XXXX-XXXX
 ```
 
 **Response:**
@@ -82,7 +82,7 @@ curl https://api.smartblogger.dev/api/usage/SB-XXXX-XXXX-XXXX
 ### Check for Updates
 
 ```bash
-curl https://api.smartblogger.dev/api/updates?version=1.0.0
+curl https://api.contentpilot.dev/api/updates?version=1.0.0
 ```
 
 **Response:**
@@ -98,7 +98,7 @@ curl https://api.smartblogger.dev/api/updates?version=1.0.0
 ### Get Changelog
 
 ```bash
-curl https://api.smartblogger.dev/api/changelog
+curl https://api.contentpilot.dev/api/changelog
 ```
 
 ---
@@ -108,7 +108,7 @@ curl https://api.smartblogger.dev/api/changelog
 ### Submit Ticket
 
 ```bash
-curl -X POST https://api.smartblogger.dev/api/support \
+curl -X POST https://api.contentpilot.dev/api/support \
   -H "Content-Type: application/json" \
   -d '{
     "email": "user@example.com",
@@ -137,7 +137,7 @@ curl -X POST https://api.smartblogger.dev/api/support \
 ### Get Overall Stats
 
 ```bash
-curl -H "X-API-Key: your-admin-key" https://api.smartblogger.dev/api/stats
+curl -H "X-API-Key: your-admin-key" https://api.contentpilot.dev/api/stats
 ```
 
 **Response:**

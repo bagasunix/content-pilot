@@ -151,25 +151,25 @@ pipeline:
 
 ```bash
 # Status
-python3 -m blog.pipeline status
+contentpilot status
 
 # Research
-python3 -m blog.pipeline research "topik anda"
+contentpilot research "topik anda"
 
 # Draft
-python3 -m blog.pipeline draft "topik-slug"
+contentpilot draft "topik-slug"
 
 # Review
-python3 -m blog.pipeline review "topik-slug"
+contentpilot review "topik-slug"
 
 # Gate
-python3 -m blog.pipeline gate "topik-slug"
+contentpilot gate "topik-slug"
 
 # Approve
-python3 -m blog.pipeline approve "topik-slug"
+contentpilot approve "topik-slug"
 
 # Publish
-python3 -m blog.pipeline publish "topik-slug"
+contentpilot publish "topik-slug"
 ```
 
 ### Web UI
@@ -250,9 +250,9 @@ A: Coba:
 
 ## 📞 Support
 
-- **Documentation**: https://docs.smartblogger.dev
+- **Documentation**: https://docs.contentpilot.dev
 - **GitHub Issues**: https://github.com/bagasunix/contentpilot/issues
-- **Email**: support@smartblogger.dev
+- **Email**: support@contentpilot.dev
 
 ---
 

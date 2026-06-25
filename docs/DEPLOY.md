@@ -33,39 +33,39 @@ Wizard akan minta:
 
 ```bash
 # Cek status
-python3 scripts/pipeline.py status
+contentpilot status
 
 # Mulai riset
-python3 scripts/pipeline.py research "cara install docker"
+contentpilot research "cara install docker"
 
 # Lihat draft
 ls workspace/drafts/
 
 # Full pipeline
-python3 scripts/pipeline.py full "cara install docker"
+contentpilot full "cara install docker"
 ```
 
 ## Publish ke Blogger
 
 ```bash
 # 1. Setup OAuth
-python3 scripts/setup_credentials.py
+contentpilot setup
 
 # 2. Push draft
-python3 scripts/pipeline.py push-draft <idea_id>
+contentpilot push-draft <idea_id>
 
 # 3. Attach images
-python3 scripts/pipeline.py attach-images <idea_id>
+contentpilot attach-images <idea_id>
 ```
 
-## Standalone (tanpa Hermes)
+## Standalone
 
 ```bash
 cd standalone
 pip install -r requirements.txt
-python3 scripts/setup.py
-python3 scripts/activate.py --key SB-XXXX-XXXX-XXXX
-python3 -m blog.pipeline status
+contentpilot setup
+contentpilot activate --key SB-XXXX-XXXX-XXXX
+contentpilot status
 ```
 
 ## Web UI

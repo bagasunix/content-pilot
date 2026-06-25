@@ -1,6 +1,6 @@
-# Setup Guide - Blog Lifecycle Pro
+# Setup Guide - ContentPilot
 
-> Panduan lengkap setup Blog Lifecycle Pro untuk customer.
+> Panduan lengkap setup ContentPilot untuk customer.
 
 ## Requirements
 
@@ -13,8 +13,8 @@
 ### 1. Clone Repository
 
 ```bash
-git clone <repo-url> blog-lifecycle-pro
-cd blog-lifecycle-pro
+git clone <repo-url> content-pilot
+cd content-pilot
 ```
 
 ### 2. Install Dependencies
@@ -71,10 +71,10 @@ Ikuti instruksi di layar untuk authorize.
 
 ```bash
 # Cek status
-python3 scripts/pipeline.py status
+contentpilot status
 
 # Cek koneksi
-python3 scripts/pipeline.py check
+contentpilot check
 ```
 
 ## Quick Start
@@ -83,24 +83,24 @@ python3 scripts/pipeline.py check
 
 ```bash
 # 1. Lihat topik yang tersedia
-python3 scripts/pipeline.py next
+contentpilot next
 
 # 2. Mulai riset
-python3 scripts/pipeline.py research "cara install docker"
+contentpilot research "cara install docker"
 
 # 3. Lihat status
-python3 scripts/pipeline.py status
+contentpilot status
 ```
 
 ### Pipeline Workflow
 
 ```
-1. Research    → python3 scripts/pipeline.py research "topik"
-2. Write       → python3 scripts/pipeline.py draft <idea_id>
-3. Review      → python3 scripts/pipeline.py review <idea_id>
-4. Gate        → python3 scripts/pipeline.py gate <idea_id>
-5. Approve     → python3 scripts/pipeline.py approve <idea_id>
-6. Publish     → python3 scripts/pipeline.py push <idea_id>
+1. Research    → contentpilot research "topik"
+2. Write       → contentpilot draft <idea_id>
+3. Review      → contentpilot review <idea_id>
+4. Gate        → contentpilot gate <idea_id>
+5. Approve     → contentpilot approve <idea_id>
+6. Publish     → contentpilot push <idea_id>
 ```
 
 ## Configuration Reference
@@ -140,41 +140,41 @@ Prioritas: H (High) > M (Medium) > L (Low)
 
 ```bash
 # Status
-python3 scripts/pipeline.py status
+contentpilot status
 
 # Topik berikutnya
-python3 scripts/pipeline.py next
+contentpilot next
 
 # Research
-python3 scripts/pipeline.py research "topik"
+contentpilot research "topik"
 
 # Draft
-python3 scripts/pipeline.py draft <idea_id>
+contentpilot draft <idea_id>
 
 # Review
-python3 scripts/pipeline.py review <idea_id>
+contentpilot review <idea_id>
 
 # Quality Gate
-python3 scripts/pipeline.py gate <idea_id>
+contentpilot gate <idea_id>
 
 # Approve (manual)
-python3 scripts/pipeline.py approve <idea_id>
+contentpilot approve <idea_id>
 
 # Publish
-python3 scripts/pipeline.py push <idea_id>
+contentpilot push <idea_id>
 
 # Attach images
-python3 scripts/pipeline.py images <idea_id>
+contentpilot images <idea_id>
 ```
 
 ### Utility Commands
 
 ```bash
 # Cek status
-python3 scripts/pipeline.py status
+contentpilot status
 
 # Reconcile state
-python3 scripts/pipeline.py reconcile
+contentpilot reconcile
 
 # Run tests
 python3 -m unittest discover -s tests -t . -v
@@ -213,7 +213,7 @@ System otomatis cek kualitas artikel:
 cat workspace/journal.jsonl | tail -10
 
 # Reconcile
-python3 scripts/pipeline.py reconcile
+contentpilot reconcile
 ```
 
 ### OAuth Expired
@@ -227,7 +227,7 @@ python3 scripts/setup_oauth.py
 
 ```bash
 # Lihat detail
-python3 scripts/pipeline.py gate <idea_id> --verbose
+contentpilot gate <idea_id> --verbose
 
 # Fix manual
 # Edit draft di workspace/drafts/<idea_id>/draft.md
@@ -237,10 +237,10 @@ python3 scripts/pipeline.py gate <idea_id> --verbose
 
 ```bash
 # Cek status
-python3 scripts/pipeline.py status
+contentpilot status
 
 # Selesaikan atau drop artikel
-python3 scripts/pipeline.py drop <idea_id>
+contentpilot drop <idea_id>
 ```
 
 ## Support

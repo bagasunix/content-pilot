@@ -41,7 +41,7 @@ pip install -r requirements.txt flask
 ### Step 3: Run Setup Wizard
 
 ```bash
-python3 scripts/setup.py
+contentpilot setup
 ```
 
 Follow the wizard:
@@ -53,7 +53,7 @@ Follow the wizard:
 ### Step 4: Activate License
 
 ```bash
-python3 scripts/activate.py --key SB-XXXX-XXXX-XXXX
+contentpilot activate --key SB-XXXX-XXXX-XXXX
 ```
 
 ### Step 5: Start Web UI
@@ -108,7 +108,7 @@ source venv/bin/activate
 pip install -r requirements.txt flask
 
 # Run setup
-python3 scripts/setup.py
+contentpilot setup
 
 # Start server
 ./start.sh
@@ -134,7 +134,7 @@ source venv/bin/activate
 pip install -r requirements.txt flask
 
 # Run setup
-python3 scripts/setup.py
+contentpilot setup
 
 # Start server
 ./start.sh
@@ -174,7 +174,7 @@ export DEEPSEEK_API_KEY="your-key"
 
 ```bash
 # Check status
-python3 -m blog.pipeline status
+contentpilot status
 
 # Test AI connection
 python3 -c "from blog.pipeline import create_provider; p = create_provider(); print('AI OK')"
@@ -208,9 +208,9 @@ pip install -r requirements.txt flask
 ### "License key invalid"
 ```bash
 # Check key format (should be SB-XXXX-XXXX-XXXX)
-python3 scripts/activate.py --check
+contentpilot license
 
-# Get new key at: https://smartblogger.dev/free
+# Get new key at: https://contentpilot.dev/free
 ```
 
 ### "AI API error"
@@ -231,9 +231,9 @@ print(r.status_code)
 
 ## 📞 Support
 
-- **Documentation**: https://docs.smartblogger.dev
+- **Documentation**: https://docs.contentpilot.dev
 - **GitHub Issues**: https://github.com/bagasunix/contentpilot/issues
-- **Email**: support@smartblogger.dev
+- **Email**: support@contentpilot.dev
 
 ---
 

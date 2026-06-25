@@ -1,6 +1,6 @@
 # Telegram Notification Setup
 
-> Setup notifikasi Telegram untuk Blog Lifecycle Pro.
+> Setup notifikasi Telegram untuk ContentPilot.
 
 ## Kenapa Telegram?
 
@@ -54,13 +54,13 @@ notifications:
 
 ```bash
 # Jalankan test
-python3 scripts/telegram_notify.py test
+contentpilot notify test
 
 # Atau manual
 python3 -c "
 from scripts.telegram_notify import TelegramNotifier
 n = TelegramNotifier('BOT_TOKEN', 'CHAT_ID')
-n.send('✅ Blog Lifecycle Pro connected!')
+n.send('✅ ContentPilot connected!')
 "
 ```
 
@@ -106,7 +106,7 @@ Telegram limit: 30 pesan per detik ke chat yang sama. Plugin otomatis handle.
 📊 Score: 85/100
 🆔 docker-install-ubuntu
 
-Jalankan: python3 scripts/pipeline.py approve docker-install-ubuntu
+Jalankan: contentpilot approve docker-install-ubuntu
 ```
 
 ## Advanced: Custom Notifikasi

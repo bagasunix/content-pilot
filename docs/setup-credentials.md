@@ -15,7 +15,7 @@ Panduan setup credentials untuk ContentPilot.
 
 ### Generate Token
 ```bash
-python3 scripts/setup_credentials.py
+contentpilot setup
 ```
 
 Browser akan buka → login → authorize → token.json auto-saved.

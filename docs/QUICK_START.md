@@ -1,12 +1,12 @@
 # Quick Start Card
 
-> Setup Blog Lifecycle Pro dalam 5 menit.
+> Setup ContentPilot dalam 5 menit.
 
 ## Step 1: Install
 
 ```bash
-git clone <repo-url> blog-lifecycle-pro
-cd blog-lifecycle-pro
+git clone <repo-url> content-pilot
+cd content-pilot
 pip install pyyaml
 ```
 
@@ -22,17 +22,17 @@ blog_id: "YOUR_BLOG_ID"
 ## Step 3: Test
 
 ```bash
-python3 scripts/pipeline.py status
+contentpilot status
 ```
 
 ## Step 4: Mulai
 
 ```bash
 # Lihat topik
-python3 scripts/pipeline.py next
+contentpilot next
 
 # Mulai riset
-python3 scripts/pipeline.py research "topik anda"
+contentpilot research "topik anda"
 ```
 
 ## Commands Penting
@@ -51,7 +51,7 @@ python3 scripts/pipeline.py research "topik anda"
 
 ```bash
 # Lihat semua commands
-python3 scripts/pipeline.py --help
+contentpilot --help
 
 # Baca docs
 cat docs/SETUP_GUIDE.md

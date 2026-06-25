@@ -1,4 +1,4 @@
-# Blog Lifecycle Test Scenarios
+# ContentPilot Test Scenarios
 
 > Source: User langsung. Authoritative.
 > Setiap test WAJIB lewat full chain: User → CC → Orch → Worker → Orch → CC → User

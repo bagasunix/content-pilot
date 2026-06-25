@@ -12,7 +12,7 @@ Menjadi sumber terpercaya untuk tutorial, tool, dan insight seputar AI, automati
 ## Content Pillars
 
 ### 1. AI & Machine Learning
-- Tool reviews (Hermes, OpenAI, Anthropic, etc.)
+- Tool reviews (OpenAI, Anthropic, etc.)
 - Tutorial & how-to guides
 - Industry news and analysis
 - Best practices and tips

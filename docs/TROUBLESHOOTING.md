@@ -41,10 +41,10 @@ pip install flask
 **Solusi:**
 ```bash
 # Linux/Mac: gunakan sudo (hati-hati)
-sudo python3 scripts/setup.py
+sudo contentpilot setup
 
 # Atau buat virtual environment di folder user
-python3 -m venv ~/venvs/smartblogger
+python3 -m venv ~/venvs/contentpilot
 ```
 
 ---
@@ -58,8 +58,8 @@ python3 -m venv ~/venvs/smartblogger
 **Solusi:**
 1. Cek format key: `SB-XXXX-XXXX-XXXX`
 2. Pastikan tidak ada spasi
-3. Cek status: `python3 scripts/activate.py --check`
-4. Dapatkan key baru: https://smartblogger.dev/free
+3. Cek status: `contentpilot license`
+4. Dapatkan key baru: https://contentpilot.dev/free
 
 ### "License already activated"
 
@@ -150,10 +150,10 @@ ollama pull llama2
 **Solusi:**
 ```bash
 # Cek status
-python3 -m blog.pipeline status
+contentpilot status
 
 # Selesaikan atau hapus artikel yang stuck
-python3 -m blog.pipeline approve <idea_id>
+contentpilot approve <idea_id>
 ```
 
 ### "Draft not found"
@@ -166,7 +166,7 @@ python3 -m blog.pipeline approve <idea_id>
 ls workspace/drafts/
 
 # Jika tidak ada, jalankan research lagi
-python3 -m blog.pipeline research "topik"
+contentpilot research "topik"
 ```
 
 ### "Gate failed"
@@ -189,7 +189,7 @@ python3 -m blog.pipeline research "topik"
 ls -la workspace/token.json
 
 # 2. Re-setup credentials
-python3 scripts/setup_credentials.py
+contentpilot setup
 
 # 3. Cek koneksi internet
 curl https://www.blogger.com
@@ -230,7 +230,7 @@ export PYTHONHTTPSVERIFY=0
 **Path issues:**
 ```bash
 # Gunakan forward slash
-python3 scripts/setup.py  # ✅
+contentpilot setup  # ✅
 python3 scripts\setup.py  # ❌
 
 # Atau gunakan raw string
@@ -262,9 +262,9 @@ xattr -d com.apple.quarantine /usr/local/bin/python3
 
 Jika masalah belum teratasi:
 
-1. **Cek Documentation**: https://docs.smartblogger.dev
+1. **Cek Documentation**: https://docs.contentpilot.dev
 2. **GitHub Issues**: https://github.com/bagasunix/contentpilot/issues
-3. **Email**: support@smartblogger.dev
+3. **Email**: support@contentpilot.dev
 
 **Sertakan info:**
 - OS & versi

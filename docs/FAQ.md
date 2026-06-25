@@ -75,9 +75,9 @@ A: Tergantung AI provider:
 
 A: Ya! Gunakan CLI:
 ```bash
-python3 -m blog.pipeline research "topik1"
-python3 -m blog.pipeline research "topik2"
-python3 -m blog.pipeline research "topik3"
+contentpilot research "topik1"
+contentpilot research "topik2"
+contentpilot research "topik3"
 ```
 
 ### Q: Hasil artikel jelek gimana?
@@ -99,7 +99,7 @@ A: Ya! Edit `workspace/voice.md` untuk customize writing style.
 ### Q: Gimana cara dapat license key?
 
 A: 
-1. Buka https://smartblogger.dev/free
+1. Buka https://contentpilot.dev/free
 2. Masukkan email
 3. Dapatkan key via email
 
@@ -107,7 +107,7 @@ A:
 
 A: 
 1. Cek format: `SB-XXXX-XXXX-XXXX`
-2. Cek status: `python3 scripts/activate.py --check`
+2. Cek status: `contentpilot license`
 3. Hubungi support jika masih error
 
 ### Q: Bisa dipakai di multiple machine?
@@ -134,7 +134,7 @@ A:
 1. Buat Google Cloud Project
 2. Enable Blogger API v3
 3. Buat OAuth credentials
-4. Jalankan: `python3 scripts/setup_credentials.py`
+4. Jalankan: `contentpilot setup`
 
 ### Q: Bisa auto-publish?
 
@@ -210,9 +210,9 @@ A:
 
 ## 📞 Masih ada pertanyaan?
 
-- **Documentation**: https://docs.smartblogger.dev
+- **Documentation**: https://docs.contentpilot.dev
 - **GitHub Issues**: https://github.com/bagasunix/contentpilot/issues
-- **Email**: support@smartblogger.dev
+- **Email**: support@contentpilot.dev
 
 ---
 
