@@ -84,9 +84,9 @@ def activate(key=None):
 @app.route('/dashboard')
 def dashboard():
     """Dashboard page."""
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
     license_data = load_license()
-    if not license_data:
-        return redirect(url_for('activate'))
     
     status = get_pipeline_status()
     articles_list = get_articles()
@@ -113,9 +113,9 @@ def dashboard():
 @app.route('/articles')
 def articles():
     """Articles management page."""
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
     license_data = load_license()
-    if not license_data:
-        return redirect(url_for('activate'))
     
     articles_list = get_articles()
     return render_template('articles.html', license=license_data, articles=articles_list)
@@ -123,9 +123,9 @@ def articles():
 @app.route('/settings', methods=['GET', 'POST'])
 def settings():
     """Settings page."""
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
     license_data = load_license()
-    if not license_data:
-        return redirect(url_for('activate'))
     
     if request.method == 'POST':
         # Save settings
@@ -159,13 +159,11 @@ def login():
     if session.get('logged_in'):
         return redirect(url_for('dashboard'))
     
-    # Check if license exists (auto-login)
+    # Check if license exists — show login form (not auto-login)
     license_data = load_license()
     if license_data and license_data.get('key'):
-        session['logged_in'] = True
-        session['license_key'] = license_data.get('key')
-        session['license_tier'] = license_data.get('tier', 'free')
-        return redirect(url_for('dashboard'))
+        # User has license but not logged in — show login form
+        pass
     
     if request.method == 'POST':
         key = request.form.get('key', '').strip()
@@ -193,7 +191,7 @@ def login():
 def logout():
     """Logout."""
     session.clear()
-    return redirect(url_for('login'))
+    return redirect(url_for('activate'))
 
 @app.route('/api/status')
 def api_status():
@@ -231,10 +229,9 @@ def save_license(key: str, tier: str):
 
 def validate_license_key(key: str) -> dict:
     """Validate license key (simplified)."""
-    # In production, this would call the license server
-    # For now, accept any key that starts with SB-
-    if key.startswith("SB-"):
-        return {"valid": True, "tier": "free"}
+    # Accept CP- keys (ContentPilot) or SB- keys (legacy)
+    if key.startswith("CP-") or key.startswith("SB-"):
+        return {"valid": True, "tier": "pro"}
     return {"valid": False, "error": "Invalid license key format"}
 
 def get_pipeline_status() -> dict:
@@ -341,6 +338,8 @@ def connect_blogger():
 @app.route('/trending')
 def trending():
     """Trending topics page."""
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
     license_data = load_license()
     return render_template('trending.html', license=license_data)
 
