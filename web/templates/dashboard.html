@@ -1,603 +1,214 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ContentPilot — Dashboard</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <style>
-        :root {
-            --primary: #6366f1;
-            --primary-dark: #4f46e5;
-            --secondary: #8b5cf6;
-            --success: #10b981;
-            --warning: #f59e0b;
-            --danger: #ef4444;
-            --bg: #0f172a;
-            --bg-card: #1e293b;
-            --bg-card-hover: #334155;
-            --text: #f8fafc;
-            --text-muted: #94a3b8;
-            --border: #334155;
-            --glass: rgba(255, 255, 255, 0.05);
-        }
+{% extends "base.html" %}
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+{% block title %}ContentPilot — Dashboard{% endblock %}
 
-        body {
-            font-family: 'Inter', sans-serif;
-            background: var(--bg);
-            min-height: 100vh;
-            color: var(--text);
-        }
+{% block content %}
+<!-- Welcome Header -->
+<div class="mb-8">
+    <h1 class="text-3xl font-bold text-white">Welcome back! 👋</h1>
+    <p class="text-surface-400 mt-1">Here's what's happening with your content today.</p>
+</div>
 
-        /* Navbar */
-        .navbar {
-            background: rgba(30, 41, 59, 0.8);
-            backdrop-filter: blur(20px);
-            border-bottom: 1px solid var(--border);
-            padding: 16px 40px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-size: 24px;
-            font-weight: 700;
-        }
-
-        .logo-icon {
-            width: 40px;
-            height: 40px;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 8px;
-        }
-
-        .nav-link {
-            padding: 10px 20px;
-            border-radius: 10px;
-            color: var(--text-muted);
-            text-decoration: none;
-            transition: all 0.3s ease;
-            font-weight: 500;
-        }
-
-        .nav-link:hover, .nav-link.active {
-            background: var(--glass);
-            color: var(--text);
-        }
-
-        .nav-link.active {
-            background: var(--primary);
-            color: white;
-        }
-
-        .user-section {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-        }
-
-        .tier-badge {
-            padding: 6px 16px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-            text-transform: uppercase;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            color: white;
-        }
-
-        .avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 600;
-        }
-
-        /* Main Container */
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 40px;
-        }
-
-        /* Welcome Section */
-        .welcome {
-            margin-bottom: 40px;
-        }
-
-        .welcome h1 {
-            font-size: 32px;
-            font-weight: 700;
-            margin-bottom: 8px;
-        }
-
-        .welcome p {
-            color: var(--text-muted);
-            font-size: 16px;
-        }
-
-        /* Stats Grid */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 24px;
-            margin-bottom: 40px;
-        }
-
-        .stat-card {
-            background: var(--bg-card);
-            border-radius: 20px;
-            padding: 24px;
-            border: 1px solid var(--border);
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .stat-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, var(--primary), var(--secondary));
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .stat-card:hover {
-            transform: translateY(-4px);
-            border-color: var(--primary);
-        }
-
-        .stat-card:hover::before {
-            opacity: 1;
-        }
-
-        .stat-icon {
-            width: 48px;
-            height: 48px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-            margin-bottom: 16px;
-        }
-
-        .stat-icon.blue { background: rgba(99, 102, 241, 0.2); color: var(--primary); }
-        .stat-icon.green { background: rgba(16, 185, 129, 0.2); color: var(--success); }
-        .stat-icon.yellow { background: rgba(245, 158, 11, 0.2); color: var(--warning); }
-        .stat-icon.purple { background: rgba(139, 92, 246, 0.2); color: var(--secondary); }
-
-        .stat-value {
-            font-size: 36px;
-            font-weight: 700;
-            margin-bottom: 4px;
-        }
-
-        .stat-label {
-            color: var(--text-muted);
-            font-size: 14px;
-        }
-
-        .stat-change {
-            position: absolute;
-            top: 24px;
-            right: 24px;
-            font-size: 12px;
-            font-weight: 600;
-            padding: 4px 8px;
-            border-radius: 6px;
-        }
-
-        .stat-change.up { background: rgba(16, 185, 129, 0.2); color: var(--success); }
-        .stat-change.down { background: rgba(239, 68, 68, 0.2); color: var(--danger); }
-
-        /* Content Grid */
-        .content-grid {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 24px;
-        }
-
-        /* Card */
-        .card {
-            background: var(--bg-card);
-            border-radius: 20px;
-            border: 1px solid var(--border);
-            overflow: hidden;
-        }
-
-        .card-header {
-            padding: 20px 24px;
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .card-title {
-            font-size: 18px;
-            font-weight: 600;
-        }
-
-        .card-body {
-            padding: 24px;
-        }
-
-        /* Pipeline Status */
-        .pipeline-grid {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 16px;
-        }
-
-        .pipeline-item {
-            text-align: center;
-            padding: 20px 12px;
-            background: var(--glass);
-            border-radius: 16px;
-            transition: all 0.3s ease;
-        }
-
-        .pipeline-item:hover {
-            background: var(--bg-card-hover);
-            transform: scale(1.02);
-        }
-
-        .pipeline-ring {
-            width: 80px;
-            height: 80px;
-            margin: 0 auto 12px;
-            position: relative;
-        }
-
-        .pipeline-ring svg {
-            transform: rotate(-90deg);
-        }
-
-        .pipeline-ring circle {
-            fill: none;
-            stroke-width: 8;
-            stroke-linecap: round;
-        }
-
-        .pipeline-ring .bg { stroke: var(--border); }
-        .pipeline-ring .progress { stroke: var(--primary); transition: stroke-dashoffset 0.5s ease; }
-
-        .pipeline-count {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 20px;
-            font-weight: 700;
-        }
-
-        .pipeline-label {
-            font-size: 13px;
-            color: var(--text-muted);
-            font-weight: 500;
-        }
-
-        /* Quick Actions */
-        .actions-list {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .action-btn {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            padding: 16px 20px;
-            background: var(--glass);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            color: var(--text);
-            text-decoration: none;
-            transition: all 0.3s ease;
-            cursor: pointer;
-        }
-
-        .action-btn:hover {
-            background: var(--bg-card-hover);
-            border-color: var(--primary);
-            transform: translateX(8px);
-        }
-
-        .action-icon {
-            width: 44px;
-            height: 44px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-        }
-
-        .action-icon.purple { background: linear-gradient(135deg, var(--primary), var(--secondary)); }
-        .action-icon.green { background: linear-gradient(135deg, #10b981, #059669); }
-        .action-icon.blue { background: linear-gradient(135deg, #3b82f6, #2563eb); }
-        .action-icon.orange { background: linear-gradient(135deg, #f59e0b, #d97706); }
-
-        .action-text h4 { font-size: 15px; font-weight: 600; margin-bottom: 2px; }
-        .action-text p { font-size: 13px; color: var(--text-muted); }
-
-        /* Recent Articles */
-        .article-item {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            padding: 16px 0;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .article-item:last-child { border-bottom: none; }
-
-        .article-status {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-        }
-
-        .article-status.published { background: var(--success); }
-        .article-status.draft { background: var(--warning); }
-        .article-status.reviewing { background: var(--primary); }
-
-        .article-info { flex: 1; }
-        .article-title { font-weight: 500; margin-bottom: 4px; }
-        .article-meta { font-size: 13px; color: var(--text-muted); }
-
-        .article-action {
-            padding: 6px 12px;
-            background: var(--glass);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            color: var(--text);
-            font-size: 12px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .article-action:hover {
-            background: var(--primary);
-            border-color: var(--primary);
-        }
-
-        /* Responsive */
-        @media (max-width: 1200px) {
-            .stats-grid { grid-template-columns: repeat(2, 1fr); }
-            .content-grid { grid-template-columns: 1fr; }
-        }
-
-        @media (max-width: 768px) {
-            .stats-grid { grid-template-columns: 1fr; }
-            .pipeline-grid { grid-template-columns: repeat(3, 1fr); }
-            .navbar { padding: 16px 20px; }
-            .container { padding: 20px; }
-        }
-
-        /* Animations */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .stat-card, .card { animation: fadeIn 0.5s ease forwards; }
-        .stat-card:nth-child(1) { animation-delay: 0.1s; }
-        .stat-card:nth-child(2) { animation-delay: 0.2s; }
-        .stat-card:nth-child(3) { animation-delay: 0.3s; }
-        .stat-card:nth-child(4) { animation-delay: 0.4s; }
-    </style>
-</head>
-<body>
-    <nav class="navbar">
-        <div class="logo">
-            <div class="logo-icon">✈️</div>
-            <span>ContentPilot</span>
-        </div>
-        <div class="nav-links">
-            <a href="/" class="nav-link active">Dashboard</a>
-            <a href="/articles" class="nav-link">Articles</a>
-            <a href="/trending" class="nav-link">Trending</a>
-            <a href="/settings" class="nav-link">Settings</a>
-        </div>
-        <div class="user-section">
-            <span class="tier-badge">FREE</span>
-            <div class="avatar">A</div>
-        </div>
-    </nav>
-
-    <div class="container">
-        <div class="welcome">
-            <h1>Welcome back! 👋</h1>
-            <p>Here's what's happening with your content today.</p>
-        </div>
-
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-icon blue"><i class="fas fa-file-alt"></i></div>
-                <div class="stat-value">0</div>
-                <div class="stat-label">Total Articles</div>
-                <span class="stat-change up">+0%</span>
+<!-- Stats Grid -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+    
+    <!-- Total Articles -->
+    <div class="bg-surface-900/50 border border-surface-700/50 rounded-xl p-5">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-sm text-surface-400">Total Articles</p>
+                <p class="text-3xl font-bold text-white mt-1">{{ status.total|default(0) }}</p>
             </div>
-            <div class="stat-card">
-                <div class="stat-icon yellow"><i class="fas fa-spinner"></i></div>
-                <div class="stat-value">0</div>
-                <div class="stat-label">In Progress</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon green"><i class="fas fa-check-circle"></i></div>
-                <div class="stat-value">0</div>
-                <div class="stat-label">Published</div>
-                <span class="stat-change up">+0%</span>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon purple"><i class="fas fa-chart-line"></i></div>
-                <div class="stat-value">0</div>
-                <div class="stat-label">Total Views</div>
-            </div>
-        </div>
-
-        <div class="content-grid">
-            <div class="card">
-                <div class="card-header">
-                    <h3 class="card-title">Pipeline Status</h3>
-                    <a href="/articles" style="color: var(--primary); text-decoration: none; font-size: 14px;">View All →</a>
-                </div>
-                <div class="card-body">
-                    <div class="pipeline-grid">
-                        <div class="pipeline-item">
-                            <div class="pipeline-ring">
-                                <svg width="80" height="80">
-                                    <circle class="bg" cx="40" cy="40" r="32"></circle>
-                                    <circle class="progress" cx="40" cy="40" r="32" stroke-dasharray="201" stroke-dashoffset="201"></circle>
-                                </svg>
-                                <span class="pipeline-count">0</span>
-                            </div>
-                            <div class="pipeline-label">Research</div>
-                        </div>
-                        <div class="pipeline-item">
-                            <div class="pipeline-ring">
-                                <svg width="80" height="80">
-                                    <circle class="bg" cx="40" cy="40" r="32"></circle>
-                                    <circle class="progress" cx="40" cy="40" r="32" stroke-dasharray="201" stroke-dashoffset="201"></circle>
-                                </svg>
-                                <span class="pipeline-count">0</span>
-                            </div>
-                            <div class="pipeline-label">Drafting</div>
-                        </div>
-                        <div class="pipeline-item">
-                            <div class="pipeline-ring">
-                                <svg width="80" height="80">
-                                    <circle class="bg" cx="40" cy="40" r="32"></circle>
-                                    <circle class="progress" cx="40" cy="40" r="32" stroke-dasharray="201" stroke-dashoffset="201"></circle>
-                                </svg>
-                                <span class="pipeline-count">0</span>
-                            </div>
-                            <div class="pipeline-label">Reviewing</div>
-                        </div>
-                        <div class="pipeline-item">
-                            <div class="pipeline-ring">
-                                <svg width="80" height="80">
-                                    <circle class="bg" cx="40" cy="40" r="32"></circle>
-                                    <circle class="progress" cx="40" cy="40" r="32" stroke-dasharray="201" stroke-dashoffset="201"></circle>
-                                </svg>
-                                <span class="pipeline-count">0</span>
-                            </div>
-                            <div class="pipeline-label">Ready</div>
-                        </div>
-                        <div class="pipeline-item">
-                            <div class="pipeline-ring">
-                                <svg width="80" height="80">
-                                    <circle class="bg" cx="40" cy="40" r="32"></circle>
-                                    <circle class="progress" cx="40" cy="40" r="32" stroke-dasharray="201" stroke-dashoffset="201"></circle>
-                                </svg>
-                                <span class="pipeline-count">0</span>
-                            </div>
-                            <div class="pipeline-label">Published</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="card-header">
-                    <h3 class="card-title">Quick Actions</h3>
-                </div>
-                <div class="card-body">
-                    <div class="actions-list">
-                        <a href="/trending" class="action-btn">
-                            <div class="action-icon purple"><i class="fas fa-fire"></i></div>
-                            <div class="action-text">
-                                <h4>Find Trending Topics</h4>
-                                <p>Discover what's hot right now</p>
-                            </div>
-                        </a>
-                        <a href="/research" class="action-btn">
-                            <div class="action-icon green"><i class="fas fa-pen-fancy"></i></div>
-                            <div class="action-text">
-                                <h4>New Article</h4>
-                                <p>Start writing something new</p>
-                            </div>
-                        </a>
-                        <a href="/articles" class="action-btn">
-                            <div class="action-icon blue"><i class="fas fa-book-open"></i></div>
-                            <div class="action-text">
-                                <h4>View Articles</h4>
-                                <p>Manage your content</p>
-                            </div>
-                        </a>
-                        <a href="/settings" class="action-btn">
-                            <div class="action-icon orange"><i class="fas fa-cog"></i></div>
-                            <div class="action-text">
-                                <h4>Settings</h4>
-                                <p>Configure your account</p>
-                            </div>
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="card" style="margin-top: 24px;">
-            <div class="card-header">
-                <h3 class="card-title">Recent Articles</h3>
-            </div>
-            <div class="card-body">
-                <div class="article-item">
-                    <div class="article-status draft"></div>
-                    <div class="article-info">
-                        <div class="article-title">No articles yet</div>
-                        <div class="article-meta">Start by finding trending topics or writing a new article</div>
-                    </div>
-                    <a href="/trending" class="article-action">Get Started</a>
-                </div>
+            <div class="w-12 h-12 bg-primary-500/10 rounded-xl flex items-center justify-center">
+                <i data-lucide="file-text" class="w-6 h-6 text-primary-400"></i>
             </div>
         </div>
     </div>
+    
+    <!-- In Progress -->
+    <div class="bg-surface-900/50 border border-surface-700/50 rounded-xl p-5">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-sm text-surface-400">In Progress</p>
+                <p class="text-3xl font-bold text-white mt-1">{{ status.wip|default(0) }}</p>
+            </div>
+            <div class="w-12 h-12 bg-yellow-500/10 rounded-xl flex items-center justify-center">
+                <i data-lucide="loader" class="w-6 h-6 text-yellow-400"></i>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Published -->
+    <div class="bg-surface-900/50 border border-surface-700/50 rounded-xl p-5">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-sm text-surface-400">Published</p>
+                <p class="text-3xl font-bold text-white mt-1">{{ status.stages.get("published", 0) }}</p>
+            </div>
+            <div class="w-12 h-12 bg-green-500/10 rounded-xl flex items-center justify-center">
+                <i data-lucide="check-circle" class="w-6 h-6 text-green-400"></i>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Total Views -->
+    <div class="bg-surface-900/50 border border-surface-700/50 rounded-xl p-5">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-sm text-surface-400">Total Views</p>
+                <p class="text-3xl font-bold text-white mt-1">0</p>
+            </div>
+            <div class="w-12 h-12 bg-purple-500/10 rounded-xl flex items-center justify-center">
+                <i data-lucide="eye" class="w-6 h-6 text-purple-400"></i>
+            </div>
+        </div>
+    </div>
+</div>
 
-    <script>
-        // Animate pipeline rings on load
-        document.addEventListener('DOMContentLoaded', () => {
-            const rings = document.querySelectorAll('.pipeline-ring .progress');
-            rings.forEach((ring, i) => {
-                setTimeout(() => {
-                    ring.style.strokeDashoffset = '201';
-                }, i * 100);
-            });
-        });
-    </script>
-</body>
-</html>
+<!-- Main Content Grid -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    
+    <!-- Pipeline Status (2 cols) -->
+    <div class="lg:col-span-2 bg-surface-900/50 border border-surface-700/50 rounded-xl p-6">
+        <div class="flex items-center justify-between mb-6">
+            <h2 class="text-lg font-semibold text-white">Pipeline Status</h2>
+            <a href="/articles" class="text-sm text-primary-400 hover:text-primary-300">View All →</a>
+        </div>
+        
+        <div class="grid grid-cols-5 gap-4">
+            <!-- Research -->
+            <div class="text-center">
+                <div class="w-16 h-16 mx-auto rounded-full border-4 border-surface-700 flex items-center justify-center mb-2">
+                    <i data-lucide="search" class="w-6 h-6 text-surface-500"></i>
+                </div>
+                <p class="text-sm text-surface-400">Research</p>
+                <p class="text-lg font-semibold text-white">{{ status.stages.get("researching", 0) }}</p>
+            </div>
+            
+            <!-- Drafting -->
+            <div class="text-center">
+                <div class="w-16 h-16 mx-auto rounded-full border-4 border-primary-500 flex items-center justify-center mb-2">
+                    <i data-lucide="pen-tool" class="w-6 h-6 text-primary-400"></i>
+                </div>
+                <p class="text-sm text-surface-400">Drafting</p>
+                <p class="text-lg font-semibold text-white">{{ status.stages.get("drafted", 0) }}</p>
+            </div>
+            
+            <!-- Reviewing -->
+            <div class="text-center">
+                <div class="w-16 h-16 mx-auto rounded-full border-4 border-surface-700 flex items-center justify-center mb-2">
+                    <i data-lucide="eye" class="w-6 h-6 text-surface-500"></i>
+                </div>
+                <p class="text-sm text-surface-400">Reviewing</p>
+                <p class="text-lg font-semibold text-white">{{ status.stages.get("reviewing", 0) }}</p>
+            </div>
+            
+            <!-- Ready -->
+            <div class="text-center">
+                <div class="w-16 h-16 mx-auto rounded-full border-4 border-surface-700 flex items-center justify-center mb-2">
+                    <i data-lucide="check" class="w-6 h-6 text-surface-500"></i>
+                </div>
+                <p class="text-sm text-surface-400">Ready</p>
+                <p class="text-lg font-semibold text-white">{{ status.stages.get("gated", 0) }}</p>
+            </div>
+            
+            <!-- Published -->
+            <div class="text-center">
+                <div class="w-16 h-16 mx-auto rounded-full border-4 border-green-500 flex items-center justify-center mb-2">
+                    <i data-lucide="rocket" class="w-6 h-6 text-green-400"></i>
+                </div>
+                <p class="text-sm text-surface-400">Published</p>
+                <p class="text-lg font-semibold text-white">{{ status.stages.get("published", 0) }}</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Quick Actions (1 col) -->
+    <div class="bg-surface-900/50 border border-surface-700/50 rounded-xl p-6">
+        <h2 class="text-lg font-semibold text-white mb-6">Quick Actions</h2>
+        
+        <div class="space-y-3">
+            <a href="/trending" class="flex items-center gap-4 p-4 bg-surface-800/50 hover:bg-surface-800 border border-surface-700/50 rounded-xl transition-all group">
+                <div class="w-10 h-10 bg-orange-500/10 rounded-lg flex items-center justify-center group-hover:bg-orange-500/20 transition-colors">
+                    <i data-lucide="flame" class="w-5 h-5 text-orange-400"></i>
+                </div>
+                <div>
+                    <p class="font-medium text-white">Find Trending Topics</p>
+                    <p class="text-xs text-surface-400">Discover what's hot right now</p>
+                </div>
+            </a>
+            
+            <a href="/articles" class="flex items-center gap-4 p-4 bg-surface-800/50 hover:bg-surface-800 border border-surface-700/50 rounded-xl transition-all group">
+                <div class="w-10 h-10 bg-primary-500/10 rounded-lg flex items-center justify-center group-hover:bg-primary-500/20 transition-colors">
+                    <i data-lucide="plus" class="w-5 h-5 text-primary-400"></i>
+                </div>
+                <div>
+                    <p class="font-medium text-white">New Article</p>
+                    <p class="text-xs text-surface-400">Start writing something new</p>
+                </div>
+            </a>
+            
+            <a href="/articles" class="flex items-center gap-4 p-4 bg-surface-800/50 hover:bg-surface-800 border border-surface-700/50 rounded-xl transition-all group">
+                <div class="w-10 h-10 bg-blue-500/10 rounded-lg flex items-center justify-center group-hover:bg-blue-500/20 transition-colors">
+                    <i data-lucide="book-open" class="w-5 h-5 text-blue-400"></i>
+                </div>
+                <div>
+                    <p class="font-medium text-white">View Articles</p>
+                    <p class="text-xs text-surface-400">Manage your content</p>
+                </div>
+            </a>
+            
+            <a href="/settings" class="flex items-center gap-4 p-4 bg-surface-800/50 hover:bg-surface-800 border border-surface-700/50 rounded-xl transition-all group">
+                <div class="w-10 h-10 bg-surface-600/10 rounded-lg flex items-center justify-center group-hover:bg-surface-600/20 transition-colors">
+                    <i data-lucide="settings" class="w-5 h-5 text-surface-400"></i>
+                </div>
+                <div>
+                    <p class="font-medium text-white">Settings</p>
+                    <p class="text-xs text-surface-400">Configure your account</p>
+                </div>
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Articles -->
+<div class="mt-6 bg-surface-900/50 border border-surface-700/50 rounded-xl p-6">
+    <div class="flex items-center justify-between mb-6">
+        <h2 class="text-lg font-semibold text-white">Recent Articles</h2>
+        <a href="/articles" class="text-sm text-primary-400 hover:text-primary-300">View All →</a>
+    </div>
+    
+    {% if articles %}
+    <div class="space-y-3">
+        {% for article in articles[:5] %}
+        <div class="flex items-center justify-between p-4 bg-surface-800/50 rounded-xl">
+            <div class="flex items-center gap-4">
+                <div class="w-10 h-10 bg-primary-500/10 rounded-lg flex items-center justify-center">
+                    <i data-lucide="file-text" class="w-5 h-5 text-primary-400"></i>
+                </div>
+                <div>
+                    <p class="font-medium text-white">{{ article.title }}</p>
+                    <p class="text-sm text-surface-400">{{ article.stage }}</p>
+                </div>
+            </div>
+            <span class="px-3 py-1 text-xs font-medium rounded-full
+                {% if article.stage == 'published' %}bg-green-500/20 text-green-400
+                {% elif article.stage == 'gated' %}bg-yellow-500/20 text-yellow-400
+                {% else %}bg-surface-700 text-surface-300{% endif %}">
+                {{ article.stage }}
+            </span>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center py-12">
+        <i data-lucide="inbox" class="w-12 h-12 text-surface-600 mx-auto mb-4"></i>
+        <p class="text-surface-400">No articles yet</p>
+        <p class="text-sm text-surface-500 mt-1">Start by finding trending topics or writing a new article</p>
+        <a href="/trending" class="inline-flex items-center gap-2 mt-4 px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors">
+            <i data-lucide="plus" class="w-4 h-4"></i> Get Started
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

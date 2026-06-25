@@ -1,263 +1,139 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ContentPilot — Settings</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <style>
-        :root {
-            --primary: #6366f1;
-            --secondary: #8b5cf6;
-            --success: #10b981;
-            --warning: #f59e0b;
-            --danger: #ef4444;
-            --bg: #0f172a;
-            --bg-card: #1e293b;
-            --bg-input: #0f172a;
-            --text: #f8fafc;
-            --text-muted: #94a3b8;
-            --border: #334155;
-        }
+{% extends "base.html" %}
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Inter', sans-serif; background: var(--bg); min-height: 100vh; color: var(--text); }
+{% block title %}ContentPilot — Settings{% endblock %}
 
-        .navbar {
-            background: rgba(30, 41, 59, 0.8);
-            backdrop-filter: blur(20px);
-            border-bottom: 1px solid var(--border);
-            padding: 16px 40px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
+{% block content %}
+<!-- Header -->
+<div class="mb-8">
+    <h1 class="text-3xl font-bold text-white">⚙️ Settings</h1>
+    <p class="text-surface-400 mt-1">Configure your account and preferences</p>
+</div>
 
-        .logo { display: flex; align-items: center; gap: 12px; font-size: 24px; font-weight: 700; }
-        .logo-icon { width: 40px; height: 40px; background: linear-gradient(135deg, var(--primary), var(--secondary)); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
-        .nav-links { display: flex; gap: 8px; }
-        .nav-link { padding: 10px 20px; border-radius: 10px; color: var(--text-muted); text-decoration: none; transition: all 0.3s ease; font-weight: 500; }
-        .nav-link:hover, .nav-link.active { background: rgba(255,255,255,0.05); color: var(--text); }
-        .nav-link.active { background: var(--primary); color: white; }
-        .user-section { display: flex; align-items: center; gap: 16px; }
-        .tier-badge { padding: 6px 16px; border-radius: 20px; font-size: 12px; font-weight: 600; text-transform: uppercase; background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white; }
-        .avatar { width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, var(--primary), var(--secondary)); display: flex; align-items: center; justify-content: center; font-weight: 600; }
-
-        .container { max-width: 800px; margin: 0 auto; padding: 40px; }
-        .header { margin-bottom: 30px; }
-        .header h1 { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
-        .header p { color: var(--text-muted); }
-
-        .card {
-            background: var(--bg-card);
-            border-radius: 20px;
-            border: 1px solid var(--border);
-            padding: 24px;
-            margin-bottom: 24px;
-        }
-
-        .card-title {
-            font-size: 18px;
-            font-weight: 600;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .form-group { margin-bottom: 20px; }
-        .form-group:last-child { margin-bottom: 0; }
-        .form-label { display: block; font-size: 14px; font-weight: 500; margin-bottom: 8px; color: var(--text-muted); }
-        .form-input {
-            width: 100%;
-            padding: 14px 16px;
-            background: var(--bg-input);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            color: var(--text);
-            font-size: 14px;
-            transition: all 0.3s ease;
-        }
-
-        .form-input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2); }
-        .form-input::placeholder { color: var(--text-muted); }
-            .form-input:disabled { opacity: 0.5; cursor: not-allowed; background: var(--bg); }
-
-        .form-select {
-            width: 100%;
-            padding: 14px 16px;
-            background: var(--bg-input);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            color: var(--text);
-            font-size: 14px;
-            cursor: pointer;
-            appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 16px center;
-        }
-
-        .form-select:focus { outline: none; border-color: var(--primary); }
-
-        .form-hint { font-size: 12px; color: var(--text-muted); margin-top: 6px; }
-
-        .btn {
-            padding: 14px 28px;
-            border-radius: 12px;
-            border: none;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .btn-primary { background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white; }
-        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(99, 102, 241, 0.3); }
-        .btn-danger { background: rgba(239, 68, 68, 0.2); color: var(--danger); border: 1px solid var(--danger); }
-        .btn-danger:hover { background: var(--danger); color: white; }
-
-        .connection-status {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 16px;
-            background: rgba(16, 185, 129, 0.1);
-            border: 1px solid rgba(16, 185, 129, 0.3);
-            border-radius: 12px;
-            margin-bottom: 20px;
-        }
-
-        .connection-status.disconnected {
-            background: rgba(239, 68, 68, 0.1);
-            border-color: rgba(239, 68, 68, 0.3);
-        }
-
-        .status-dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            background: var(--success);
-        }
-
-        .connection-status.disconnected .status-dot { background: var(--danger); }
-
-        .btn-group { display: flex; gap: 12px; }
-
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        .card { animation: fadeIn 0.5s ease forwards; }
-    </style>
-</head>
-<body>
-    <nav class="navbar">
-        <div class="logo">
-            <div class="logo-icon">✈️</div>
-            <span>ContentPilot</span>
-        </div>
-        <div class="nav-links">
-            <a href="/" class="nav-link">Dashboard</a>
-            <a href="/articles" class="nav-link">Articles</a>
-            <a href="/trending" class="nav-link">Trending</a>
-            <a href="/settings" class="nav-link active">Settings</a>
-        </div>
-        <div class="user-section">
-            <span class="tier-badge">{{ license.tier|default("FREE")|upper }}</span>
-            <div class="avatar">A</div>
-        </div>
-    </nav>
-
-    <div class="container">
-        <div class="header">
-            <h1>⚙️ Settings</h1>
-            <p>Configure your ContentPilot account</p>
-        </div>
-
-        <div class="card">
-            <h3 class="card-title"><i class="fas fa-user"></i> Profile</h3>
-            <div class="form-group">
-                <label class="form-label">Email</label>
-                <input type="email" class="form-input" value="user@example.com" disabled>
+<form method="POST" action="/settings" class="space-y-6 max-w-2xl">
+    
+    <!-- Profile Section -->
+    <div class="bg-surface-900/50 border border-surface-700/50 rounded-xl p-6">
+        <h2 class="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+            <i data-lucide="user" class="w-5 h-5 text-primary-400"></i> Profile
+        </h2>
+        
+        <div class="space-y-4">
+            <div>
+                <label class="block text-sm font-medium text-surface-300 mb-2">Email</label>
+                <input type="email" 
+                       value="{{ license.email|default('user@example.com') }}" 
+                       disabled
+                       class="w-full px-4 py-3 bg-surface-800 border border-surface-700 rounded-xl text-surface-400 cursor-not-allowed opacity-60">
             </div>
-            <div class="form-group">
-                <label class="form-label">License Tier</label>
-                <input type="text" class="form-input" value="{{ license.tier|default("FREE")|upper }}" disabled>
+            
+            <div>
+                <label class="block text-sm font-medium text-surface-300 mb-2">License Tier</label>
+                <input type="text" 
+                       value="{{ license.tier|default('FREE')|upper }}" 
+                       disabled
+                       class="w-full px-4 py-3 bg-surface-800 border border-surface-700 rounded-xl text-surface-400 cursor-not-allowed opacity-60">
             </div>
-        </div>
-
-        <div class="card">
-            <h3 class="card-title"><i class="fas fa-robot"></i> AI Provider</h3>
-            <div class="form-group">
-                <label class="form-label">Provider</label>
-                <select class="form-select">
-                    <option value="openai">OpenAI (GPT-4)</option>
-                    <option value="deepseek">DeepSeek</option>
-                    <option value="ollama">Ollama (Local)</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label class="form-label">API Key</label>
-                <input type="password" class="form-input" placeholder="sk-...">
-                <p class="form-hint">Your API key is stored securely and never shared</p>
-            </div>
-            <div class="form-group">
-                <label class="form-label">Model</label>
-                <select class="form-select">
-                    <option value="gpt-4">GPT-4</option>
-                    <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
-                </select>
-            </div>
-        </div>
-
-        <div class="card">
-            <h3 class="card-title"><i class="fab fa-blogger"></i> Blogger Connection</h3>
-            <div class="connection-status disconnected">
-                <div class="status-dot"></div>
-                <div>
-                    <strong>Not Connected</strong>
-                    <p style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">Connect your Google account to publish articles</p>
-                </div>
-            </div>
-            <div class="btn-group">
-                <a href="/connect-blogger" class="btn btn-primary">
-                    <i class="fab fa-google"></i> Connect Google Account
-                </a>
-            </div>
-        </div>
-
-        <div class="card">
-            <h3 class="card-title"><i class="fas fa-cog"></i> Pipeline Settings</h3>
-            <div class="form-group">
-                <label class="form-label">WIP Limit (Max articles in progress)</label>
-                <input type="number" class="form-input" value="3" min="1" max="10">
-            </div>
-            <div class="form-group">
-                <label class="form-label">Publish Mode</label>
-                <select class="form-select">
-                    <option value="draft">Draft (Review first)</option>
-                    <option value="live">Live (Publish immediately)</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label class="form-label">Language</label>
-                <select class="form-select">
-                    <option value="id">Bahasa Indonesia</option>
-                    <option value="en">English</option>
-                </select>
-            </div>
-        </div>
-
-        <div class="btn-group" style="justify-content: flex-end;">
-            <button class="btn btn-primary">
-                <i class="fas fa-save"></i> Save Settings
-            </button>
         </div>
     </div>
-</body>
-</html>
+    
+    <!-- AI Provider Section -->
+    <div class="bg-surface-900/50 border border-surface-700/50 rounded-xl p-6">
+        <h2 class="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+            <i data-lucide="bot" class="w-5 h-5 text-primary-400"></i> AI Provider
+        </h2>
+        
+        <div class="space-y-4">
+            <div>
+                <label class="block text-sm font-medium text-surface-300 mb-2">Provider</label>
+                <select name="ai_provider" class="w-full px-4 py-3 bg-surface-800 border border-surface-700 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-primary-500 transition-colors">
+                    <option value="openai" {% if config.get('ai', {}).get('provider') == 'openai' %}selected{% endif %}>OpenAI (GPT-4)</option>
+                    <option value="deepseek" {% if config.get('ai', {}).get('provider') == 'deepseek' %}selected{% endif %}>DeepSeek</option>
+                    <option value="ollama" {% if config.get('ai', {}).get('provider') == 'ollama' %}selected{% endif %}>Ollama (Local)</option>
+                </select>
+            </div>
+            
+            <div>
+                <label class="block text-sm font-medium text-surface-300 mb-2">API Key</label>
+                <input type="password" 
+                       name="ai_api_key"
+                       value="{{ config.get('ai', {}).get('api_key', '') }}"
+                       placeholder="sk-..."
+                       class="w-full px-4 py-3 bg-surface-800 border border-surface-700 rounded-xl text-white placeholder-surface-500 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-colors">
+                <p class="text-xs text-surface-500 mt-2">Your API key is stored securely and never shared</p>
+            </div>
+            
+            <div>
+                <label class="block text-sm font-medium text-surface-300 mb-2">Model</label>
+                <select name="ai_model" class="w-full px-4 py-3 bg-surface-800 border border-surface-700 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-primary-500 transition-colors">
+                    <option value="gpt-4" {% if config.get('ai', {}).get('model') == 'gpt-4' %}selected{% endif %}>GPT-4</option>
+                    <option value="gpt-3.5-turbo" {% if config.get('ai', {}).get('model') == 'gpt-3.5-turbo' %}selected{% endif %}>GPT-3.5 Turbo</option>
+                    <option value="deepseek-chat" {% if config.get('ai', {}).get('model') == 'deepseek-chat' %}selected{% endif %}>DeepSeek Chat</option>
+                    <option value="llama2" {% if config.get('ai', {}).get('model') == 'llama2' %}selected{% endif %}>Llama 2 (Ollama)</option>
+                </select>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Blogger Connection -->
+    <div class="bg-surface-900/50 border border-surface-700/50 rounded-xl p-6">
+        <h2 class="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+            <i data-lucide="link" class="w-5 h-5 text-primary-400"></i> Blogger Connection
+        </h2>
+        
+        <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                <div>
+                    <p class="font-medium text-white">Not Connected</p>
+                    <p class="text-sm text-surface-400">Connect your Google account to publish articles</p>
+                </div>
+            </div>
+            <a href="/connect-blogger" class="px-4 py-2 bg-primary-500 text-white text-sm font-medium rounded-lg hover:bg-primary-600 transition-colors">
+                <i data-lucide="external-link" class="w-4 h-4 inline mr-1"></i> Connect
+            </a>
+        </div>
+    </div>
+    
+    <!-- Pipeline Settings -->
+    <div class="bg-surface-900/50 border border-surface-700/50 rounded-xl p-6">
+        <h2 class="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+            <i data-lucide="sliders" class="w-5 h-5 text-primary-400"></i> Pipeline Settings
+        </h2>
+        
+        <div class="space-y-4">
+            <div>
+                <label class="block text-sm font-medium text-surface-300 mb-2">WIP Limit (Max articles in progress)</label>
+                <input type="number" 
+                       name="wip_limit"
+                       value="{{ config.get('pipeline', {}).get('wip_limit', 3) }}"
+                       min="1" max="10"
+                       class="w-full px-4 py-3 bg-surface-800 border border-surface-700 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-primary-500 transition-colors">
+            </div>
+            
+            <div>
+                <label class="block text-sm font-medium text-surface-300 mb-2">Publish Mode</label>
+                <select name="publish_mode" class="w-full px-4 py-3 bg-surface-800 border border-surface-700 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-primary-500 transition-colors">
+                    <option value="draft" {% if config.get('pipeline', {}).get('publish_mode') == 'draft' %}selected{% endif %}>Draft (Review first)</option>
+                    <option value="live" {% if config.get('pipeline', {}).get('publish_mode') == 'live' %}selected{% endif %}>Live (Publish immediately)</option>
+                </select>
+            </div>
+            
+            <div>
+                <label class="block text-sm font-medium text-surface-300 mb-2">Language</label>
+                <select name="language" class="w-full px-4 py-3 bg-surface-800 border border-surface-700 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-primary-500 transition-colors">
+                    <option value="id" {% if config.get('language') == 'id' %}selected{% endif %}>Bahasa Indonesia</option>
+                    <option value="en" {% if config.get('language') == 'en' %}selected{% endif %}>English</option>
+                </select>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Save Button -->
+    <div class="flex justify-end">
+        <button type="submit" 
+                class="px-6 py-3 bg-primary-500 text-white font-semibold rounded-xl hover:bg-primary-600 transition-colors shadow-lg shadow-primary-500/25">
+            <i data-lucide="save" class="w-4 h-4 inline mr-2"></i> Save Settings
+        </button>
+    </div>
+</form>
+{% endblock %}

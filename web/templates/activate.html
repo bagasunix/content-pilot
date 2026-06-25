@@ -1,142 +1,52 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ContentPilot</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-        
-        .container {
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            padding: 40px;
-            max-width: 500px;
-            width: 90%;
-            text-align: center;
-        }
-        
-        .logo {
-            font-size: 48px;
-            margin-bottom: 20px;
-        }
-        
-        h1 {
-            color: #333;
-            margin-bottom: 10px;
-            font-size: 28px;
-        }
-        
-        .subtitle {
-            color: #666;
-            margin-bottom: 30px;
-            font-size: 14px;
-        }
-        
-        .form-group {
-            margin-bottom: 20px;
-            text-align: left;
-        }
-        
-        label {
-            display: block;
-            margin-bottom: 8px;
-            color: #333;
-            font-weight: 500;
-        }
-        
-        input[type="text"] {
-            width: 100%;
-            padding: 15px;
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            font-size: 16px;
-            transition: border-color 0.3s;
-        }
-        
-        input[type="text"]:focus {
-            outline: none;
-            border-color: #667eea;
-        }
-        
-        .btn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            padding: 15px 40px;
-            border-radius: 10px;
-            font-size: 16px;
-            cursor: pointer;
-            width: 100%;
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-        
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
-        }
-        
-        .error {
-            background: #fee;
-            color: #c00;
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            border: 1px solid #fcc;
-        }
-        
-        .help-text {
-            margin-top: 20px;
-            color: #666;
-            font-size: 13px;
-        }
-        
-        .help-text a {
-            color: #667eea;
-            text-decoration: none;
-        }
-        
-        .help-text a:hover {
-            text-decoration: underline;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="logo">✨</div>
-        <h1>ContentPilot</h1>
-        <p class="subtitle">Blog automation yang bikin kamu produktif 10x lipat</p>
-        
-        {% if error %}
-        <div class="error">{{ error }}</div>
-        {% endif %}
-        
-        <form method="POST" action="/activate">
-            <div class="form-group">
-                <label for="key">License Key</label>
-                <input type="text" id="key" name="key" placeholder="SB-XXXX-XXXX-XXXX" required>
+{% extends "base.html" %}
+
+{% block title %}ContentPilot — Activate{% endblock %}
+
+{% block body %}
+<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-surface-950 via-primary-950/20 to-surface-950 p-4">
+    
+    <!-- Activate Card -->
+    <div class="w-full max-w-md">
+        <div class="bg-surface-900/80 backdrop-blur-xl border border-surface-700/50 rounded-2xl p-8 shadow-2xl">
+            
+            <!-- Logo -->
+            <div class="text-center mb-8">
+                <div class="w-16 h-16 bg-gradient-to-br from-primary-500 to-purple-500 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-primary-500/25">
+                    <i data-lucide="rocket" class="w-8 h-8 text-white"></i>
+                </div>
+                <h1 class="text-2xl font-bold text-white">ContentPilot</h1>
+                <p class="text-surface-400 mt-2">Blog automation yang bikin kamu produktif 10x lipat</p>
             </div>
             
-            <button type="submit" class="btn">Activate License</button>
-        </form>
-        
-        <p class="help-text">
-            Don't have a key? <a href="https://smartblogger.dev/free">Get a free key</a>
-        </p>
+            <!-- Form -->
+            <form method="POST" action="/activate" class="space-y-6">
+                
+                <!-- License Key Input -->
+                <div>
+                    <label for="license_key" class="block text-sm font-medium text-surface-300 mb-2">License Key</label>
+                    <input type="text" 
+                           id="license_key" 
+                           name="license_key"
+                           required
+                           placeholder="CP-XXXX-XXXX"
+                           class="w-full px-4 py-3 bg-surface-800 border border-surface-600 rounded-xl text-white placeholder-surface-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all font-mono text-center text-lg tracking-wider">
+                </div>
+                
+                <!-- Submit Button -->
+                <button type="submit" 
+                        class="w-full py-3 px-4 bg-gradient-to-r from-primary-500 to-purple-500 hover:from-primary-600 hover:to-purple-600 text-white font-semibold rounded-xl shadow-lg shadow-primary-500/25 transition-all hover:shadow-xl hover:shadow-primary-500/30 transform hover:-translate-y-0.5">
+                    Activate License
+                </button>
+            </form>
+            
+            <!-- Footer -->
+            <div class="mt-6 text-center">
+                <p class="text-sm text-surface-500">
+                    Don't have a key? 
+                    <a href="https://contentpilot.dev/pricing" class="text-primary-400 hover:text-primary-300 font-medium">Get a free key</a>
+                </p>
+            </div>
+        </div>
     </div>
-</body>
-</html>
+</div>
+{% endblock %}

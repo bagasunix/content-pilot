@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}ContentPilot{% endblock %}</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: { 50: '#eef2ff', 100: '#e0e7ff', 200: '#c7d2fe', 300: '#a5b4fc', 400: '#818cf8', 500: '#6366f1', 600: '#4f46e5', 700: '#4338ca', 800: '#3730a3', 900: '#312e81' },
+                        surface: { 50: '#f8fafc', 100: '#f1f5f9', 200: '#e2e8f0', 300: '#cbd5e1', 400: '#94a3b8', 500: '#64748b', 600: '#475569', 700: '#334155', 800: '#1e293b', 900: '#0f172a', 950: '#020617' }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Alpine.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    
+    <!-- Inter Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    
+    <style>
+        [x-cloak] { display: none !important; }
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+    
+    {% block head %}{% endblock %}
+</head>
+<body class="bg-surface-950 text-surface-50 min-h-screen">
+    
+    {% block body %}
+    <div class="min-h-screen flex flex-col">
+        
+        <!-- Navbar -->
+        <nav class="bg-surface-900/80 backdrop-blur-xl border-b border-surface-700/50 sticky top-0 z-50">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex items-center justify-between h-16">
+                    <!-- Brand -->
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 bg-gradient-to-br from-primary-500 to-purple-500 rounded-lg flex items-center justify-center">
+                            <i data-lucide="rocket" class="w-5 h-5 text-white"></i>
+                        </div>
+                        <span class="text-xl font-bold text-white">ContentPilot</span>
+                    </div>
+                    
+                    <!-- Nav Links -->
+                    <div class="hidden md:flex items-center gap-1">
+                        <a href="/dashboard" class="px-4 py-2 rounded-lg text-sm font-medium transition-colors
+                            {% if active_page == 'dashboard' %}bg-primary-500/10 text-primary-400{% else %}text-surface-400 hover:text-white hover:bg-surface-800{% endif %}">
+                            <i data-lucide="layout-dashboard" class="w-4 h-4 inline mr-2"></i>Dashboard
+                        </a>
+                        <a href="/articles" class="px-4 py-2 rounded-lg text-sm font-medium transition-colors
+                            {% if active_page == 'articles' %}bg-primary-500/10 text-primary-400{% else %}text-surface-400 hover:text-white hover:bg-surface-800{% endif %}">
+                            <i data-lucide="file-text" class="w-4 h-4 inline mr-2"></i>Articles
+                        </a>
+                        <a href="/trending" class="px-4 py-2 rounded-lg text-sm font-medium transition-colors
+                            {% if active_page == 'trending' %}bg-primary-500/10 text-primary-400{% else %}text-surface-400 hover:text-white hover:bg-surface-800{% endif %}">
+                            <i data-lucide="trending-up" class="w-4 h-4 inline mr-2"></i>Trending
+                        </a>
+                        <a href="/settings" class="px-4 py-2 rounded-lg text-sm font-medium transition-colors
+                            {% if active_page == 'settings' %}bg-primary-500/10 text-primary-400{% else %}text-surface-400 hover:text-white hover:bg-surface-800{% endif %}">
+                            <i data-lucide="settings" class="w-4 h-4 inline mr-2"></i>Settings
+                        </a>
+                    </div>
+                    
+                    <!-- Actions -->
+                    <div class="flex items-center gap-3">
+                        <span class="px-3 py-1 text-xs font-semibold rounded-full bg-primary-500/20 text-primary-400">
+                            {{ license.tier|default('FREE')|upper }}
+                        </span>
+                        <div class="w-8 h-8 bg-surface-700 rounded-full flex items-center justify-center text-sm font-medium text-surface-300">
+                            {{ (license.email if 'email' in license else 'U')[0]|upper }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </nav>
+        
+        <!-- Main Content -->
+        <main class="flex-1">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                {% block content %}{% endblock %}
+            </div>
+        </main>
+        
+        <!-- Footer -->
+        <footer class="border-t border-surface-800 py-6">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-sm text-surface-500">
+                ContentPilot — Blog automation yang bikin kamu produktif 10x lipat.
+            </div>
+        </footer>
+    </div>
+    {% endblock %}
+    
+    <!-- Initialize Lucide Icons -->
+    <script>
+        lucide.createIcons();
+    </script>
+    
+    {% block scripts %}{% endblock %}
+</body>
+</html>

@@ -258,7 +258,8 @@ if __name__ == '__main__':
 def connect_blogger():
     """Connect Blogger page."""
     connected = session.get('blogger_connected', False)
-    return render_template('connect_blogger.html', 
+    license_data = load_license()
+    return render_template('connect_blogger.html', license=license_data, 
                          connected=connected,
                          blog_name=session.get('blog_name', ''),
                          blog_id=session.get('blog_id', ''))
@@ -266,13 +267,15 @@ def connect_blogger():
 @app.route('/trending')
 def trending():
     """Trending topics page."""
-    return render_template('trending.html')
+    license_data = load_license()
+    return render_template('trending.html', license=license_data)
 
 @app.route('/publish/<idea_id>')
 def publish_page(idea_id):
     """Publish article page."""
     # Load article data
-    return render_template('publish.html',
+    license_data = load_license()
+    return render_template('publish.html', license=license_data,
                          article={'id': idea_id, 'title': 'Sample', 'slug': 'sample', 'word_count': 1000, 'seo_score': 85, 'excerpt': 'Preview...'},
                          blog_name=session.get('blog_name', 'My Blog'),
                          blog_id=session.get('blog_id', ''))
