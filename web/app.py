@@ -73,7 +73,11 @@ def activate(key=None):
         if result.get('valid'):
             # Save license
             save_license(key, result.get('tier', 'free'))
-            return redirect(url_for('index'))
+            # Set session
+            session['logged_in'] = True
+            session['license_key'] = key
+            session['license_tier'] = result.get('tier', 'free')
+            return redirect(url_for('dashboard'))
         else:
             return render_template('activate.html', error=result.get('error', 'Invalid key'))
     
