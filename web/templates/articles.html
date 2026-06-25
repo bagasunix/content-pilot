@@ -60,6 +60,7 @@
     {% if articles %}
     <div class="space-y-3">
         {% for article in articles %}
+        <div x-show="filter === 'all' || filter === '{{ article.stage }}'"
         <div x-show="(filter === 'all' || filter === '{{ article.stage }}') && (search === '' || '{{ article.title|default(article.idea_id) }}'.toLowerCase().includes(search.toLowerCase()))"
              x-transition
              class="bg-surface-900/50 border border-surface-700/50 rounded-2xl p-5 hover:border-surface-600 transition-all">
@@ -150,6 +151,9 @@
         </form>
     </div>
 </div>
+
+</div>
+    
 
 </div>
 {% endblock %}
