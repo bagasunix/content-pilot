@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ContentPilot — Publish Article</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
+            min-height: 100vh;
+        }
+        .header {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        .container { max-width: 800px; margin: 20px auto; padding: 0 20px; }
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .article-preview {
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .article-title { font-size: 24px; font-weight: bold; margin-bottom: 10px; }
+        .article-meta { color: #666; font-size: 14px; margin-bottom: 15px; }
+        .article-body { line-height: 1.6; }
+        .publish-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .option-card {
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            padding: 15px;
+            cursor: pointer;
+        }
+        .option-card.selected { border-color: #28a745; background: #f0fff4; }
+        .option-card h4 { margin-bottom: 5px; }
+        .option-card p { font-size: 12px; color: #666; }
+        .btn-publish {
+            width: 100%;
+            padding: 15px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            cursor: pointer;
+        }
+        .btn-publish:hover { background: #218838; }
+        .btn-publish:disabled { background: #ccc; cursor: not-allowed; }
+        .status { text-align: center; margin-top: 20px; }
+        .status.success { color: #28a745; }
+        .status.error { color: #dc3545; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🚀 Publish Article</h1>
+        <p>Publish artikel ke blog kamu</p>
+    </div>
+    
+    <div class="container">
+        <div class="card">
+            <h3>Article Preview</h3>
+            <div class="article-preview">
+                <div class="article-title">{{ article.title }}</div>
+                <div class="article-meta">
+                    Slug: {{ article.slug }} | Words: {{ article.word_count }} | SEO: {{ article.seo_score }}/100
+                </div>
+                <div class="article-body">{{ article.excerpt }}...</div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h3>Publish Options</h3>
+            <div class="publish-options">
+                <div class="option-card selected" onclick="selectOption('draft')">
+                    <h4>📝 Draft</h4>
+                    <p>Publish sebagai draft, review dulu sebelum live</p>
+                </div>
+                <div class="option-card" onclick="selectOption('live')">
+                    <h4>🔴 Live</h4>
+                    <p>Langsung publish ke blog</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h3>Blog Target</h3>
+            <p>{{ blog_name }} (ID: {{ blog_id }})</p>
+            <a href="/settings" style="color: #667eea;">Ganti blog →</a>
+        </div>
+        
+        <button class="btn-publish" onclick="publish()">
+            🚀 Publish Sekarang
+        </button>
+        
+        <div id="status" class="status" style="display: none;"></div>
+    </div>
+
+    <script>
+        let publishMode = 'draft';
+        
+        function selectOption(mode) {
+            publishMode = mode;
+            document.querySelectorAll('.option-card').forEach(c => c.classList.remove('selected'));
+            event.target.closest('.option-card').classList.add('selected');
+        }
+        
+        function publish() {
+            const btn = document.querySelector('.btn-publish');
+            btn.disabled = true;
+            btn.textContent = 'Publishing...';
+            
+            fetch('/api/publish', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    idea_id: '{{ article.id }}',
+                    mode: publishMode
+                })
+            })
+            .then(r => r.json())
+            .then(data => {
+                const status = document.getElementById('status');
+                status.style.display = 'block';
+                
+                if (data.success) {
+                    status.className = 'status success';
+                    status.innerHTML = '✅ Published successfully!<br><a href="' + data.url + '" target="_blank">View on Blogger →</a>';
+                } else {
+                    status.className = 'status error';
+                    status.innerHTML = '❌ Error: ' + data.error;
+                }
+                
+                btn.disabled = false;
+                btn.textContent = '🚀 Publish Sekarang';
+            })
+            .catch(err => {
+                const status = document.getElementById('status');
+                status.style.display = 'block';
+                status.className = 'status error';
+                status.innerHTML = '❌ Network error: ' + err.message;
+                btn.disabled = false;
+                btn.textContent = '🚀 Publish Sekarang';
+            });
+        }
+    </script>
+</body>
+</html>
