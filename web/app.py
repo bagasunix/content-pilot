@@ -195,6 +195,29 @@ def logout():
     session.clear()
     return redirect(url_for('login'))
 
+
+@app.route('/api/topics', methods=['POST'])
+def api_add_topic():
+    """Add a new topic to idea bank."""
+    if not session.get('logged_in'):
+        return jsonify({'success': False, 'error': 'Not logged in'}), 401
+    
+    title = request.form.get('title', '').strip()
+    category = request.form.get('category', 'general')
+    
+    if not title:
+        return jsonify({'success': False, 'error': 'Title required'}), 400
+    
+    # Add to idea bank
+    idea_bank = WORKSPACE / 'idea-bank.md'
+    with open(idea_bank, 'a') as f:
+        entry = f"\n### [M] {title}\n- category: {category}\n- status: idea\n"
+        f.write(entry)
+    
+    return jsonify({'success': True, 'title': title, 'category': category})
+    return jsonify({'success': True, 'title': title, 'category': category})
+
+
 @app.route('/api/status')
 def api_status():
     """API endpoint for status."""

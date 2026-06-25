@@ -3,7 +3,7 @@
 {% block title %}ContentPilot — Articles{% endblock %}
 
 {% block content %}
-<div x-data="{ filter: 'all', search: '' }">
+<div x-data="{ filter: 'all', search: '', showAddModal: false }">
     
     <!-- Header -->
     <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
@@ -109,11 +109,47 @@
             <a href="/trending" class="inline-flex items-center gap-2 px-4 py-2 bg-primary-500 text-white text-sm rounded-lg hover:bg-primary-600 transition-colors">
                 <i data-lucide="trending-up" class="w-4 h-4"></i> Find Topics
             </a>
-            <a href="/articles" class="inline-flex items-center gap-2 px-4 py-2 bg-surface-800 text-surface-300 text-sm rounded-lg hover:bg-surface-700 transition-colors">
-                <i data-lucide="plus" class="w-4 h-4"></i> Add Manual
-            </a>
+            <button type="button" @click="showAddModal = true" class="inline-flex items-center gap-2 px-4 py-2 bg-surface-800 text-surface-300 text-sm rounded-lg hover:bg-surface-700 transition-colors">
+                <i data-lucide="plus" class="w-4 h-4"></i> Add Topic
+            </button>
         </div>
     </div>
     {% endif %}
+
+<!-- Add Topic Modal -->
+<div x-show="showAddModal" x-cloak
+     class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+     @click.self="showAddModal = false">
+    <div class="bg-surface-900 border border-surface-700 rounded-2xl p-6 w-full max-w-md mx-4 shadow-2xl" @click.stop>
+        <div class="flex items-center justify-between mb-6">
+            <h3 class="text-lg font-semibold text-white">Add New Topic</h3>
+            <button @click="showAddModal = false" class="p-2 text-surface-400 hover:text-white rounded-lg hover:bg-surface-800 transition-colors">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+        </div>
+        <form method="POST" action="/api/topics" class="space-y-4">
+            <div>
+                <label class="block text-sm font-medium text-surface-300 mb-2">Topic Title</label>
+                <input type="text" name="title" required placeholder="e.g., Cara Install Docker"
+                       class="w-full px-4 py-3 bg-surface-800 border border-surface-700 rounded-xl text-white placeholder-surface-500 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-colors">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-surface-300 mb-2">Category</label>
+                <select name="category" class="w-full px-4 py-3 bg-surface-800 border border-surface-700 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-primary-500 transition-colors">
+                    <option value="devops">DevOps</option>
+                    <option value="ai">AI/Tech</option>
+                    <option value="webdev">Web Dev</option>
+                    <option value="security">Security</option>
+                    <option value="general">General</option>
+                </select>
+            </div>
+            <div class="flex gap-3 pt-2">
+                <button type="button" @click="showAddModal = false" class="flex-1 px-4 py-3 bg-surface-800 text-surface-300 rounded-xl hover:bg-surface-700 transition-colors">Cancel</button>
+                <button type="submit" class="flex-1 px-4 py-3 bg-primary-500 text-white rounded-xl hover:bg-primary-600 transition-colors font-medium">Add Topic</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 </div>
 {% endblock %}
