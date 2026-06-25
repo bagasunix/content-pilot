@@ -9,7 +9,7 @@ Usage:
 Then open: http://localhost:8080
 """
 
-from flask import Flask, render_template, request, jsonify, redirect, url_for
+from flask import Flask, render_template, request, jsonify, redirect, url_for, session
 import json
 import os
 import sys
@@ -50,8 +50,19 @@ def index():
                          status=status)
 
 @app.route('/activate', methods=['GET', 'POST'])
-def activate():
+@app.route('/activate/<key>')
+def activate(key=None):
     """License activation page."""
+    # Direct activation via URL
+    if key:
+        result = validate_license_key(key)
+        if result.get('valid'):
+            save_license(key, result.get('tier', 'free'))
+            session['logged_in'] = True
+            session['license_key'] = key
+            session['license_tier'] = result.get('tier', 'free')
+            return redirect(url_for('dashboard'))
+    
     if request.method == 'POST':
         key = request.form.get('key', '').strip()
         
@@ -139,6 +150,50 @@ def research():
         "idea_id": idea_id,
         "message": f"Research started for: {topic}"
     })
+
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    """Login page."""
+    # Check if already logged in
+    if session.get('logged_in'):
+        return redirect(url_for('dashboard'))
+    
+    # Check if license exists (auto-login)
+    license_data = load_license()
+    if license_data and license_data.get('key'):
+        session['logged_in'] = True
+        session['license_key'] = license_data.get('key')
+        session['license_tier'] = license_data.get('tier', 'free')
+        return redirect(url_for('dashboard'))
+    
+    if request.method == 'POST':
+        key = request.form.get('key', '').strip()
+        
+        if not key:
+            return render_template('login.html', error="Please enter a license key")
+        
+        # Validate key
+        result = validate_license_key(key)
+        
+        if result.get('valid'):
+            # Save license
+            save_license(key, result.get('tier', 'free'))
+            # Set session
+            session['logged_in'] = True
+            session['license_key'] = key
+            session['license_tier'] = result.get('tier', 'free')
+            return redirect(url_for('dashboard'))
+        else:
+            return render_template('login.html', error=result.get('error', 'Invalid key'))
+    
+    return render_template('login.html')
+
+@app.route('/logout')
+def logout():
+    """Logout."""
+    session.clear()
+    return redirect(url_for('login'))
 
 @app.route('/api/status')
 def api_status():

@@ -83,6 +83,9 @@
                         <div class="w-8 h-8 bg-surface-700 rounded-full flex items-center justify-center text-sm font-medium text-surface-300">
                             {{ (license.email if 'email' in license else 'U')[0]|upper }}
                         </div>
+                        <a href="/logout" class="p-2 text-surface-400 hover:text-white hover:bg-surface-800 rounded-lg transition-colors" title="Logout">
+                            <i data-lucide="log-out" class="w-4 h-4"></i>
+                        </a>
                     </div>
                 </div>
             </div>
