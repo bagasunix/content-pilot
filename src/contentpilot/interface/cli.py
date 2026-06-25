@@ -173,6 +173,32 @@ def main(argv: list[str] | None = None) -> int:
         for k, v in stats.items():
             print(f"  {k}: {v}")
         return 0
+
+    elif cmd == "activate" and rest:
+        from ..license import activate_license
+        key = rest[0]
+        result = activate_license(key)
+        if result.get("success"):
+            print(f"✅ License activated!")
+            print(f"   Tier: {result.get('tier', 'free')}")
+            print(f"   Expires: {result.get('expires_at', 'never')}")
+        else:
+            print(f"❌ Activation failed: {result.get('error', 'unknown')}")
+            return 1
+        return 0
+
+    elif cmd == "license":
+        from ..license import get_license_info
+        info = get_license_info()
+        if info.get("active"):
+            print(f"✅ License active")
+            print(f"   Key: {info.get('key', 'N/A')}")
+            print(f"   Tier: {info.get('tier', 'unknown')}")
+            print(f"   Expires: {info.get('expires_at', 'never')}")
+        else:
+            print(f"❌ License inactive: {info.get('error', 'unknown')}")
+        return 0
+
     else:
         print(USAGE)
     return 0

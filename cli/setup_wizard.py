@@ -132,15 +132,29 @@ def main():
     generate_config(config)
     generate_env_example()
 
+    # License activation
+    print()
+    print("🔑 LICENSE ACTIVATION")
+    print("-" * 40)
+    key = get_input("License key (tekan Enter untuk skip)", "", required=False)
+    if key:
+        sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
+        from contentpilot.license import activate_license
+        result = activate_license(key)
+        if result.get("success"):
+            print(f"  ✅ License activated! Tier: {result.get('tier', 'free')}")
+        else:
+            print(f"  ⚠️  Activation failed: {result.get('error', 'unknown')}")
+            print("  You can activate later: contentpilot activate --key YOUR-KEY")
+
     print()
     print("=" * 50)
     print("  ✅ Setup Complete!")
     print("=" * 50)
     print()
     print("NEXT:")
-    print(f"  1. cp .env.example .env && edit .env")
-    print(f"  2. python3 scripts/setup_credentials.py")
-    print(f"  3. python3 python3 -m contentpilot.pipeline status")
+    print(f"  1. Edit .env: cp .env.example .env")
+    print(f"  2. Run: contentpilot status")
     print()
     print(f"  Domain:  {config['domain']}")
     print(f"  Blog ID: {config['blog_id']}")
