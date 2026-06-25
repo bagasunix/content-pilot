@@ -1,9 +1,0 @@
-ai:
-  model: llama2
-  provider: ollama
-blog_id: '123'
-domain: test.com
-pipeline:
-  wip_limit: 3
-workspace:
-  path: workspace

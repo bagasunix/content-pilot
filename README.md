@@ -23,30 +23,6 @@ Writing a blog post manually takes 4-8 hours. With ContentPilot:
 
 ---
 
-## What You Get
-
-**🧠 Smart Research**
-- AI finds the best keywords and topics
-- Competitor analysis built-in
-- Content angle suggestions
-
-**✍️ Quality Writing**
-- AI-generated articles that don't sound like AI
-- 19 AI-tell phrases automatically detected and removed
-- Voice guide keeps your tone consistent
-
-**📊 SEO Scoring**
-- Real-time SEO score (0-100)
-- Readability grading
-- Internal linking suggestions
-
-**🚀 One-Click Publish**
-- Auto-post to Blogger
-- Draft or live mode
-- Featured image upload
-
----
-
 ## Quick Start
 
 ```bash
@@ -55,38 +31,24 @@ git clone https://github.com/bagasunix/content-pilot.git
 cd content-pilot
 pip install -r requirements.txt
 
-# 2. Setup (interactive wizard)
-python3 scripts/setup_wizard.py
+# 2. Setup
+python3 cli/setup_wizard.py
 
 # 3. Run
-python3 scripts/pipeline.py status
-python3 scripts/pipeline.py full "how to install docker on ubuntu"
+python3 -m contentpilot.pipeline status
+python3 -m contentpilot.pipeline full "how to install docker"
 ```
-
-That's it. Your article is ready in `workspace/drafts/`.
 
 ---
 
 ## How It Works
 
 ```
-┌─────────────────────────────────────────────────┐
-│              ContentPilot Pipeline               │
-├─────────────────────────────────────────────────┤
-│                                                   │
-│  📝 Idea ──→ 🔍 Research ──→ ✍️ Write           │
-│                                         │         │
-│  📊 Score ◄── 🔍 Quality Gate ◄────────┘         │
-│      │                                            │
-│      ▼                                            │
-│  🚀 Publish ──→ Blogger (draft/live)              │
-│                                                   │
-└─────────────────────────────────────────────────┘
+📝 Idea ──→ 🔍 Research ──→ ✍️ Write ──→ 🔍 Quality Gate ──→ 🚀 Publish
 ```
 
 **Quality Gate catches:**
-- ❌ "Di era digital saat ini..." (AI-tells)
-- ❌ "Sangat penting untuk..." (AI-tells)
+- ❌ AI-tell phrases ("Di era digital saat ini...")
 - ❌ Dead links (404/410)
 - ❌ Hoax domains
 - ❌ Missing SEO fields
@@ -94,9 +56,27 @@ That's it. Your article is ready in `workspace/drafts/`.
 
 ---
 
-## Bring Your Own AI
+## Project Structure
 
-ContentPilot works with any AI provider:
+```
+content-pilot/
+├── src/contentpilot/       # Core pipeline library
+│   ├── domain/             # Entities, gates, stages
+│   ├── application/        # Use cases, ports
+│   ├── infrastructure/     # Adapters (Blogger, files)
+│   └── interface/          # CLI entry point
+├── cli/                    # CLI commands
+├── templates/              # Article templates
+├── workspace/              # Runtime data (drafts, config)
+├── config/                 # Config templates
+├── docs/                   # Documentation
+├── pyproject.toml
+└── requirements.txt
+```
+
+---
+
+## Bring Your Own AI
 
 ```yaml
 # OpenAI
@@ -115,63 +95,28 @@ ai:
   model: llama2
 ```
 
-**No vendor lock-in. No API limits. Your data stays local with Ollama.**
-
 ---
 
 ## Commands
 
 ```bash
-python3 scripts/pipeline.py status          # See all articles
-python3 scripts/pipeline.py next            # Pick next topic
-python3 scripts/pipeline.py research "topic" # Research phase
-python3 scripts/pipeline.py draft <id>       # Write article
-python3 scripts/pipeline.py gate <id>        # Quality check
-python3 scripts/pipeline.py approve <id>     # Human approval
-python3 scripts/pipeline.py push-draft <id>  # Publish to Blogger
+python3 -m contentpilot.pipeline status          # See all articles
+python3 -m contentpilot.pipeline next            # Pick next topic
+python3 -m contentpilot.pipeline research "topic" # Research
+python3 -m contentpilot.pipeline draft <id>       # Write
+python3 -m contentpilot.pipeline gate <id>        # Quality check
+python3 -m contentpilot.pipeline approve <id>     # Human approval
+python3 -m contentpilot.pipeline push-draft <id>  # Publish
 ```
 
 ---
 
 ## Perfect For
 
-**🧑‍💻 Solo Bloggers** — Stop staring at blank pages. Let AI do the heavy lifting while you focus on your ideas.
-
-**📝 Content Creators** — Publish 10x more content without sacrificing quality. Built-in quality gates ensure every post meets your standards.
-
-**🏢 Agencies** — Standardize content workflow across clients. Same quality, same process, every time.
-
-**📈 SEO Professionals** — Keyword research + writing + optimization in one pipeline. No more juggling 5 different tools.
-
----
-
-## Quality That Competes
-
-| Feature | ContentPilot | Manual | Jasper | Copy.ai |
-|---------|:------------:|:------:|:------:|:-------:|
-| AI Research | ✅ | ❌ | ⚠️ | ⚠️ |
-| AI Writing | ✅ | ❌ | ✅ | ✅ |
-| Quality Gates | ✅ | ❌ | ❌ | ❌ |
-| Voice Guide | ✅ | ⚠️ | ⚠️ | ❌ |
-| SEO Scoring | ✅ | ❌ | ⚠️ | ⚠️ |
-| Publish to Blogger | ✅ | ❌ | ❌ | ❌ |
-| Open Source | ✅ | — | ❌ | ❌ |
-| Free Tier | ✅ | — | ❌ | ❌ |
-| Local AI (Ollama) | ✅ | — | ❌ | ❌ |
-
----
-
-## Installation
-
-```bash
-git clone https://github.com/bagasunix/content-pilot.git
-cd content-pilot
-pip install -r requirements.txt
-```
-
-**Requirements:** Python 3.10+, pip
-
-**Optional:** Ollama (for free local AI), Google Cloud credentials (for Blogger publishing)
+- **🧑‍💻 Solo Bloggers** — Stop staring at blank pages
+- **📝 Content Creators** — Publish 10x more content
+- **🏢 Agencies** — Standardize content workflow
+- **📈 SEO Professionals** — All-in-one pipeline
 
 ---
 

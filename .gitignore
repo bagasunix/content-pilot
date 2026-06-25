@@ -7,12 +7,18 @@ __pycache__/
 dist/
 build/
 
-# Hermes
-workspace/credentials.json
-workspace/token.json
-credentials-backup/
-*.env
+# Runtime data (user-specific)
+workspace/config.yaml
+workspace/drafts/
+workspace/journal.jsonl
+workspace/.license
+
+# Secrets
 .env
+.env.*
+!.env.example
+credentials.json
+token.json
 
 # Logs
 *.log
@@ -33,12 +39,6 @@ workspace/logs/
 .DS_Store
 Thumbs.db
 
-# User config (contains real values)
-workspace/config.yaml
-
-# Generated output (filled by generate_souls.py from variables.json)
-# Do NOT commit — these contain deployment-specific hardcoded values
-SOUL.md
-AGENTS.md
-profiles/*-SOUL.md
-profiles/*-config.yaml
+# Addons (not included in base install)
+analytics-addon/
+promotion-addon/
