@@ -167,7 +167,7 @@
             <a href="/settings" class="nav-link active">Settings</a>
         </div>
         <div class="user-section">
-            <span class="tier-badge">FREE</span>
+            <span class="tier-badge">{{ license.tier|default("FREE")|upper }}</span>
             <div class="avatar">A</div>
         </div>
     </nav>
@@ -182,11 +182,11 @@
             <h3 class="card-title"><i class="fas fa-user"></i> Profile</h3>
             <div class="form-group">
                 <label class="form-label">Email</label>
-                <input type="email" class="form-input" value="user@example.com" readonly>
+                <input type="email" class="form-input" value="{{ license.email|default("Not provided") }}" readonly>
             </div>
             <div class="form-group">
                 <label class="form-label">License Tier</label>
-                <input type="text" class="form-input" value="FREE" readonly>
+                <input type="text" class="form-input" value="{{ license.tier|default("FREE")|upper }}" readonly>
             </div>
         </div>
 
