@@ -4,158 +4,261 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ContentPilot — Trending Topics</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
+        :root {
+            --primary: #6366f1;
+            --secondary: #8b5cf6;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --bg: #0f172a;
+            --bg-card: #1e293b;
+            --text: #f8fafc;
+            --text-muted: #94a3b8;
+            --border: #334155;
+        }
+
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #f5f5f5;
-            min-height: 100vh;
-        }
-        .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 20px;
-            text-align: center;
-        }
-        .container { max-width: 800px; margin: 20px auto; padding: 0 20px; }
-        .card {
-            background: white;
-            border-radius: 15px;
-            padding: 20px;
-            margin-bottom: 15px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        .topic-item {
+        body { font-family: 'Inter', sans-serif; background: var(--bg); min-height: 100vh; color: var(--text); }
+
+        .navbar {
+            background: rgba(30, 41, 59, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            padding: 16px 40px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 15px;
-            border-bottom: 1px solid #eee;
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
-        .topic-item:last-child { border-bottom: none; }
-        .topic-title { font-weight: 600; color: #333; }
-        .topic-source { font-size: 12px; color: #999; }
-        .topic-actions { display: flex; gap: 10px; }
-        .btn {
-            padding: 8px 16px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 14px;
-        }
-        .btn-primary { background: #667eea; color: white; }
-        .btn-primary:hover { background: #5a6fd6; }
-        .btn-secondary { background: #e9ecef; color: #333; }
-        .niche-filter {
+
+        .logo { display: flex; align-items: center; gap: 12px; font-size: 24px; font-weight: 700; }
+        .logo-icon { width: 40px; height: 40px; background: linear-gradient(135deg, var(--primary), var(--secondary)); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+        .nav-links { display: flex; gap: 8px; }
+        .nav-link { padding: 10px 20px; border-radius: 10px; color: var(--text-muted); text-decoration: none; transition: all 0.3s ease; font-weight: 500; }
+        .nav-link:hover, .nav-link.active { background: rgba(255,255,255,0.05); color: var(--text); }
+        .nav-link.active { background: var(--primary); color: white; }
+        .user-section { display: flex; align-items: center; gap: 16px; }
+        .tier-badge { padding: 6px 16px; border-radius: 20px; font-size: 12px; font-weight: 600; text-transform: uppercase; background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white; }
+        .avatar { width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, var(--primary), var(--secondary)); display: flex; align-items: center; justify-content: center; font-weight: 600; }
+
+        .container { max-width: 1200px; margin: 0 auto; padding: 40px; }
+        .header { margin-bottom: 30px; }
+        .header h1 { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+        .header p { color: var(--text-muted); }
+
+        .filters {
             display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
+            gap: 12px;
+            margin-bottom: 24px;
             flex-wrap: wrap;
         }
-        .niche-btn {
-            padding: 8px 16px;
-            background: white;
-            border: 2px solid #667eea;
-            border-radius: 20px;
+
+        .filter-btn {
+            padding: 10px 20px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text-muted);
             cursor: pointer;
+            transition: all 0.3s ease;
             font-size: 14px;
         }
-        .niche-btn.active { background: #667eea; color: white; }
-        .loading { text-align: center; padding: 40px; color: #666; }
+
+        .filter-btn:hover, .filter-btn.active { background: var(--primary); border-color: var(--primary); color: white; }
+
+        .topics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+        }
+
+        .topic-card {
+            background: var(--bg-card);
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            padding: 24px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .topic-card:hover { border-color: var(--primary); transform: translateY(-4px); box-shadow: 0 20px 40px rgba(0,0,0,0.3); }
+
+        .topic-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
+        .topic-source {
+            padding: 4px 12px;
+            background: rgba(99, 102, 241, 0.2);
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .topic-title { font-size: 18px; font-weight: 600; margin-bottom: 12px; line-height: 1.4; }
+        .topic-meta { display: flex; gap: 16px; margin-bottom: 16px; font-size: 13px; color: var(--text-muted); }
+        .topic-meta span { display: flex; align-items: center; gap: 6px; }
+
+        .topic-actions { display: flex; gap: 10px; }
+        .btn {
+            padding: 10px 16px;
+            border-radius: 10px;
+            border: none;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-primary { background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white; }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(99, 102, 241, 0.3); }
+        .btn-secondary { background: rgba(255,255,255,0.05); color: var(--text); border: 1px solid var(--border); }
+        .btn-secondary:hover { background: rgba(255,255,255,0.1); }
+
+        .card {
+            background: var(--bg-card);
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .card-title { font-size: 18px; font-weight: 600; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+
+        .gap-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 12px;
+            margin-bottom: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .gap-item:hover { background: rgba(255,255,255,0.05); }
+        .gap-item:last-child { margin-bottom: 0; }
+        .gap-title { font-weight: 500; margin-bottom: 4px; }
+        .gap-opportunity { font-size: 13px; color: var(--success); }
+
+        .empty-state { text-align: center; padding: 60px 20px; color: var(--text-muted); }
+        .empty-state i { font-size: 48px; margin-bottom: 16px; opacity: 0.3; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .topic-card, .card { animation: fadeIn 0.5s ease forwards; }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>🔍 Trending Topics</h1>
-        <p>Topik trending berdasarkan niche blog kamu</p>
-    </div>
-    
-    <div class="container">
-        <div class="niche-filter">
-            <button class="niche-btn active" onclick="filterNiche('all')">All</button>
-            <button class="niche-btn" onclick="filterNiche('devops')">DevOps</button>
-            <button class="niche-btn" onclick="filterNiche('ai')">AI/Tech</button>
-            <button class="niche-btn" onclick="filterNiche('webdev')">Web Dev</button>
-            <button class="niche-btn" onclick="filterNiche('security')">Security</button>
+    <nav class="navbar">
+        <div class="logo">
+            <div class="logo-icon">✈️</div>
+            <span>ContentPilot</span>
         </div>
-        
-        <div class="card">
-            <div id="topics-list">
-                <div class="loading">Loading trending topics...</div>
+        <div class="nav-links">
+            <a href="/" class="nav-link">Dashboard</a>
+            <a href="/articles" class="nav-link">Articles</a>
+            <a href="/trending" class="nav-link active">Trending</a>
+            <a href="/settings" class="nav-link">Settings</a>
+        </div>
+        <div class="user-section">
+            <span class="tier-badge">FREE</span>
+            <div class="avatar">A</div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="header">
+            <h1>🔥 Trending Topics</h1>
+            <p>Discover what's trending and find content gaps</p>
+        </div>
+
+        <div class="filters">
+            <button class="filter-btn active">All</button>
+            <button class="filter-btn">DevOps</button>
+            <button class="filter-btn">AI/Tech</button>
+            <button class="filter-btn">Web Dev</button>
+            <button class="filter-btn">Security</button>
+        </div>
+
+        <div class="topics-grid">
+            <div class="topic-card">
+                <div class="topic-header">
+                    <span class="topic-source">Google Trends</span>
+                </div>
+                <h3 class="topic-title">Cara Install Docker di Ubuntu 24.04</h3>
+                <div class="topic-meta">
+                    <span><i class="fas fa-globe"></i> Indonesia</span>
+                    <span><i class="fas fa-fire"></i> High Interest</span>
+                </div>
+                <div class="topic-actions">
+                    <button class="btn btn-primary"><i class="fas fa-pen"></i> Write</button>
+                    <button class="btn btn-secondary"><i class="fas fa-bookmark"></i> Save</button>
+                </div>
+            </div>
+
+            <div class="topic-card">
+                <div class="topic-header">
+                    <span class="topic-source">HackerNews</span>
+                </div>
+                <h3 class="topic-title">Tutorial Kubernetes untuk Pemula</h3>
+                <div class="topic-meta">
+                    <span><i class="fas fa-globe"></i> Global</span>
+                    <span><i class="fas fa-chart-line"></i> Growing</span>
+                </div>
+                <div class="topic-actions">
+                    <button class="btn btn-primary"><i class="fas fa-pen"></i> Write</button>
+                    <button class="btn btn-secondary"><i class="fas fa-bookmark"></i> Save</button>
+                </div>
+            </div>
+
+            <div class="topic-card">
+                <div class="topic-header">
+                    <span class="topic-source">Google Trends</span>
+                </div>
+                <h3 class="topic-title">React vs Vue vs Angular 2024</h3>
+                <div class="topic-meta">
+                    <span><i class="fas fa-globe"></i> Global</span>
+                    <span><i class="fas fa-fire"></i> High Interest</span>
+                </div>
+                <div class="topic-actions">
+                    <button class="btn btn-primary"><i class="fas fa-pen"></i> Write</button>
+                    <button class="btn btn-secondary"><i class="fas fa-bookmark"></i> Save</button>
+                </div>
             </div>
         </div>
-        
-        <div class="card">
-            <h3 style="margin-bottom: 15px;">💡 Content Gap Analysis</h3>
-            <div id="gaps-list">
-                <div class="loading">Analyzing content gaps...</div>
+
+        <div class="card" style="margin-top: 30px;">
+            <h3 class="card-title"><i class="fas fa-lightbulb"></i> Content Gap Analysis</h3>
+            <div class="gap-item">
+                <div>
+                    <div class="gap-title">Advanced Docker Compose Techniques</div>
+                    <div class="gap-opportunity">High search, low competition</div>
+                </div>
+                <button class="btn btn-primary"><i class="fas fa-pen"></i> Write</button>
+            </div>
+            <div class="gap-item">
+                <div>
+                    <div class="gap-title">Linux Security Best Practices</div>
+                    <div class="gap-opportunity">Growing demand</div>
+                </div>
+                <button class="btn btn-primary"><i class="fas fa-pen"></i> Write</button>
             </div>
         </div>
     </div>
 
     <script>
-        // Load trending topics
-        fetch('/api/trending')
-            .then(r => r.json())
-            .then(data => {
-                const list = document.getElementById('topics-list');
-                list.innerHTML = data.topics.map(t => `
-                    <div class="topic-item">
-                        <div>
-                            <div class="topic-title">${t.title}</div>
-                            <div class="topic-source">${t.source} • ${t.region || 'Global'}</div>
-                        </div>
-                        <div class="topic-actions">
-                            <button class="btn btn-primary" onclick="startArticle('${t.title}')">Write</button>
-                            <button class="btn btn-secondary" onclick="saveTopic('${t.title}')">Save</button>
-                        </div>
-                    </div>
-                `).join('');
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
             });
-        
-        // Load content gaps
-        fetch('/api/gaps')
-            .then(r => r.json())
-            .then(data => {
-                const list = document.getElementById('gaps-list');
-                list.innerHTML = data.gaps.map(g => `
-                    <div class="topic-item">
-                        <div>
-                            <div class="topic-title">${g.title}</div>
-                            <div class="topic-source">Opportunity: ${g.opportunity}</div>
-                        </div>
-                        <div class="topic-actions">
-                            <button class="btn btn-primary" onclick="startArticle('${g.title}')">Write</button>
-                        </div>
-                    </div>
-                `).join('');
-            });
-        
-        function startArticle(topic) {
-            fetch('/api/research', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({topic: topic})
-            }).then(r => r.json()).then(data => {
-                if (data.success) window.location.href = '/articles';
-            });
-        }
-        
-        function saveTopic(topic) {
-            fetch('/api/idea-bank/add', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({topic: topic})
-            }).then(r => r.json()).then(data => {
-                alert('Topic saved to idea bank!');
-            });
-        }
-        
-        function filterNiche(niche) {
-            document.querySelectorAll('.niche-btn').forEach(b => b.classList.remove('active'));
-            event.target.classList.add('active');
-            // TODO: Filter topics by niche
-        }
+        });
     </script>
 </body>
 </html>
