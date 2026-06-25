@@ -1,155 +1,98 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ContentPilot — Connect Blogger</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .card {
-            background: white;
-            border-radius: 20px;
-            padding: 40px;
-            width: 100%;
-            max-width: 500px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-        }
-        .logo { text-align: center; font-size: 48px; margin-bottom: 10px; }
-        h1 { text-align: center; color: #333; margin-bottom: 10px; }
-        .subtitle { text-align: center; color: #666; margin-bottom: 30px; }
-        .connect-btn {
-            width: 100%;
-            padding: 15px;
-            background: #4285f4;
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-size: 16px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
-        .connect-btn:hover { background: #357abd; }
-        .divider { text-align: center; margin: 20px 0; color: #999; }
-        .manual-input { margin-top: 20px; }
-        .manual-input label { display: block; margin-bottom: 5px; color: #333; }
-        .manual-input input {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            font-size: 14px;
-        }
-        .manual-input input:focus { border-color: #667eea; outline: none; }
-        .btn-secondary {
-            width: 100%;
-            padding: 12px;
-            background: #6c757d;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 14px;
-            cursor: pointer;
-            margin-top: 10px;
-        }
-        .status { text-align: center; margin-top: 20px; padding: 10px; border-radius: 8px; }
-        .status.success { background: #d4edda; color: #155724; }
-        .status.error { background: #f8d7da; color: #721c24; }
-    </style>
-</head>
-<body>
-    <div class="card">
-        <div class="logo">📝</div>
-        <h1>Connect Blogger</h1>
-        <p class="subtitle">Hubungkan akun Google kamu untuk publish artikel</p>
-        
-        {% if not connected %}
-        <a href="/auth/blogger" class="connect-btn">
-            <svg width="20" height="20" viewBox="0 0 24 24"><path fill="currentColor" d="M12.545,10.239v3.821h5.445c-0.712,2.315-2.647,3.972-5.445,3.972c-3.332,0-6.033-2.701-6.033-6.032s2.701-6.032,6.033-6.032c1.498,0,2.866,0.549,3.921,1.453l2.814-2.814C17.503,2.988,15.139,2,12.545,2C7.021,2,2.543,6.477,2.543,12s4.478,10,10.002,10c8.396,0,10.249-7.85,9.426-11.748L12.545,10.239z"/></svg>
-            Connect Google Account
-        </a>
-        
-        <div class="divider">atau</div>
-        
-        <div class="manual-input">
-            <label>Masukkan Blog ID manual:</label>
-            <input type="text" id="blog_id" placeholder="Contoh: 1234567890">
-            <button class="btn-secondary" onclick="saveBlogId()">Simpan Blog ID</button>
+{% extends "base.html" %}
+
+{% block title %}ContentPilot — Connect Blogger{% endblock %}
+
+{% block content %}
+<div class="max-w-lg mx-auto">
+    
+    <!-- Header -->
+    <div class="text-center mb-8">
+        <div class="w-16 h-16 bg-blue-500/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <i data-lucide="link" class="w-8 h-8 text-blue-400"></i>
         </div>
-        {% else %}
-        <div class="status success">
-            ✅ Blogger sudah terhubung!
-            <br><strong>{{ blog_name }}</strong> (ID: {{ blog_id }})
+        <h1 class="text-2xl font-bold text-white">Connect Blogger</h1>
+        <p class="text-surface-400 mt-2">Connect your Google account to publish articles</p>
+    </div>
+    
+    {% if connected %}
+    <!-- Connected State -->
+    <div class="bg-surface-900/50 border border-surface-700/50 rounded-2xl p-6">
+        <div class="flex items-center gap-4 mb-6">
+            <div class="w-12 h-12 bg-green-500/10 rounded-xl flex items-center justify-center">
+                <i data-lucide="check-circle" class="w-6 h-6 text-green-400"></i>
+            </div>
+            <div>
+                <h3 class="font-semibold text-white">Connected</h3>
+                <p class="text-sm text-surface-400">{{ blog_name|default('My Blog') }}</p>
+            </div>
         </div>
-        <button class="btn-secondary" onclick="disconnect()">Disconnect</button>
-        {% endif %}
         
-        <div id="blog-select" style="display:none; margin-top: 20px;">
-            <label>Pilih blog yang mau dipakai:</label>
-            <div id="blog-list"></div>
-            <button class="btn-secondary" onclick="saveSelectedBlog()">Simpan Pilihan</button>
+        <div class="space-y-4">
+            <div class="p-4 bg-surface-800/50 rounded-xl">
+                <p class="text-sm text-surface-400">Blog ID</p>
+                <p class="text-white font-mono">{{ blog_id|default('N/A') }}</p>
+            </div>
+            
+            <div class="flex gap-3">
+                <a href="/settings" class="flex-1 px-4 py-3 bg-surface-800 text-surface-300 rounded-xl hover:bg-surface-700 transition-colors text-center font-medium">
+                    Settings
+                </a>
+                <a href="/dashboard" class="flex-1 px-4 py-3 bg-primary-500 text-white rounded-xl hover:bg-primary-600 transition-colors text-center font-medium">
+                    Dashboard
+                </a>
+            </div>
         </div>
     </div>
-
-    <script>
-        // Check if user has multiple blogs
-        fetch('/api/blogs')
-            .then(r => r.json())
-            .then(data => {
-                if (data.blogs && data.blogs.length > 1) {
-                    document.getElementById('blog-select').style.display = 'block';
-                    const list = document.getElementById('blog-list');
-                    data.blogs.forEach(blog => {
-                        list.innerHTML += `
-                            <label style="display:block; padding:10px; margin:5px 0; background:#f5f5f5; border-radius:8px; cursor:pointer;">
-                                <input type="radio" name="blog" value="${blog.id}"> ${blog.name} (ID: ${blog.id})
-                            </label>
-                        `;
-                    });
-                }
-            });
+    
+    {% else %}
+    <!-- Not Connected State -->
+    <div class="bg-surface-900/50 border border-surface-700/50 rounded-2xl p-6">
+        <div class="flex items-center gap-4 mb-6">
+            <div class="w-12 h-12 bg-red-500/10 rounded-xl flex items-center justify-center">
+                <i data-lucide="x-circle" class="w-6 h-6 text-red-400"></i>
+            </div>
+            <div>
+                <h3 class="font-semibold text-white">Not Connected</h3>
+                <p class="text-sm text-surface-400">Connect your Google account</p>
+            </div>
+        </div>
         
-        function saveBlogId() {
-            const blogId = document.getElementById('blog_id').value;
-            fetch('/api/blogs/select', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({blog_id: blogId})
-            }).then(r => r.json()).then(data => {
-                if (data.success) location.reload();
-            });
-        }
-        
-        function saveSelectedBlog() {
-            const selected = document.querySelector('input[name="blog"]:checked');
-            if (selected) {
-                fetch('/api/blogs/select', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({blog_id: selected.value})
-                }).then(r => r.json()).then(data => {
-                    if (data.success) location.reload();
-                });
-            }
-        }
-        
-        function disconnect() {
-            fetch('/api/blogs/disconnect', {method: 'POST'})
-                .then(r => r.json())
-                .then(data => {
-                    if (data.success) location.reload();
-                });
-        }
-    </script>
-</body>
-</html>
+        <div class="space-y-4">
+            <div class="p-4 bg-surface-800/50 rounded-xl">
+                <h4 class="font-medium text-white mb-2">How it works:</h4>
+                <ol class="text-sm text-surface-400 space-y-2">
+                    <li class="flex items-start gap-2">
+                        <span class="w-5 h-5 bg-primary-500/20 rounded-full flex items-center justify-center text-xs text-primary-400 flex-shrink-0 mt-0.5">1</span>
+                        Click "Connect Google Account" below
+                    </li>
+                    <li class="flex items-start gap-2">
+                        <span class="w-5 h-5 bg-primary-500/20 rounded-full flex items-center justify-center text-xs text-primary-400 flex-shrink-0 mt-0.5">2</span>
+                        Sign in with your Google account
+                    </li>
+                    <li class="flex items-start gap-2">
+                        <span class="w-5 h-5 bg-primary-500/20 rounded-full flex items-center justify-center text-xs text-primary-400 flex-shrink-0 mt-0.5">3</span>
+                        Authorize ContentPilot to access your blog
+                    </li>
+                </ol>
+            </div>
+            
+            <a href="/auth/blogger" class="w-full flex items-center justify-center gap-2 px-4 py-3 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-colors font-medium">
+                <svg class="w-5 h-5" viewBox="0 0 24 24"><path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.64z M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+                Connect Google Account
+            </a>
+            
+            <p class="text-xs text-surface-500 text-center">
+                We only request read access to your blog. Your data is secure.
+            </p>
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Back link -->
+    <div class="text-center mt-6">
+        <a href="/settings" class="text-sm text-surface-400 hover:text-white transition-colors">
+            ← Back to Settings
+        </a>
+    </div>
+</div>
+{% endblock %}

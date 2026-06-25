@@ -1,163 +1,78 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ContentPilot — Publish Article</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #f5f5f5;
-            min-height: 100vh;
-        }
-        .header {
-            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-            color: white;
-            padding: 20px;
-            text-align: center;
-        }
-        .container { max-width: 800px; margin: 20px auto; padding: 0 20px; }
-        .card {
-            background: white;
-            border-radius: 15px;
-            padding: 20px;
-            margin-bottom: 15px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        .article-preview {
-            border: 2px solid #ddd;
-            border-radius: 10px;
-            padding: 20px;
-            margin-bottom: 20px;
-        }
-        .article-title { font-size: 24px; font-weight: bold; margin-bottom: 10px; }
-        .article-meta { color: #666; font-size: 14px; margin-bottom: 15px; }
-        .article-body { line-height: 1.6; }
-        .publish-options {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-        .option-card {
-            border: 2px solid #ddd;
-            border-radius: 10px;
-            padding: 15px;
-            cursor: pointer;
-        }
-        .option-card.selected { border-color: #28a745; background: #f0fff4; }
-        .option-card h4 { margin-bottom: 5px; }
-        .option-card p { font-size: 12px; color: #666; }
-        .btn-publish {
-            width: 100%;
-            padding: 15px;
-            background: #28a745;
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-size: 18px;
-            cursor: pointer;
-        }
-        .btn-publish:hover { background: #218838; }
-        .btn-publish:disabled { background: #ccc; cursor: not-allowed; }
-        .status { text-align: center; margin-top: 20px; }
-        .status.success { color: #28a745; }
-        .status.error { color: #dc3545; }
-    </style>
-</head>
-<body>
-    <div class="header">
-        <h1>🚀 Publish Article</h1>
-        <p>Publish artikel ke blog kamu</p>
+{% extends "base.html" %}
+
+{% block title %}ContentPilot — Publish{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    
+    <!-- Header -->
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-white">🚀 Publish Article</h1>
+        <p class="text-surface-400 mt-1">Review and publish your article to Blogger</p>
     </div>
     
-    <div class="container">
-        <div class="card">
-            <h3>Article Preview</h3>
-            <div class="article-preview">
-                <div class="article-title">{{ article.title }}</div>
-                <div class="article-meta">
-                    Slug: {{ article.slug }} | Words: {{ article.word_count }} | SEO: {{ article.seo_score }}/100
-                </div>
-                <div class="article-body">{{ article.excerpt }}...</div>
+    <!-- Article Preview Card -->
+    <div class="bg-surface-900/50 border border-surface-700/50 rounded-2xl p-6 mb-6">
+        <div class="flex items-center gap-4 mb-4">
+            <div class="w-12 h-12 bg-green-500/10 rounded-xl flex items-center justify-center">
+                <i data-lucide="file-text" class="w-6 h-6 text-green-400"></i>
+            </div>
+            <div>
+                <h2 class="font-semibold text-white">{{ article.title|default('Untitled') }}</h2>
+                <p class="text-sm text-surface-400">{{ article.slug|default('') }}</p>
             </div>
         </div>
         
-        <div class="card">
-            <h3>Publish Options</h3>
-            <div class="publish-options">
-                <div class="option-card selected" onclick="selectOption('draft')">
-                    <h4>📝 Draft</h4>
-                    <p>Publish sebagai draft, review dulu sebelum live</p>
-                </div>
-                <div class="option-card" onclick="selectOption('live')">
-                    <h4>🔴 Live</h4>
-                    <p>Langsung publish ke blog</p>
-                </div>
+        <div class="grid grid-cols-2 gap-4 mb-4">
+            <div class="p-4 bg-surface-800/50 rounded-xl">
+                <p class="text-sm text-surface-400">Word Count</p>
+                <p class="text-xl font-bold text-white">{{ article.word_count|default(0) }}</p>
+            </div>
+            <div class="p-4 bg-surface-800/50 rounded-xl">
+                <p class="text-sm text-surface-400">SEO Score</p>
+                <p class="text-xl font-bold {% if article.seo_score >= 80 %}text-green-400{% elif article.seo_score >= 60 %}text-yellow-400{% else %}text-red-400{% endif %}">
+                    {{ article.seo_score|default(0) }}/100
+                </p>
             </div>
         </div>
         
-        <div class="card">
-            <h3>Blog Target</h3>
-            <p>{{ blog_name }} (ID: {{ blog_id }})</p>
-            <a href="/settings" style="color: #667eea;">Ganti blog →</a>
+        {% if article.excerpt %}
+        <div class="p-4 bg-surface-800/50 rounded-xl">
+            <p class="text-sm text-surface-400 mb-2">Excerpt</p>
+            <p class="text-surface-300 text-sm">{{ article.excerpt }}</p>
         </div>
-        
-        <button class="btn-publish" onclick="publish()">
-            🚀 Publish Sekarang
-        </button>
-        
-        <div id="status" class="status" style="display: none;"></div>
+        {% endif %}
     </div>
-
-    <script>
-        let publishMode = 'draft';
+    
+    <!-- Publish Settings -->
+    <div class="bg-surface-900/50 border border-surface-700/50 rounded-2xl p-6 mb-6">
+        <h3 class="font-semibold text-white mb-4">Publish Settings</h3>
         
-        function selectOption(mode) {
-            publishMode = mode;
-            document.querySelectorAll('.option-card').forEach(c => c.classList.remove('selected'));
-            event.target.closest('.option-card').classList.add('selected');
-        }
-        
-        function publish() {
-            const btn = document.querySelector('.btn-publish');
-            btn.disabled = true;
-            btn.textContent = 'Publishing...';
+        <div class="space-y-4">
+            <div>
+                <label class="block text-sm font-medium text-surface-300 mb-2">Publish Mode</label>
+                <select class="w-full px-4 py-3 bg-surface-800 border border-surface-700 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-primary-500 transition-colors">
+                    <option value="draft">Draft (Review first)</option>
+                    <option value="live">Live (Publish immediately)</option>
+                </select>
+            </div>
             
-            fetch('/api/publish', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({
-                    idea_id: '{{ article.id }}',
-                    mode: publishMode
-                })
-            })
-            .then(r => r.json())
-            .then(data => {
-                const status = document.getElementById('status');
-                status.style.display = 'block';
-                
-                if (data.success) {
-                    status.className = 'status success';
-                    status.innerHTML = '✅ Published successfully!<br><a href="' + data.url + '" target="_blank">View on Blogger →</a>';
-                } else {
-                    status.className = 'status error';
-                    status.innerHTML = '❌ Error: ' + data.error;
-                }
-                
-                btn.disabled = false;
-                btn.textContent = '🚀 Publish Sekarang';
-            })
-            .catch(err => {
-                const status = document.getElementById('status');
-                status.style.display = 'block';
-                status.className = 'status error';
-                status.innerHTML = '❌ Network error: ' + err.message;
-                btn.disabled = false;
-                btn.textContent = '🚀 Publish Sekarang';
-            });
-        }
-    </script>
-</body>
-</html>
+            <div>
+                <label class="block text-sm font-medium text-surface-300 mb-2">Labels</label>
+                <input type="text" placeholder="e.g., tutorial, devops, python"
+                       class="w-full px-4 py-3 bg-surface-800 border border-surface-700 rounded-xl text-white placeholder-surface-500 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-colors">
+            </div>
+        </div>
+    </div>
+    
+    <!-- Publish Button -->
+    <div class="flex gap-4">
+        <a href="/articles" class="flex-1 px-4 py-3 bg-surface-800 text-surface-300 rounded-xl hover:bg-surface-700 transition-colors text-center font-medium">
+            Cancel
+        </a>
+        <button class="flex-1 px-4 py-3 bg-green-500 text-white rounded-xl hover:bg-green-600 transition-colors font-medium">
+            <i data-lucide="rocket" class="w-4 h-4 inline mr-2"></i> Publish
+        </button>
+    </div>
+</div>
+{% endblock %}
