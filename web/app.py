@@ -27,7 +27,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 WORKSPACE = Path("workspace")
 LICENSE_FILE = WORKSPACE / ".license"
-CONFIG_FILE = Path("config/config.yaml")
+CONFIG_FILE = Path("workspace/config.yaml")
 
 # ============================================================
 # ROUTES
@@ -218,6 +218,49 @@ def api_add_topic():
     return jsonify({'success': True, 'title': title, 'category': category})
 
 
+
+import urllib.request
+import json
+
+def fetch_trending_topics():
+    """Fetch trending topics from multiple sources."""
+    topics = []
+    
+    # Source 1: Hacker News (top stories)
+    try:
+        url = "https://hacker-news.firebaseio.com/v0/topstories.json"
+        req = urllib.request.Request(url, headers={"User-Agent": "ContentPilot/1.0"})
+        with urllib.request.urlopen(req, timeout=5) as resp:
+            story_ids = json.loads(resp.read())[:10]
+            
+            for story_id in story_ids:
+                story_url = f"https://hacker-news.firebaseio.com/v0/item/{story_id}.json"
+                story_req = urllib.request.Request(story_url, headers={"User-Agent": "ContentPilot/1.0"})
+                with urllib.request.urlopen(story_req, timeout=3) as story_resp:
+                    story = json.loads(story_resp.read())
+                    if story.get("title"):
+                        topics.append({
+                            "title": story["title"],
+                            "source": "HackerNews",
+                            "category": "ai" if any(kw in story["title"].lower() for kw in ["ai", "gpt", "llm", "machine learning"]) else "devops" if any(kw in story["title"].lower() for kw in ["docker", "kubernetes", "linux", "server"]) else "webdev" if any(kw in story["title"].lower() for kw in ["react", "vue", "angular", "javascript"]) else "general",
+                            "url": story.get("url", f"https://news.ycombinator.com/item?id={story_id}")
+                        })
+    except Exception:
+        pass
+    
+    # Fallback: hardcoded if API fails
+    if not topics:
+        topics = [
+            {"title": "Cara Install Docker di Ubuntu 24.04", "source": "Trending", "category": "devops"},
+            {"title": "Tutorial Kubernetes untuk Pemula", "source": "Trending", "category": "devops"},
+            {"title": "React vs Vue vs Angular 2024", "source": "Trending", "category": "webdev"},
+            {"title": "Python AI Automation Tools", "source": "Trending", "category": "ai"},
+            {"title": "Linux Security Best Practices", "source": "Trending", "category": "security"},
+        ]
+    
+    return topics[:10]
+
+
 @app.route('/api/status')
 def api_status():
     """API endpoint for status."""
@@ -366,7 +409,8 @@ def trending():
     if not session.get('logged_in'):
         return redirect(url_for('login'))
     license_data = load_license()
-    return render_template('trending.html', license=license_data)
+    topics = fetch_trending_topics()
+    return render_template('trending.html', license=license_data, topics=topics)
 
 @app.route('/publish/<idea_id>')
 def publish_page(idea_id):
@@ -381,11 +425,8 @@ def publish_page(idea_id):
 @app.route('/api/trending')
 def api_trending():
     """Get trending topics."""
-    return jsonify({"topics": [
-        {"title": "Cara Install Docker di Ubuntu 24.04", "source": "Google Trends", "region": "Indonesia"},
-        {"title": "Tutorial Kubernetes untuk Pemula", "source": "HackerNews", "region": "Global"},
-        {"title": "React vs Vue vs Angular 2024", "source": "Google Trends", "region": "Global"}
-    ]})
+    topics = fetch_trending_topics()
+    return jsonify({"topics": topics})
 
 @app.route('/api/gaps')
 def api_gaps():
