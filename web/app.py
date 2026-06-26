@@ -52,6 +52,24 @@ SERVER_URL = os.getenv("CONTENTPILOT_SERVER", "http://localhost:5001")
 # SERVER SYNC HELPER
 # ============================================================
 
+def load_license() -> dict:
+    """Load license data."""
+    if LICENSE_FILE.exists():
+        with open(LICENSE_FILE, 'r') as f:
+            return json.load(f)
+    return {}
+
+def save_license(key: str, tier: str):
+    """Save license data."""
+    WORKSPACE.mkdir(parents=True, exist_ok=True)
+    license_data = {
+        "key": key,
+        "tier": tier,
+        "activated_at": __import__('datetime').datetime.now().isoformat()
+    }
+    with open(LICENSE_FILE, 'w') as f:
+        json.dump(license_data, f, indent=2)
+
 def get_sync_client():
     """Get sync client for server communication."""
     license_data = load_license()
@@ -113,18 +131,6 @@ def startup_sync():
             cache.set_trending(trending)
 
 
-if __name__ == '__main__':
-    # Run startup sync
-    startup_sync()
-    
-    print("=" * 60)
-    print("  ContentPilot — Web Dashboard")
-    print("=" * 60)
-    print()
-    print(f"  Open: http://localhost:8080")
-    print(f"  Server: {SERVER_URL}")
-    print()
-    
     app.run(debug=os.getenv("FLASK_DEBUG", "false").lower() == "true", host='0.0.0.0', port=8080)
 
 # ============================================================
@@ -567,23 +573,6 @@ def api_articles():
 # HELPER FUNCTIONS
 # ============================================================
 
-def load_license() -> dict:
-    """Load license data."""
-    if LICENSE_FILE.exists():
-        with open(LICENSE_FILE, 'r') as f:
-            return json.load(f)
-    return {}
-
-def save_license(key: str, tier: str):
-    """Save license data."""
-    WORKSPACE.mkdir(exist_ok=True)
-    license_data = {
-        "key": key,
-        "tier": tier,
-        "activated_at": __import__('datetime').datetime.now().isoformat()
-    }
-    with open(LICENSE_FILE, 'w') as f:
-        json.dump(license_data, f, indent=2)
 
 def validate_license_key(key: str) -> dict:
     """Validate license key (secure)."""
@@ -600,7 +589,7 @@ def validate_license_key(key: str) -> dict:
         return {"valid": False, "error": "Invalid key length"}
     
     # Format check: CP-XXXX-XXXX or SB-XXXX-XXXX (alphanumeric only)
-    if not re.match(r'^(CP|SB)-[A-Z0-9]{4}-[A-Z0-9]{4}$', key):
+    if not re.match(r'^(CP|SB)-[A-Z0-9]{4,}-[A-Z0-9]{4,}$', key):
         return {"valid": False, "error": "Invalid key format"}
     
     # Check if key exists in local license file

@@ -20,7 +20,7 @@
             
             <!-- Form -->
             <form method="POST" action="/activate"
-                {{ csrf_token() }} class="space-y-6">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"> class="space-y-6">
                 
                 <!-- License Key Input -->
                 <div>
