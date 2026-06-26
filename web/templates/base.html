@@ -69,6 +69,10 @@
                             {% if active_page == 'trending' %}bg-primary-500/10 text-primary-400{% else %}text-surface-400 hover:text-white hover:bg-surface-800{% endif %}">
                             <i data-lucide="trending-up" class="w-4 h-4 inline mr-2"></i>Trending
                         </a>
+                        <a href="/monitor" class="px-4 py-2 rounded-lg text-sm font-medium transition-colors
+                            {% if active_page == 'monitor' %}bg-primary-500/10 text-primary-400{% else %}text-surface-400 hover:text-white hover:bg-surface-800{% endif %}">
+                            <i data-lucide="activity" class="w-4 h-4 inline mr-2"></i>Monitor
+                        </a>
                         <a href="/settings" class="px-4 py-2 rounded-lg text-sm font-medium transition-colors
                             {% if active_page == 'settings' %}bg-primary-500/10 text-primary-400{% else %}text-surface-400 hover:text-white hover:bg-surface-800{% endif %}">
                             <i data-lucide="settings" class="w-4 h-4 inline mr-2"></i>Settings

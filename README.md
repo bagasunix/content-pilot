@@ -1,136 +1,82 @@
-# ✨ ContentPilot
+# ContentPilot
 
-> **From idea to published blog post — in minutes, not hours.**
+> Blog automation yang bikin kamu produktif 10x lipat.
 
-ContentPilot is an AI-powered blog automation pipeline that handles the entire content creation process: research, writing, quality checking, and publishing.
+## Masalah yang Kamu Hadapi
 
-**You bring your own AI** (OpenAI, DeepSeek, or Ollama). **We handle the pipeline.**
+- **Waktu habis** cari topik, nulis, optimasi SEO
+- **Konsisten sulit** — males nulis, jarang publish
+- **Kualitas meragukan** — takut tulisan kedengeran AI
+- **Publisher lambat** — draft numpuk, gak ke-publish
 
----
+## Solusi: ContentPilot
 
-## Why ContentPilot?
-
-Writing a blog post manually takes 4-8 hours. With ContentPilot:
-
-| Step | Manual | ContentPilot |
-|------|--------|-------------|
-| Research keywords | 1-2 hours | 2 minutes |
-| Write 1000+ word article | 2-4 hours | 5 minutes |
-| SEO optimization | 30 min | Automatic |
-| Quality check | 1 hour | Instant |
-| Publish to Blogger | 10 min | One command |
-| **Total** | **4-8 hours** | **~10 minutes** |
-
----
-
-## Quick Start
-
-```bash
-# 1. Install
-git clone https://github.com/bagasunix/content-pilot.git
-cd content-pilot
-pip install -r requirements.txt
-
-# 2. Setup
-python3 cli/setup_wizard.py
-
-# 3. Run
-python3 -m contentpilot.pipeline status
-python3 -m contentpilot.pipeline full "how to install docker"
-```
-
----
-
-## How It Works
+ContentPilot adalah **blog automation** yang bekerja di belakang layar. Kamu cukup pilih topik, sisanya system yang handle.
 
 ```
-📝 Idea ──→ 🔍 Research ──→ ✍️ Write ──→ 🔍 Quality Gate ──→ 🚀 Publish
+1. Buka ContentPilot
+2. Lihat topik saran (berdasarkan blog kamu)
+3. Klik "Start"
+4. Monitor progress
+5. Approve → Publish!
 ```
 
-**Quality Gate catches:**
-- ❌ AI-tell phrases ("Di era digital saat ini...")
-- ❌ Dead links (404/410)
-- ❌ Hoax domains
-- ❌ Missing SEO fields
-- ❌ Articles under 600 words
+**Zero editing. Zero hassle. Full automation.**
 
----
+## Fitur Utama
 
-## Project Structure
+### 💡 Smart Topic Suggestions
+Tidak perlu pusing cari topik. ContentPilot menganalisis blog kamu dan menyarankan topik yang **relevan** dengan konten yang sudah ada.
 
-```
-content-pilot/
-├── src/contentpilot/       # Core pipeline library
-│   ├── domain/             # Entities, gates, stages
-│   ├── application/        # Use cases, ports
-│   ├── infrastructure/     # Adapters (Blogger, files)
-│   └── interface/          # CLI entry point
-├── cli/                    # CLI commands
-├── templates/              # Article templates
-├── workspace/              # Runtime data (drafts, config)
-├── config/                 # Config templates
-├── docs/                   # Documentation
-├── pyproject.toml
-└── requirements.txt
-```
+### 📊 Real-time Monitoring
+Lihat progress pipeline secara real-time. Research → Draft → SEO Check → Quality Gate → Publish. Semua transparan.
 
----
+### ⚙️ Flexible Schedule
+Atur seberapa sering kamu dapat saran baru:
+- Setiap 1 jam (Business)
+- Setiap 2 jam (Pro)
+- Setiap 6 jam (Default)
 
-## Bring Your Own AI
+### 🔒 Quality Gates
+Setiap artikel melewati quality check otomatis:
+- Deteksi AI-generated content
+- SEO optimization
+- Link validation
+- Voice consistency
 
-```yaml
-# OpenAI
-ai:
-  provider: openai
-  model: gpt-4
+### 🖥️ Desktop App
+Tidak perlu browser. ContentPilot hadir sebagai desktop app yang langsung terbuka di komputer kamu.
 
-# DeepSeek (cheaper)
-ai:
-  provider: deepseek
-  model: deepseek-chat
+## Cara Pakai
 
-# Ollama (free, local)
-ai:
-  provider: ollama
-  model: llama2
-```
+1. **Download** ContentPilot untuk OS kamu
+2. **Install** — tinggal double-click
+3. **Login** dengan license key
+4. **Connect** blog kamu di Settings
+5. **Duduk manis** — sistem bekerja untukmu
 
----
+## Pricing
 
-## Commands
+| Plan | Harga | Fitur |
+|------|-------|-------|
+| Free | $0 | 10 artikel/bulan, fitur dasar |
+| Pro | $29/bulan | Unlimited, smart suggestions, analytics |
+| Business | $99/bulan | Multi-blog, priority support, API |
 
-```bash
-python3 -m contentpilot.pipeline status          # See all articles
-python3 -m contentpilot.pipeline next            # Pick next topic
-python3 -m contentpilot.pipeline research "topic" # Research
-python3 -m contentpilot.pipeline draft <id>       # Write
-python3 -m contentpilot.pipeline gate <id>        # Quality check
-python3 -m contentpilot.pipeline approve <id>     # Human approval
-python3 -m contentpilot.pipeline push-draft <id>  # Publish
-```
+## Tech Stack
 
----
-
-## Perfect For
-
-- **🧑‍💻 Solo Bloggers** — Stop staring at blank pages
-- **📝 Content Creators** — Publish 10x more content
-- **🏢 Agencies** — Standardize content workflow
-- **📈 SEO Professionals** — All-in-one pipeline
-
----
+- Python + Flask (backend)
+- PyWebView (desktop wrapper)
+- PostgreSQL (database)
+- AI-powered suggestions
 
 ## License
 
-MIT License — free for personal and commercial use.
+MIT License
 
----
+## Links
 
-<div align="center">
-
-**ContentPilot** — From idea to published post in minutes.
-
-[![GitHub stars](https://img.shields.io/github/stars/bagasunix/content-pilot?style=social)](https://github.com/bagasunix/content-pilot)
-[![GitHub forks](https://img.shields.io/github/forks/bagasunix/content-pilot?style=social)](https://github.com/bagasunix/content-pilot)
-
-</div>
+- [Documentation](docs/)
+- [Installation Guide](docs/INSTALLATION.md)
+- [User Manual](docs/USER_MANUAL.md)
+- [FAQ](docs/FAQ.md)

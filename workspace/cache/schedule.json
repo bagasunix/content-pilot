@@ -1,0 +1,10 @@
+{
+  "data": {
+    "suggestion_interval_hours": 24,
+    "analysis_interval_hours": 24,
+    "trending_interval_hours": 24,
+    "auto_suggest": true
+  },
+  "cached_at": "2026-06-26T10:15:25.521250",
+  "ttl_hours": 24
+}

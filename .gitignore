@@ -42,3 +42,7 @@ Thumbs.db
 # Addons (not included in base install)
 analytics-addon/
 promotion-addon/
+
+# Internal concept (RAHASIA - jangan di-push)
+docs/CONCEPT-INTERNAL.md
+docs/IMPLEMENTATION-PLAN.md

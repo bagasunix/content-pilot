@@ -5,69 +5,61 @@
 {% block content %}
 <!-- Welcome Header -->
 <div class="mb-8">
-    <h1 class="text-3xl font-bold text-white">Dashboard</h1>
-    <p class="text-surface-400 mt-1">Overview of your blog automation pipeline</p>
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-3xl font-bold text-white">Dashboard</h1>
+            <p class="text-surface-400 mt-1">Your smart content automation hub</p>
+        </div>
+        <div class="flex items-center gap-2">
+            {% if server_connected %}
+            <span class="px-3 py-1 bg-green-500/20 text-green-400 text-xs font-medium rounded-full">● Connected</span>
+            {% else %}
+            <span class="px-3 py-1 bg-red-500/20 text-red-400 text-xs font-medium rounded-full">● Offline</span>
+            {% endif %}
+        </div>
+    </div>
 </div>
 
-<!-- Stats Grid -->
-<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-    
-    <!-- Total Ideas -->
-    <div class="bg-surface-900/50 border border-surface-700/50 rounded-2xl p-5 hover:border-primary-500/30 transition-colors">
-        <div class="flex items-center justify-between">
-            <div>
-                <p class="text-sm text-surface-400">Ideas in Bank</p>
-                <p class="text-3xl font-bold text-white mt-1">{{ stats.ideas|default(0) }}</p>
-            </div>
-            <div class="w-12 h-12 bg-primary-500/10 rounded-xl flex items-center justify-center">
-                <i data-lucide="lightbulb" class="w-6 h-6 text-primary-400"></i>
-            </div>
-        </div>
-        <p class="text-xs text-surface-500 mt-3">Ready to be researched</p>
+<!-- Smart Suggestions (from Server) -->
+{% if suggestions %}
+<div class="bg-surface-900/50 border border-surface-700/50 rounded-2xl p-6 mb-8">
+    <div class="flex items-center justify-between mb-4">
+        <h2 class="text-lg font-semibold text-white">💡 Smart Suggestions</h2>
+        <span class="text-xs text-surface-500">From ContentPilot Server</span>
     </div>
     
-    <!-- In Progress -->
-    <div class="bg-surface-900/50 border border-surface-700/50 rounded-2xl p-5 hover:border-yellow-500/30 transition-colors">
-        <div class="flex items-center justify-between">
-            <div>
-                <p class="text-sm text-surface-400">In Progress</p>
-                <p class="text-3xl font-bold text-white mt-1">{{ stats.in_progress|default(0) }}</p>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+        {% for suggestion in suggestions[:6] %}
+        <div class="p-4 bg-surface-800/50 hover:bg-surface-800 border border-surface-700/30 rounded-xl transition-all cursor-pointer group"
+             onclick="startTopic('{{ suggestion.title }}')">
+            <div class="flex items-start justify-between mb-2">
+                <span class="px-2 py-0.5 text-xs font-medium rounded-full
+                    {% if suggestion.priority == 'high' %}bg-green-500/20 text-green-400
+                    {% elif suggestion.priority == 'medium' %}bg-yellow-500/20 text-yellow-400
+                    {% else %}bg-surface-700 text-surface-400{% endif %}">
+                    {{ suggestion.priority }}
+                </span>
+                <span class="text-xs text-surface-500">{{ suggestion.category }}</span>
             </div>
-            <div class="w-12 h-12 bg-yellow-500/10 rounded-xl flex items-center justify-center">
-                <i data-lucide="loader" class="w-6 h-6 text-yellow-400"></i>
-            </div>
-        </div>
-        <p class="text-xs text-surface-500 mt-3">Currently in pipeline</p>
-    </div>
-    
-    <!-- Published -->
-    <div class="bg-surface-900/50 border border-surface-700/50 rounded-2xl p-5 hover:border-green-500/30 transition-colors">
-        <div class="flex items-center justify-between">
-            <div>
-                <p class="text-sm text-surface-400">Published</p>
-                <p class="text-3xl font-bold text-white mt-1">{{ stats.published|default(0) }}</p>
-            </div>
-            <div class="w-12 h-12 bg-green-500/10 rounded-xl flex items-center justify-center">
-                <i data-lucide="check-circle" class="w-6 h-6 text-green-400"></i>
+            <p class="font-medium text-white text-sm mb-1">{{ suggestion.title }}</p>
+            <p class="text-xs text-surface-400">{{ suggestion.reason }}</p>
+            <div class="mt-3 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                <span class="text-xs text-primary-400">Click to start →</span>
             </div>
         </div>
-        <p class="text-xs text-surface-500 mt-3">Live on your blog</p>
-    </div>
-    
-    <!-- SEO Score -->
-    <div class="bg-surface-900/50 border border-surface-700/50 rounded-2xl p-5 hover:border-purple-500/30 transition-colors">
-        <div class="flex items-center justify-between">
-            <div>
-                <p class="text-sm text-surface-400">Avg SEO Score</p>
-                <p class="text-3xl font-bold text-white mt-1">{{ stats.avg_seo|default(0) }}</p>
-            </div>
-            <div class="w-12 h-12 bg-purple-500/10 rounded-xl flex items-center justify-center">
-                <i data-lucide="bar-chart" class="w-6 h-6 text-purple-400"></i>
-            </div>
-        </div>
-        <p class="text-xs text-surface-500 mt-3">Quality indicator</p>
+        {% endfor %}
     </div>
 </div>
+{% else %}
+<div class="bg-surface-900/50 border border-surface-700/50 rounded-2xl p-6 mb-8">
+    <div class="text-center py-4">
+        <p class="text-surface-400 text-sm">No suggestions yet. Connect your blog in Settings to get personalized topics.</p>
+        <a href="/settings" class="inline-flex items-center gap-2 mt-3 px-4 py-2 bg-primary-500 text-white text-sm rounded-lg hover:bg-primary-600 transition-colors">
+            Go to Settings →
+        </a>
+    </div>
+</div>
+{% endif %}
 
 <!-- Pipeline Status -->
 <div class="bg-surface-900/50 border border-surface-700/50 rounded-2xl p-6 mb-8">
@@ -77,64 +69,49 @@
     </div>
     
     <div class="flex items-center justify-between gap-2 overflow-x-auto pb-2">
-        <!-- Research -->
         <div class="flex-1 min-w-[100px]">
             <div class="flex items-center gap-2 mb-2">
-                <div class="w-8 h-8 rounded-lg bg-surface-800 flex items-center justify-center">
-                    <i data-lucide="search" class="w-4 h-4 text-surface-400"></i>
-                </div>
+                <div class="w-8 h-8 rounded-lg bg-surface-800 flex items-center justify-center">🔍</div>
                 <span class="text-sm text-surface-400">Research</span>
             </div>
             <p class="text-2xl font-bold text-white">{{ pipeline.researching|default(0) }}</p>
         </div>
         
-        <i data-lucide="chevron-right" class="w-5 h-5 text-surface-600 flex-shrink-0"></i>
+        <span class="text-surface-600">→</span>
         
-        <!-- Draft -->
         <div class="flex-1 min-w-[100px]">
             <div class="flex items-center gap-2 mb-2">
-                <div class="w-8 h-8 rounded-lg bg-primary-500/10 flex items-center justify-center">
-                    <i data-lucide="pen-tool" class="w-4 h-4 text-primary-400"></i>
-                </div>
+                <div class="w-8 h-8 rounded-lg bg-primary-500/10 flex items-center justify-center">✍️</div>
                 <span class="text-sm text-surface-400">Draft</span>
             </div>
             <p class="text-2xl font-bold text-white">{{ pipeline.drafted|default(0) }}</p>
         </div>
         
-        <i data-lucide="chevron-right" class="w-5 h-5 text-surface-600 flex-shrink-0"></i>
+        <span class="text-surface-600">→</span>
         
-        <!-- SEO Analyze -->
         <div class="flex-1 min-w-[100px]">
             <div class="flex items-center gap-2 mb-2">
-                <div class="w-8 h-8 rounded-lg bg-surface-800 flex items-center justify-center">
-                    <i data-lucide="scan" class="w-4 h-4 text-surface-400"></i>
-                </div>
-                <span class="text-sm text-surface-400">SEO Check</span>
+                <div class="w-8 h-8 rounded-lg bg-surface-800 flex items-center justify-center">✅</div>
+                <span class="text-sm text-surface-400">SEO</span>
             </div>
             <p class="text-2xl font-bold text-white">{{ pipeline.gated|default(0) }}</p>
         </div>
         
-        <i data-lucide="chevron-right" class="w-5 h-5 text-surface-600 flex-shrink-0"></i>
+        <span class="text-surface-600">→</span>
         
-        <!-- Quality Gate -->
         <div class="flex-1 min-w-[100px]">
             <div class="flex items-center gap-2 mb-2">
-                <div class="w-8 h-8 rounded-lg bg-surface-800 flex items-center justify-center">
-                    <i data-lucide="shield-check" class="w-4 h-4 text-surface-400"></i>
-                </div>
+                <div class="w-8 h-8 rounded-lg bg-yellow-500/10 flex items-center justify-center">🛡️</div>
                 <span class="text-sm text-surface-400">Quality</span>
             </div>
             <p class="text-2xl font-bold text-white">{{ pipeline.reviewing|default(0) }}</p>
         </div>
         
-        <i data-lucide="chevron-right" class="w-5 h-5 text-surface-600 flex-shrink-0"></i>
+        <span class="text-surface-600">→</span>
         
-        <!-- Published -->
         <div class="flex-1 min-w-[100px]">
             <div class="flex items-center gap-2 mb-2">
-                <div class="w-8 h-8 rounded-lg bg-green-500/10 flex items-center justify-center">
-                    <i data-lucide="rocket" class="w-4 h-4 text-green-400"></i>
-                </div>
+                <div class="w-8 h-8 rounded-lg bg-green-500/10 flex items-center justify-center">🚀</div>
                 <span class="text-sm text-surface-400">Published</span>
             </div>
             <p class="text-2xl font-bold text-white">{{ pipeline.published|default(0) }}</p>
@@ -150,37 +127,31 @@
         <h2 class="text-lg font-semibold text-white mb-4">Quick Actions</h2>
         
         <div class="space-y-3">
-            <a href="/trending" class="flex items-center gap-4 p-4 bg-surface-800/50 hover:bg-surface-800 border border-surface-700/30 rounded-xl transition-all group">
-                <div class="w-10 h-10 bg-orange-500/10 rounded-lg flex items-center justify-center group-hover:bg-orange-500/20 transition-colors">
-                    <i data-lucide="flame" class="w-5 h-5 text-orange-400"></i>
-                </div>
+            <a href="/monitor" class="flex items-center gap-4 p-4 bg-surface-800/50 hover:bg-surface-800 border border-surface-700/30 rounded-xl transition-all group">
+                <div class="w-10 h-10 bg-blue-500/10 rounded-lg flex items-center justify-center group-hover:bg-blue-500/20 transition-colors">📊</div>
                 <div class="flex-1">
-                    <p class="font-medium text-white text-sm">Find Trending Topics</p>
-                    <p class="text-xs text-surface-400">Discover what's hot</p>
+                    <p class="font-medium text-white text-sm">Monitor Pipeline</p>
+                    <p class="text-xs text-surface-400">Real-time progress</p>
                 </div>
-                <i data-lucide="arrow-right" class="w-4 h-4 text-surface-500 group-hover:text-white transition-colors"></i>
-            </a>
-            
-            <a href="/articles" class="flex items-center gap-4 p-4 bg-surface-800/50 hover:bg-surface-800 border border-surface-700/30 rounded-xl transition-all group">
-                <div class="w-10 h-10 bg-primary-500/10 rounded-lg flex items-center justify-center group-hover:bg-primary-500/20 transition-colors">
-                    <i data-lucide="file-plus" class="w-5 h-5 text-primary-400"></i>
-                </div>
-                <div class="flex-1">
-                    <p class="font-medium text-white text-sm">New Article</p>
-                    <p class="text-xs text-surface-400">Start writing</p>
-                </div>
-                <i data-lucide="arrow-right" class="w-4 h-4 text-surface-500 group-hover:text-white transition-colors"></i>
+                <span class="text-surface-500 group-hover:text-white transition-colors">→</span>
             </a>
             
             <a href="/settings" class="flex items-center gap-4 p-4 bg-surface-800/50 hover:bg-surface-800 border border-surface-700/30 rounded-xl transition-all group">
-                <div class="w-10 h-10 bg-surface-600/10 rounded-lg flex items-center justify-center group-hover:bg-surface-600/20 transition-colors">
-                    <i data-lucide="settings" class="w-5 h-5 text-surface-400"></i>
-                </div>
+                <div class="w-10 h-10 bg-surface-600/10 rounded-lg flex items-center justify-center group-hover:bg-surface-600/20 transition-colors">⚙️</div>
                 <div class="flex-1">
                     <p class="font-medium text-white text-sm">Settings</p>
-                    <p class="text-xs text-surface-400">Configure pipeline</p>
+                    <p class="text-xs text-surface-400">Configure schedule</p>
                 </div>
-                <i data-lucide="arrow-right" class="w-4 h-4 text-surface-500 group-hover:text-white transition-colors"></i>
+                <span class="text-surface-500 group-hover:text-white transition-colors">→</span>
+            </a>
+            
+            <a href="/trending" class="flex items-center gap-4 p-4 bg-surface-800/50 hover:bg-surface-800 border border-surface-700/30 rounded-xl transition-all group">
+                <div class="w-10 h-10 bg-orange-500/10 rounded-lg flex items-center justify-center group-hover:bg-orange-500/20 transition-colors">🔥</div>
+                <div class="flex-1">
+                    <p class="font-medium text-white text-sm">View Trending</p>
+                    <p class="text-xs text-surface-400">See what's hot</p>
+                </div>
+                <span class="text-surface-500 group-hover:text-white transition-colors">→</span>
             </a>
         </div>
     </div>
@@ -202,8 +173,9 @@
                         {% elif article.stage == 'gated' %}bg-yellow-500/10
                         {% elif article.stage == 'drafted' %}bg-primary-500/10
                         {% else %}bg-surface-700{% endif %}">
-                        <i data-lucide="{% if article.stage == 'published' %}check-circle{% elif article.stage == 'drafted' %}pen-tool{% else %}file-text{% endif %}" 
-                           class="w-5 h-5 {% if article.stage == 'published' %}text-green-400{% elif article.stage == 'drafted' %}text-primary-400{% else %}text-surface-400{% endif %}"></i>
+                        {% if article.stage == 'published' %}✅
+                        {% elif article.stage == 'drafted' %}✍️
+                        {% else %}📄{% endif %}
                     </div>
                     <div>
                         <p class="font-medium text-white text-sm">{{ article.title|default(article.idea_id) }}</p>
@@ -222,13 +194,31 @@
         </div>
         {% else %}
         <div class="text-center py-8">
-            <i data-lucide="inbox" class="w-12 h-12 text-surface-600 mx-auto mb-3"></i>
             <p class="text-surface-400 text-sm">No articles yet</p>
-            <a href="/trending" class="inline-flex items-center gap-2 mt-3 px-4 py-2 bg-primary-500 text-white text-sm rounded-lg hover:bg-primary-600 transition-colors">
-                <i data-lucide="plus" class="w-4 h-4"></i> Get Started
-            </a>
+            <p class="text-surface-500 text-xs mt-1">Select a suggestion above to get started</p>
         </div>
         {% endif %}
     </div>
 </div>
+
+<script>
+function startTopic(title) {
+    if (confirm('Start writing: ' + title + '?')) {
+        fetch('/api/trigger', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            credentials: 'same-origin',
+            body: JSON.stringify({job_type: 'research', metadata: {topic: title}})
+        })
+        .then(r => r.json())
+        .then(d => {
+            if (d.success) {
+                alert('Pipeline started! Check Monitor for progress.');
+            } else {
+                alert('Error: ' + (d.error || 'Unknown error'));
+            }
+        });
+    }
+}
+</script>
 {% endblock %}

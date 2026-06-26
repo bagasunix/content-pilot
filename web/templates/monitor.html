@@ -1,0 +1,289 @@
+{% extends "base.html" %}
+
+{% block title %}ContentPilot — Monitor{% endblock %}
+
+{% block content %}
+<div x-data="monitor()" x-init="init()">
+    
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-8">
+        <div>
+            <h1 class="text-3xl font-bold text-white">📊 Monitor</h1>
+            <p class="text-surface-400 mt-1">Real-time pipeline progress</p>
+        </div>
+        <div class="flex items-center gap-3">
+            <span class="px-3 py-1 text-xs font-medium rounded-full"
+                  :class="connected ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'">
+                ● <span x-text="connected ? 'Connected' : 'Disconnected'"></span>
+            </span>
+            <button @click="refresh()" class="px-4 py-2 bg-surface-800 hover:bg-surface-700 text-white text-sm rounded-lg transition-colors">
+                ↻ Refresh
+            </button>
+        </div>
+    </div>
+    
+    <!-- Queue Status -->
+    <div class="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-8">
+        <div class="bg-surface-900/50 border border-surface-700/50 rounded-2xl p-5">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-surface-400">Pending</p>
+                    <p class="text-3xl font-bold text-yellow-400" x-text="queue.pending || 0"></p>
+                </div>
+                <div class="w-12 h-12 bg-yellow-500/10 rounded-xl flex items-center justify-center">
+                    <i data-lucide="clock" class="w-6 h-6 text-yellow-400"></i>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-surface-900/50 border border-surface-700/50 rounded-2xl p-5">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-surface-400">Processing</p>
+                    <p class="text-3xl font-bold text-blue-400" x-text="queue.processing || 0"></p>
+                </div>
+                <div class="w-12 h-12 bg-blue-500/10 rounded-xl flex items-center justify-center">
+                    <i data-lucide="loader" class="w-6 h-6 text-blue-400 animate-spin"></i>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-surface-900/50 border border-surface-700/50 rounded-2xl p-5">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-surface-400">Completed</p>
+                    <p class="text-3xl font-bold text-green-400" x-text="queue.done || 0"></p>
+                </div>
+                <div class="w-12 h-12 bg-green-500/10 rounded-xl flex items-center justify-center">
+                    <i data-lucide="check-circle" class="w-6 h-6 text-green-400"></i>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-surface-900/50 border border-surface-700/50 rounded-2xl p-5">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-surface-400">Failed</p>
+                    <p class="text-3xl font-bold text-red-400" x-text="queue.failed || 0"></p>
+                </div>
+                <div class="w-12 h-12 bg-red-500/10 rounded-xl flex items-center justify-center">
+                    <i data-lucide="x-circle" class="w-6 h-6 text-red-400"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Pipeline Status -->
+    <div class="bg-surface-900/50 border border-surface-700/50 rounded-2xl p-6 mb-8">
+        <h2 class="text-lg font-semibold text-white mb-4">Pipeline Progress</h2>
+        
+        <div class="space-y-4">
+            {% for stage in ['researching', 'drafted', 'gated', 'reviewing', 'published'] %}
+            <div class="flex items-center gap-4">
+                <div class="w-32 text-sm text-surface-400">{{ stage|capitalize }}</div>
+                <div class="flex-1 h-3 bg-surface-800 rounded-full overflow-hidden">
+                    <div class="h-full rounded-full transition-all duration-500"
+                         :style="`width: ${getStageWidth('{{ stage }}')}%`"
+                         :class="{
+                            'bg-green-500': '{{ stage }}' === 'published',
+                            'bg-yellow-500': '{{ stage }}' === 'gated' || '{{ stage }}' === 'reviewing',
+                            'bg-primary-500': '{{ stage }}' === 'drafted',
+                            'bg-blue-500': '{{ stage }}' === 'researching'
+                         }"></div>
+                </div>
+                <div class="w-12 text-right text-sm font-mono text-white" x-text="pipeline.{{ stage }} || 0"></div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    
+    <!-- Recent Jobs -->
+    <div class="bg-surface-900/50 border border-surface-700/50 rounded-2xl p-6 mb-8">
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="text-lg font-semibold text-white">Recent Jobs</h2>
+            <button @click="refreshHistory()" class="text-sm text-primary-400 hover:text-primary-300">Refresh</button>
+        </div>
+        
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead>
+                    <tr class="text-left text-sm text-surface-400 border-b border-surface-700">
+                        <th class="pb-3 font-medium">Job Type</th>
+                        <th class="pb-3 font-medium">Status</th>
+                        <th class="pb-3 font-medium">Priority</th>
+                        <th class="pb-3 font-medium">Scheduled</th>
+                        <th class="pb-3 font-medium">Completed</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <template x-for="job in history" :key="job.job_id">
+                        <tr class="border-b border-surface-800 hover:bg-surface-800/50">
+                            <td class="py-3">
+                                <span class="px-2 py-1 text-xs font-medium rounded-full bg-surface-700 text-surface-300"
+                                      x-text="job.job_type"></span>
+                            </td>
+                            <td class="py-3">
+                                <span class="px-2 py-1 text-xs font-medium rounded-full"
+                                      :class="{
+                                        'bg-green-500/20 text-green-400': job.status === 'done',
+                                        'bg-yellow-500/20 text-yellow-400': job.status === 'pending',
+                                        'bg-blue-500/20 text-blue-400': job.status === 'processing',
+                                        'bg-red-500/20 text-red-400': job.status === 'failed'
+                                      }"
+                                      x-text="job.status"></span>
+                            </td>
+                            <td class="py-3 text-sm text-surface-300" x-text="job.priority"></td>
+                            <td class="py-3 text-sm text-surface-400" x-text="formatTime(job.scheduled_at)"></td>
+                            <td class="py-3 text-sm text-surface-400" x-text="formatTime(job.completed_at)"></td>
+                        </tr>
+                    </template>
+                    <template x-if="history.length === 0">
+                        <tr>
+                            <td colspan="5" class="py-8 text-center text-surface-500">No jobs yet</td>
+                        </tr>
+                    </template>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <!-- Quick Actions -->
+    <div class="bg-surface-900/50 border border-surface-700/50 rounded-2xl p-6">
+        <h2 class="text-lg font-semibold text-white mb-4">Quick Actions</h2>
+        
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <button @click="triggerJob('analysis')" 
+                    class="flex items-center gap-3 p-4 bg-surface-800/50 hover:bg-surface-800 border border-surface-700/30 rounded-xl transition-all">
+                <div class="w-10 h-10 bg-purple-500/10 rounded-lg flex items-center justify-center">
+                    <i data-lucide="scan" class="w-5 h-5 text-purple-400"></i>
+                </div>
+                <div class="text-left">
+                    <p class="font-medium text-white text-sm">Analyze Blog</p>
+                    <p class="text-xs text-surface-400">Find content gaps</p>
+                </div>
+            </button>
+            
+            <button @click="triggerJob('suggestion')"
+                    class="flex items-center gap-3 p-4 bg-surface-800/50 hover:bg-surface-800 border border-surface-700/30 rounded-xl transition-all">
+                <div class="w-10 h-10 bg-orange-500/10 rounded-lg flex items-center justify-center">
+                    <i data-lucide="lightbulb" class="w-5 h-5 text-orange-400"></i>
+                </div>
+                <div class="text-left">
+                    <p class="font-medium text-white text-sm">Get Suggestions</p>
+                    <p class="text-xs text-surface-400">Smart topic ideas</p>
+                </div>
+            </button>
+            
+            <button @click="triggerJob('trending')"
+                    class="flex items-center gap-3 p-4 bg-surface-800/50 hover:bg-surface-800 border border-surface-700/30 rounded-xl transition-all">
+                <div class="w-10 h-10 bg-red-500/10 rounded-lg flex items-center justify-center">
+                    <i data-lucide="flame" class="w-5 h-5 text-red-400"></i>
+                </div>
+                <div class="text-left">
+                    <p class="font-medium text-white text-sm">Fetch Trending</p>
+                    <p class="text-xs text-surface-400">Latest hot topics</p>
+                </div>
+            </button>
+        </div>
+        
+        <div x-show="jobTriggered" x-transition class="mt-4 text-center text-sm text-green-400">
+            ✓ Job queued successfully!
+        </div>
+    </div>
+</div>
+
+<script>
+function monitor() {
+    return {
+        connected: false,
+        queue: {},
+        pipeline: {},
+        history: [],
+        jobTriggered: false,
+        
+        async init() {
+            await this.refresh();
+            // Auto-refresh every 30 seconds
+            setInterval(() => this.refresh(), 30000);
+        },
+        
+        async refresh() {
+            await Promise.all([
+                this.checkServer(),
+                this.getQueueStatus(),
+                this.getPipelineStatus(),
+                this.refreshHistory()
+            ]);
+        },
+        
+        async checkServer() {
+            try {
+                const resp = await fetch('/api/server/status');
+                const data = await resp.json();
+                this.connected = data.connected;
+            } catch (e) {
+                this.connected = false;
+            }
+        },
+        
+        async getQueueStatus() {
+            try {
+                const resp = await fetch('/api/queue/status');
+                const data = await resp.json();
+                if (!data.error) this.queue = data;
+            } catch (e) {}
+        },
+        
+        async getPipelineStatus() {
+            try {
+                const resp = await fetch('/api/status');
+                const data = await resp.json();
+                this.pipeline = data.stages || {};
+            } catch (e) {}
+        },
+        
+        async refreshHistory() {
+            try {
+                const resp = await fetch('/api/queue/history');
+                const data = await resp.json();
+                if (data.history) this.history = data.history;
+            } catch (e) {}
+        },
+        
+        async triggerJob(type) {
+            try {
+                const resp = await fetch('/api/trigger', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    credentials: 'same-origin',
+                    body: JSON.stringify({job_type: type, metadata: {}})
+                });
+                const data = await resp.json();
+                if (data.success) {
+                    this.jobTriggered = true;
+                    setTimeout(() => this.jobTriggered = false, 2000);
+                    await this.refresh();
+                }
+            } catch (e) {
+                console.error('Failed to trigger job:', e);
+            }
+        },
+        
+        getStageWidth(stage) {
+            const total = Object.values(this.pipeline).reduce((a, b) => a + (b || 0), 0) || 1;
+            return ((this.pipeline[stage] || 0) / total * 100).toFixed(0);
+        },
+        
+        formatTime(iso) {
+            if (!iso) return '-';
+            return new Date(iso).toLocaleString('id-ID', { 
+                hour: '2-digit', 
+                minute: '2-digit',
+                day: '2-digit',
+                month: 'short'
+            });
+        }
+    };
+}
+</script>
+{% endblock %}

@@ -41,3 +41,53 @@ Antrian topik untuk pipeline. Diisi oleh: `trend-monitor`, `community-engagement
 ## Low
 
 (empty - add your topics here)
+
+### [M] Test Topic
+- category: devops
+- status: idea
+
+### [H] Kubernetes Guide
+- idea_id: kubernetes-guide
+- category: general
+- source: smart-suggestion
+- status: idea
+
+### [H] Cara Install Docker di Ubuntu 24.04
+- idea_id: cara-install-docker-di-ubuntu-2404
+- category: general
+- source: smart-suggestion
+- status: idea
+
+### [M] Wibu
+- category: general
+- status: idea
+
+### [M] Haha
+- category: devops
+- status: idea
+
+### [M] Test
+- category: devops
+- status: idea
+
+### [H] Test Topic
+- idea_id: test-topic
+- category: general
+- source: smart-suggestion
+- status: idea
+
+### [M] haha
+- category: devops
+- status: idea
+
+### [H] Cara Install Docker di Ubuntu 24.04
+- idea_id: cara-install-docker-di-ubuntu-2404
+- category: general
+- source: smart-suggestion
+- status: idea
+
+### [H] Cara Install Docker di Ubuntu 24.04
+- idea_id: cara-install-docker-di-ubuntu-2404
+- category: general
+- source: smart-suggestion
+- status: idea
