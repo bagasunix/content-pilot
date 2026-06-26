@@ -160,6 +160,19 @@
     <div class="lg:col-span-2 bg-surface-900/50 border border-surface-700/50 rounded-2xl p-6">
         <div class="flex items-center justify-between mb-4">
             <h2 class="text-lg font-semibold text-white">Recent Articles</h2>
+            {% if usage %}
+            <div class="flex items-center gap-2 text-sm">
+                <span class="text-surface-400">Articles this month:</span>
+                <span class="font-medium {% if usage.remaining == 0 %}text-red-400{% else %}text-primary-400{% endif %}">
+                    {{ usage.used }}/{{ usage.limit }}
+                </span>
+                {% if usage.remaining > 0 %}
+                <span class="text-surface-500">({{ usage.remaining }} remaining)</span>
+                {% else %}
+                <span class="text-red-400">(limit reached)</span>
+                {% endif %}
+            </div>
+            {% endif %}
             <a href="/articles" class="text-sm text-primary-400 hover:text-primary-300 transition-colors">View All →</a>
         </div>
         

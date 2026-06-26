@@ -8,6 +8,34 @@
     <p class="text-surface-400 mt-1">Monitor your content pipeline progress</p>
 </div>
 
+<!-- Article Limit Warning -->
+{% if usage %}
+<div class="mb-6 p-4 rounded-xl {% if usage.remaining == 0 %}bg-red-500/10 border border-red-500/20{% elif usage.remaining <= 2 %}bg-yellow-500/10 border border-yellow-500/20{% else %}bg-surface-800/50 border border-surface-700/50{% endif %}">
+    <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+            {% if usage.remaining == 0 %}
+            <span class="text-red-400">⚠️</span>
+            <span class="text-red-400 font-medium">Article limit reached</span>
+            {% elif usage.remaining <= 2 %}
+            <span class="text-yellow-400">⚠️</span>
+            <span class="text-yellow-400 font-medium">Approaching limit</span>
+            {% else %}
+            <span class="text-green-400">✓</span>
+            <span class="text-surface-300">Articles this month</span>
+            {% endif %}
+        </div>
+        <div class="text-sm">
+            <span class="font-medium {% if usage.remaining == 0 %}text-red-400{% elif usage.remaining <= 2 %}text-yellow-400{% else %}text-white{% endif %}">
+                {{ usage.used }}/{{ usage.limit }}
+            </span>
+            <span class="text-surface-500 ml-2">({{ usage.remaining }} remaining)</span>
+        </div>
+    </div>
+    {% if usage.remaining == 0 %}
+    <p class="text-xs text-red-400 mt-2">Upgrade to Pro for more articles per month.</p>
+    {% endif %}
+</div>
+{% endif %}
 <!-- Filters -->
 <div class="flex flex-wrap gap-2 mb-6">
     <a href="/articles" class="px-4 py-2 rounded-lg text-sm font-medium transition-colors bg-primary-500 text-white">
