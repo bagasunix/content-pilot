@@ -685,6 +685,19 @@ def save_settings(form: dict):
     CONFIG_FILE.parent.mkdir(parents=True, exist_ok=True)
     with open(CONFIG_FILE, 'w') as f:
         yaml.dump(config, f, default_flow_style=False)
+    
+    # Sync AI settings to server
+    license_data = load_license()
+    if license_data and license_data.get("key"):
+        ai_config = config.get("ai", {})
+        if ai_config.get("api_key"):
+            # Send to server (API key will be encrypted server-side)
+            server_request("POST", "/api/settings/ai", {
+                "key": license_data["key"],
+                "provider": ai_config.get("provider"),
+                "model": ai_config.get("model"),
+                "api_key": ai_config.get("api_key")
+            })
 
 def slugify(text: str) -> str:
     """Convert text to slug."""

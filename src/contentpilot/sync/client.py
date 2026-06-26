@@ -156,3 +156,38 @@ class SyncClient:
     def health_check(self) -> Dict:
         """Check if server is reachable."""
         return self._get("/api/status")
+    
+    # ── AI Settings ──────────────────────────────────────────────
+    
+    def update_ai_settings(self, provider: str, model: str, api_key: str) -> Dict:
+        """Update AI provider settings.
+        
+        Args:
+            provider: AI provider (openai, deepseek, ollama)
+            model: Model name (gpt-4, deepseek-chat, llama2)
+            api_key: API key (will be encrypted server-side)
+        
+        Returns:
+            Dict with success status and masked key hint
+        """
+        return self._post("/api/settings/ai", {
+            "key": self.license_key,
+            "provider": provider,
+            "model": model,
+            "api_key": api_key
+        })
+    
+    def get_ai_settings(self) -> Dict:
+        """Get AI provider settings."""
+        return self._get(f"/api/settings/ai?key={self.license_key}")
+    
+    def delete_ai_settings(self) -> Dict:
+        """Delete AI provider settings."""
+        return self._request("DELETE", f"/api/settings/ai?key={self.license_key}")
+    
+    def check_article_limit(self) -> Dict:
+        """Check article limit for user."""
+        return self._get(f"/api/usage/articles?key={self.license_key}")
+    
+    def test_ai_provider(self) -> Dict:
+        """Test AI provider connection."""
