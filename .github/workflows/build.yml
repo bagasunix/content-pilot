@@ -49,6 +49,10 @@ jobs:
           pip install pyyaml requests flask pywebview pyinstaller
           pip install PyQt5 PyQtWebEngine qtpy
 
+      - name: Install contentpilot package
+        run: |
+          pip install -e .
+
       - name: Build executable (Linux/macOS)
         if: runner.os != 'Windows'
         run: |
@@ -80,6 +84,9 @@ jobs:
             --hidden-import contentpilot.license \
             --hidden-import contentpilot.seo \
             --hidden-import contentpilot.blogger \
+            --hidden-import contentpilot.sync \
+            --hidden-import contentpilot.sync.client \
+            --hidden-import contentpilot.sync.cache \
             --collect-all webview \
             --collect-all qtpy \
             web/desktop.py
@@ -115,6 +122,9 @@ jobs:
             --hidden-import contentpilot.license ^
             --hidden-import contentpilot.seo ^
             --hidden-import contentpilot.blogger ^
+            --hidden-import contentpilot.sync ^
+            --hidden-import contentpilot.sync.client ^
+            --hidden-import contentpilot.sync.cache ^
             --collect-all webview ^
             --collect-all qtpy ^
             web\desktop.py
