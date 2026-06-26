@@ -15,4 +15,4 @@ Clean architecture layers (dependency rule points inward):
 Runtime state lives in <repo>/workspace (see blog.infrastructure.paths.Workspace).
 """
 
-__version__ = "2.0.0"
+__version__ = "1.1.0"
