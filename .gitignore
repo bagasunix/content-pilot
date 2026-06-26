@@ -46,3 +46,7 @@ promotion-addon/
 # Internal concept (RAHASIA - jangan di-push)
 docs/CONCEPT-INTERNAL.md
 docs/IMPLEMENTATION-PLAN.md
+
+# Server files (belongs to content-pilot-server repo)
+central-server/
+license-server/
