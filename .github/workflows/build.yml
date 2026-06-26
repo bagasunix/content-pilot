@@ -93,6 +93,7 @@ jobs:
 
       - name: Build executable (Windows)
         if: runner.os == 'Windows'
+        shell: cmd
         run: |
           pyinstaller ^
             --name ContentPilot ^
