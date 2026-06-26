@@ -345,6 +345,36 @@ function selectOption(group, value) {
             btn.className = btn.className.replace('bg-primary-500 text-white', 'bg-surface-800 text-surface-400');
         }
     });
+    
+    // Filter models by provider
+    if (group === 'provider') {
+        filterModelsByProvider(value);
+    }
+}
+
+function filterModelsByProvider(provider) {
+    // Define models per provider
+    const modelsByProvider = {
+        'openai': ['gpt-4', 'gpt-3.5-turbo'],
+        'deepseek': ['deepseek-chat', 'deepseek-coder'],
+        'ollama': ['llama2', 'mistral']
+    };
+    
+    const models = modelsByProvider[provider] || [];
+    
+    // Show/hide model buttons
+    document.querySelectorAll('[data-group="model"]').forEach(btn => {
+        if (models.includes(btn.dataset.value)) {
+            btn.style.display = '';
+        } else {
+            btn.style.display = 'none';
+        }
+    });
+    
+    // Select first available model
+    if (models.length > 0) {
+        selectOption('model', models[0]);
+    }
 }
 
 function testAIConnection() {

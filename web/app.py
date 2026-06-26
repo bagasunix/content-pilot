@@ -232,7 +232,18 @@ def articles():
         return redirect(url_for('login'))
     license_data = load_license()
     articles_list = get_articles()
-    return render_template('articles.html', license=license_data, articles=articles_list)
+    
+    # Get usage data for article limit display
+    usage = {}
+    if license_data and license_data.get("key"):
+        try:
+            result = server_request("GET", f"/api/usage/articles?key={license_data['key']}")
+            if result and not result.get("error"):
+                usage = result
+        except:
+            pass
+    
+    return render_template('articles.html', license=license_data, articles=articles_list, usage=usage)
 
 @app.route('/settings', methods=['GET', 'POST'])
 def settings():
