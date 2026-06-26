@@ -7,6 +7,7 @@ import json
 import urllib.request
 import urllib.error
 from typing import Dict, Optional, List
+import time
 
 
 class SyncClient:
@@ -109,8 +110,40 @@ class SyncClient:
         return self._get(f"/api/queue/history?key={self.license_key}")
     
     def get_task_status(self, task_id: str) -> Dict:
-        """Get pipeline task status."""
-        return self._get(f"/api/pipeline/status/{task_id}?key={self.license_key}")
+        """Get background task status."""
+        return self._get(f"/api/task/{task_id}")
+
+    def wait_for_task(self, task_id: str, timeout: int = 300, poll_interval: int = 5) -> Dict:
+        """Wait for background task to complete.
+        
+        Args:
+            task_id: Task ID to wait for
+            timeout: Max seconds to wait (default: 5 minutes)
+            poll_interval: Seconds between polls (default: 5)
+        
+        Returns:
+            Task result or error
+        """
+        start_time = time.time()
+        
+        while time.time() - start_time < timeout:
+            result = self.get_task_status(task_id)
+            
+            if result.get("error"):
+                return result
+            
+            status = result.get("status")
+            
+            if status == "SUCCESS":
+                return result.get("result", {})
+            elif status == "FAILURE":
+                return {"error": "Task failed", "details": result.get("result")}
+            elif status in ("PENDING", "STARTED", "RETRY"):
+                time.sleep(poll_interval)
+            else:
+                time.sleep(poll_interval)
+        
+        return {"error": "Task timeout", "task_id": task_id}
     
     # ── License ────────────────────────────────────────────────────
     
