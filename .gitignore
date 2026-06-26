@@ -1,0 +1,39 @@
+# Build
+dist/
+build/
+*.egg-info/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Environment
+.env
+.venv/
+venv/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# ContentPilot specific
+workspace/.license
+workspace/drafts/
+workspace/journal.jsonl
+
+# Server config (JANGAN di-push ke public repo)
+config/mcporter.json
+config/.env
+cookies.txt
+
+# License server
+license-server/
+
+# Generated files
+*.log
+*.tmp

@@ -1,0 +1,20 @@
+# Blog Lifecycle Pro — Config Template
+# Copy this to workspace/config.yaml and fill in your values
+
+# === BLOG CONFIGURATION ===
+domain: "{DOMAIN}"                    # e.g., myblog.com
+platform: blogger
+blog_id: "{BLOG_ID}"                  # Blogger Blog ID (angka)
+language: id
+
+# === PUBLISH SETTINGS ===
+publish_mode: draft                   # draft | live
+autonomy: gated                       # gated = butuh approval manual
+wip_limit: 3                          # max artikel in-flight
+auto_promote: []                      # channel untuk auto-distribute
+
+# === AUTHENTICATION ===
+# token.json: OAuth refresh token Blogger API v3
+# Scope: https://www.googleapis.com/auth/blogger
+# Status: PENDING (run setup_credentials.py)
+

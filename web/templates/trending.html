@@ -1,0 +1,176 @@
+{% extends "base.html" %}
+
+{% block title %}ContentPilot — Smart Topics{% endblock %}
+
+{% block content %}
+<div x-data="{ filter: 'all', search: '' }">
+    
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
+        <div>
+            <h1 class="text-3xl font-bold text-white">🎯 Smart Topics</h1>
+            <p class="text-surface-400 mt-1">
+                {% if blog_analysis.connected %}
+                    Topics suggested based on your blog's content and trending searches
+                {% else %}
+                    Connect your blog in Settings to get personalized suggestions
+                {% endif %}
+            </p>
+        </div>
+    </div>
+    
+    <!-- Blog Analysis Card -->
+    {% if blog_analysis.connected %}
+    <div class="bg-surface-900/50 border border-surface-700/50 rounded-2xl p-6 mb-6">
+        <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 bg-green-500/10 rounded-xl flex items-center justify-center">
+                <i data-lucide="check-circle" class="w-5 h-5 text-green-400"></i>
+            </div>
+            <div>
+                <h3 class="font-semibold text-white">Blog Connected</h3>
+                <p class="text-sm text-surface-400">Analyzing {{ blog_analysis.post_count }} existing posts</p>
+            </div>
+        </div>
+        
+        {% if blog_analysis.categories %}
+        <div class="flex flex-wrap gap-2">
+            {% for cat, count in blog_analysis.categories.items() %}
+            <span class="px-3 py-1 text-xs font-medium rounded-full bg-primary-500/10 text-primary-400">
+                {{ cat }} ({{ count }})
+            </span>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+    {% else %}
+    <div class="bg-surface-900/50 border border-yellow-500/20 rounded-2xl p-6 mb-6">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-yellow-500/10 rounded-xl flex items-center justify-center">
+                <i data-lucide="alert-triangle" class="w-5 h-5 text-yellow-400"></i>
+            </div>
+            <div>
+                <h3 class="font-semibold text-white">Blog Not Connected</h3>
+                <p class="text-sm text-surface-400">Connect your Blogger account in Settings for personalized suggestions</p>
+            </div>
+            <a href="/settings" class="ml-auto px-4 py-2 bg-primary-500 text-white text-sm rounded-lg hover:bg-primary-600 transition-colors">
+                Settings
+            </a>
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Filters + Search -->
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+        <div class="flex flex-wrap gap-2">
+            <button @click="filter = 'all'" 
+                    :class="filter === 'all' ? 'bg-primary-500 text-white' : 'bg-surface-800 text-surface-400 hover:text-white'"
+                    class="px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                All
+            </button>
+            <button @click="filter = 'content_gap'" 
+                    :class="filter === 'content_gap' ? 'bg-green-500 text-white' : 'bg-surface-800 text-surface-400 hover:text-white'"
+                    class="px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                <i data-lucide="target" class="w-3 h-3 inline mr-1"></i> Content Gap
+            </button>
+            <button @click="filter = 'expand'" 
+                    :class="filter === 'expand' ? 'bg-blue-500 text-white' : 'bg-surface-800 text-surface-400 hover:text-white'"
+                    class="px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                <i data-lucide="expand" class="w-3 h-3 inline mr-1"></i> Expand
+            </button>
+            <button @click="filter = 'related'" 
+                    :class="filter === 'related' ? 'bg-purple-500 text-white' : 'bg-surface-800 text-surface-400 hover:text-white'"
+                    class="px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                <i data-lucide="link" class="w-3 h-3 inline mr-1"></i> Related
+            </button>
+            <button @click="filter = 'curated'" 
+                    :class="filter === 'curated' ? 'bg-orange-500 text-white' : 'bg-surface-800 text-surface-400 hover:text-white'"
+                    class="px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                <i data-lucide="sparkles" class="w-3 h-3 inline mr-1"></i> Curated
+            </button>
+        </div>
+        
+        <!-- Search -->
+        <div class="relative w-full sm:w-64">
+            <i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-surface-500"></i>
+            <input type="text" 
+                   x-model="search"
+                   placeholder="Search topics..."
+                   class="w-full pl-10 pr-4 py-2 bg-surface-800 border border-surface-700 rounded-lg text-white text-sm placeholder-surface-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+        </div>
+    </div>
+    
+    <!-- Topics Grid -->
+    {% if topics %}
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {% for topic in topics %}
+        <div x-show="(filter === 'all' || filter === '{{ topic.type|default('curated') }}') && (search === '' || '{{ topic.title }}'.toLowerCase().includes(search.toLowerCase()))"
+             x-transition
+             class="bg-surface-900/50 border border-surface-700/50 rounded-2xl p-5 hover:border-surface-600 transition-all group">
+            
+            <div class="flex items-start justify-between gap-4">
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-center gap-2 mb-2">
+                        <!-- Type Badge -->
+                        <span class="px-2 py-0.5 text-xs font-medium rounded
+                            {% if topic.type == 'content_gap' %}bg-green-500/20 text-green-400
+                            {% elif topic.type == 'expand' %}bg-blue-500/20 text-blue-400
+                            {% elif topic.type == 'related' %}bg-purple-500/20 text-purple-400
+                            {% else %}bg-orange-500/20 text-orange-400{% endif %}">
+                            {{ topic.type|default('curated')|replace('_', ' ')|title }}
+                        </span>
+                        
+                        <!-- Category Badge -->
+                        <span class="px-2 py-0.5 text-xs font-medium rounded bg-surface-700 text-surface-300">
+                            {{ topic.category|default('general') }}
+                        </span>
+                        
+                        {% if topic.priority == 'high' %}
+                        <span class="px-2 py-0.5 text-xs font-medium rounded bg-red-500/20 text-red-400">
+                            High Priority
+                        </span>
+                        {% endif %}
+                    </div>
+                    
+                    <h3 class="font-semibold text-white mb-1">{{ topic.title }}</h3>
+                    
+                    {% if topic.reason %}
+                    <p class="text-sm text-surface-400">{{ topic.reason }}</p>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-2 mt-4">
+                <a href="/research?topic={{ topic.title|urlencode }}" 
+                   class="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2 bg-primary-500 text-white text-sm font-medium rounded-lg hover:bg-primary-600 transition-colors">
+                    <i data-lucide="pen-tool" class="w-4 h-4"></i> Write
+                </a>
+                <button class="px-4 py-2 bg-surface-800 text-surface-300 text-sm font-medium rounded-lg hover:bg-surface-700 transition-colors">
+                    <i data-lucide="bookmark" class="w-4 h-4"></i>
+                </button>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="bg-surface-900/50 border border-surface-700/50 rounded-2xl p-12 text-center">
+        <div class="w-16 h-16 bg-surface-800 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <i data-lucide="sparkles" class="w-8 h-8 text-surface-600"></i>
+        </div>
+        <h3 class="text-lg font-semibold text-white mb-2">No suggestions yet</h3>
+        <p class="text-surface-400 text-sm mb-6 max-w-sm mx-auto">
+            {% if blog_analysis.connected %}
+                Your blog doesn't have enough content for analysis yet. Add more posts to get better suggestions.
+            {% else %}
+                Connect your blog in Settings to get personalized topic suggestions based on your existing content.
+            {% endif %}
+        </p>
+        <a href="/settings" class="inline-flex items-center gap-2 px-4 py-2 bg-primary-500 text-white text-sm rounded-lg hover:bg-primary-600 transition-colors">
+            <i data-lucide="settings" class="w-4 h-4"></i> Configure Blog
+        </a>
+    </div>
+    {% endif %}
+</div>
+    
+
+</div>
+{% endblock %}

@@ -1,0 +1,9 @@
+ai:
+  api_key: ''
+  model: gpt-4
+  provider: openai
+blog_id: ''
+domain: ''
+pipeline:
+  publish_mode: draft
+  wip_limit: 3
