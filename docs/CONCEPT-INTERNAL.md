@@ -1,23 +1,40 @@
 # ContentPilot — Internal Concept
 
 > Catatan internal arsitektur dan concept. BUKAN untuk publik.
-> Last updated: 2026-06-26
+> Last updated: 2026-06-27
+> Updated: Online-backed + BYOM flexibility
 
 ## Overview
 
-ContentPilot = monitoring dashboard + control interface untuk blog automation pipeline.
+ContentPilot = blog automation desktop app dengan full pipeline (research → write → SEO → publish).
 
 ```
-User → ContentPilot Client (dashboard)
-           ↓
-       ContentPilot Server (brain: suggestions, rules, analysis, RESEARCH TOOLS)
-           ↓
-       Blog-lifecycle (worker: research, write, publish)
-           ↓
-       Blogger (publish)
+User (blogger)
+    ↓
+┌─────────────────────────────────────┐
+│  CONTENTPILOT CLIENT (Desktop App)  │
+│  ├── PyWebView (native window)      │
+│  ├── Flask (localhost server)       │
+│  ├── Dashboard (HTML/CSS/JS)        │
+│  └── Settings (AI provider config)  │
+└──────────────┬──────────────────────┘
+               ↓ HTTP
+┌─────────────────────────────────────┐
+│  CONTENTPILOT SERVER                │
+│  ├── Flask API endpoints            │
+│  ├── Celery + Redis (background)    │
+│  ├── PostgreSQL (database)          │
+│  ├── AI Provider (BYOM - any)       │
+│  ├── Research Tools (Exa, YouTube)  │
+│  ├── Quality Gates (19 AI-tells)    │
+│  ├── E-E-A-T Scoring (AI)          │
+│  ├── Indexing Monitor (Google API)  │
+│  └── Publisher (Blogger/WP API)     │
+└─────────────────────────────────────┘
 ```
 
-**Important:** Research tools (Exa, YouTube, Bilibili, Xiaohongshu, Blogwatcher) are on the SERVER, not client. Client only displays results.
+**Important:** ContentPilot = ONLINE-BACKED (not offline-first).
+Most features require internet: research, AI, publishing, indexing.
 
 ## Core Concept: Zero Editing, Full Automation
 

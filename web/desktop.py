@@ -25,6 +25,17 @@ sys.path.insert(0, str(_ROOT / "src"))
 sys.path.insert(0, str(_ROOT))
 
 
+# Window configuration
+WINDOW_CONFIG = {
+    "title": "ContentPilot — Blog Automation",
+    "width": 1200,
+    "height": 800,
+    "min_size": (800, 600),
+    "resizable": True,
+    "text_select": True,
+}
+
+
 def _start_flask(port: int) -> None:
     """Run Flask in a background thread."""
     from web.app import app
@@ -47,8 +58,10 @@ def _wait_for_server(port: int, timeout: float = 10.0) -> bool:
 def main() -> None:
     parser = argparse.ArgumentParser(description="ContentPilot Desktop")
     parser.add_argument("--port", type=int, default=8080, help="Flask port (default: 8080)")
-    parser.add_argument("--width", type=int, default=1200, help="Window width (default: 1200)")
-    parser.add_argument("--height", type=int, default=800, help="Window height (default: 800)")
+    parser.add_argument("--width", type=int, default=WINDOW_CONFIG["width"], 
+                        help=f"Window width (default: {WINDOW_CONFIG['width']})")
+    parser.add_argument("--height", type=int, default=WINDOW_CONFIG["height"],
+                        help=f"Window height (default: {WINDOW_CONFIG['height']})")
     parser.add_argument("--fullscreen", action="store_true", help="Start in fullscreen")
     args = parser.parse_args()
 
@@ -67,12 +80,14 @@ def main() -> None:
     import webview
 
     window = webview.create_window(
-        title="ContentPilot",
+        title=WINDOW_CONFIG["title"],
         url=f"http://127.0.0.1:{args.port}",
         width=args.width,
         height=args.height,
-        min_size=(800, 600),
-        text_select=True,
+        min_size=WINDOW_CONFIG["min_size"],
+        resizable=WINDOW_CONFIG["resizable"],
+        text_select=WINDOW_CONFIG["text_select"],
+        fullscreen=args.fullscreen,
     )
 
     webview.start()

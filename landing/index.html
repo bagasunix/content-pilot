@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ContentPilot — Blog Automation Tool</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .gradient-text { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    </style>
+</head>
+<body class="bg-gray-900 text-white">
+
+<!-- Navigation -->
+<nav class="fixed w-full bg-gray-900/90 backdrop-blur-sm z-50 border-b border-gray-800">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+            <span class="text-2xl">🚀</span>
+            <span class="text-xl font-bold">ContentPilot</span>
+        </div>
+        <div class="hidden md:flex items-center gap-8">
+            <a href="#features" class="text-gray-400 hover:text-white transition">Features</a>
+            <a href="#how-it-works" class="text-gray-400 hover:text-white transition">How It Works</a>
+            <a href="#pricing" class="text-gray-400 hover:text-white transition">Pricing</a>
+            <a href="#faq" class="text-gray-400 hover:text-white transition">FAQ</a>
+        </div>
+        <div class="flex items-center gap-4">
+            <a href="#download" class="px-4 py-2 text-gray-400 hover:text-white transition">Download</a>
+            <a href="#download" class="px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg font-medium transition">Get Started Free</a>
+        </div>
+    </div>
+</nav>
+
+<!-- Hero Section -->
+<section class="pt-32 pb-20 px-6">
+    <div class="max-w-7xl mx-auto text-center">
+        <div class="inline-block px-4 py-2 bg-purple-500/20 text-purple-400 rounded-full text-sm font-medium mb-6">
+            ✨ Full automation from research to publish
+        </div>
+        <h1 class="text-5xl md:text-7xl font-bold mb-6">
+            Write once,<br>
+            <span class="gradient-text">rank everywhere</span>
+        </h1>
+        <p class="text-xl text-gray-400 max-w-2xl mx-auto mb-10">
+            ContentPilot automates your entire blog workflow — from research to SEO optimization to publishing. 
+            Use any AI provider you want.
+        </p>
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            <a href="#download" class="px-8 py-4 bg-purple-600 hover:bg-purple-700 rounded-xl font-semibold text-lg transition">
+                🚀 Download Free
+            </a>
+            <a href="#how-it-works" class="px-8 py-4 bg-gray-800 hover:bg-gray-700 rounded-xl font-semibold text-lg transition">
+                Watch Demo →
+            </a>
+        </div>
+        <p class="text-gray-500 text-sm mt-4">No credit card required • Free tier available</p>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section id="features" class="py-20 px-6 bg-gray-800/50">
+    <div class="max-w-7xl mx-auto">
+        <div class="text-center mb-16">
+            <h2 class="text-4xl font-bold mb-4">Everything you need</h2>
+            <p class="text-gray-400 text-lg">One tool to rule them all</p>
+        </div>
+        
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <!-- Feature 1 -->
+            <div class="bg-gray-900/50 border border-gray-700 rounded-2xl p-6 hover:border-purple-500/50 transition">
+                <div class="w-12 h-12 bg-purple-500/20 rounded-xl flex items-center justify-center text-2xl mb-4">🔍</div>
+                <h3 class="text-xl font-semibold mb-2">Smart Research</h3>
+                <p class="text-gray-400">AI-powered topic research with competitor analysis and trending topics.</p>
+            </div>
+            
+            <!-- Feature 2 -->
+            <div class="bg-gray-900/50 border border-gray-700 rounded-2xl p-6 hover:border-purple-500/50 transition">
+                <div class="w-12 h-12 bg-blue-500/20 rounded-xl flex items-center justify-center text-2xl mb-4">✍️</div>
+                <h3 class="text-xl font-semibold mb-2">AI Writing</h3>
+                <p class="text-gray-400">Generate high-quality content with your own AI provider. BYOM - Bring Your Own Model.</p>
+            </div>
+            
+            <!-- Feature 3 -->
+            <div class="bg-gray-900/50 border border-gray-700 rounded-2xl p-6 hover:border-purple-500/50 transition">
+                <div class="w-12 h-12 bg-green-500/20 rounded-xl flex items-center justify-center text-2xl mb-4">📊</div>
+                <h3 class="text-xl font-semibold mb-2">E-E-A-T Scoring</h3>
+                <p class="text-gray-400">AI-powered content quality scoring based on Google's E-E-A-T standards.</p>
+            </div>
+            
+            <!-- Feature 4 -->
+            <div class="bg-gray-900/50 border border-gray-700 rounded-2xl p-6 hover:border-purple-500/50 transition">
+                <div class="w-12 h-12 bg-yellow-500/20 rounded-xl flex items-center justify-center text-2xl mb-4">🎙️</div>
+                <h3 class="text-xl font-semibold mb-2">Voice Guide</h3>
+                <p class="text-gray-400">AI analyzes your blog's writing style and maintains consistency.</p>
+            </div>
+            
+            <!-- Feature 5 -->
+            <div class="bg-gray-900/50 border border-gray-700 rounded-2xl p-6 hover:border-purple-500/50 transition">
+                <div class="w-12 h-12 bg-pink-500/20 rounded-xl flex items-center justify-center text-2xl mb-4">📝</div>
+                <h3 class="text-xl font-semibold mb-2">Cross-Platform</h3>
+                <p class="text-gray-400">Publish to both Blogger and WordPress from one dashboard.</p>
+            </div>
+            
+            <!-- Feature 6 -->
+            <div class="bg-gray-900/50 border border-gray-700 rounded-2xl p-6 hover:border-purple-500/50 transition">
+                <div class="w-12 h-12 bg-red-500/20 rounded-xl flex items-center justify-center text-2xl mb-4">🔍</div>
+                <h3 class="text-xl font-semibold mb-2">Indexing Monitor</h3>
+                <p class="text-gray-400">Check if your articles are indexed by Google and submit URLs automatically.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- How It Works -->
+<section id="how-it-works" class="py-20 px-6">
+    <div class="max-w-7xl mx-auto">
+        <div class="text-center mb-16">
+            <h2 class="text-4xl font-bold mb-4">How it works</h2>
+            <p class="text-gray-400 text-lg">Three simple steps to automated content</p>
+        </div>
+        
+        <div class="grid md:grid-cols-3 gap-8">
+            <div class="text-center">
+                <div class="w-16 h-16 bg-purple-500/20 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-4">1</div>
+                <h3 class="text-xl font-semibold mb-2">Configure</h3>
+                <p class="text-gray-400">Connect your blog and AI provider. Takes 2 minutes.</p>
+            </div>
+            <div class="text-center">
+                <div class="w-16 h-16 bg-purple-500/20 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-4">2</div>
+                <h3 class="text-xl font-semibold mb-2">Create</h3>
+                <p class="text-gray-400">Enter your topic and let ContentPilot do the rest.</p>
+            </div>
+            <div class="text-center">
+                <div class="w-16 h-16 bg-purple-500/20 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-4">3</div>
+                <h3 class="text-xl font-semibold mb-2">Publish</h3>
+                <p class="text-gray-400">Review and publish with one click. Done!</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Pricing -->
+<section id="pricing" class="py-20 px-6 bg-gray-800/50">
+    <div class="max-w-7xl mx-auto">
+        <div class="text-center mb-16">
+            <h2 class="text-4xl font-bold mb-4">Simple pricing</h2>
+            <p class="text-gray-400 text-lg">Start free, upgrade when you need more</p>
+        </div>
+        
+        <div class="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+            <!-- Free Tier -->
+            <div class="bg-gray-900/50 border border-gray-700 rounded-2xl p-8">
+                <div class="text-sm font-medium text-gray-400 mb-2">FREE</div>
+                <div class="text-4xl font-bold mb-4">$0<span class="text-lg text-gray-400">/month</span></div>
+                <p class="text-gray-400 mb-6">Perfect for getting started</p>
+                <ul class="space-y-3 mb-8">
+                    <li class="flex items-center gap-3">
+                        <span class="text-green-400">✓</span>
+                        <span>5 articles/month</span>
+                    </li>
+                    <li class="flex items-center gap-3">
+                        <span class="text-green-400">✓</span>
+                        <span>1 blog</span>
+                    </li>
+                    <li class="flex items-center gap-3">
+                        <span class="text-green-400">✓</span>
+                        <span>Basic SEO checks</span>
+                    </li>
+                    <li class="flex items-center gap-3">
+                        <span class="text-green-400">✓</span>
+                        <span>BYOM (your AI provider)</span>
+                    </li>
+                    <li class="flex items-center gap-3">
+                        <span class="text-green-400">✓</span>
+                        <span>Blogger + WordPress</span>
+                    </li>
+                </ul>
+                <a href="#download" class="block w-full py-3 bg-gray-800 hover:bg-gray-700 rounded-xl font-semibold text-center transition">
+                    Get Started
+                </a>
+            </div>
+            
+            <!-- Pro Tier -->
+            <div class="bg-gray-900/50 border-2 border-purple-500 rounded-2xl p-8 relative">
+                <div class="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 bg-purple-500 rounded-full text-sm font-medium">
+                    POPULAR
+                </div>
+                <div class="text-sm font-medium text-purple-400 mb-2">PRO</div>
+                <div class="text-4xl font-bold mb-4">$19<span class="text-lg text-gray-400">/month</span></div>
+                <p class="text-gray-400 mb-6">For serious bloggers</p>
+                <ul class="space-y-3 mb-8">
+                    <li class="flex items-center gap-3">
+                        <span class="text-green-400">✓</span>
+                        <span class="font-medium">Unlimited articles</span>
+                    </li>
+                    <li class="flex items-center gap-3">
+                        <span class="text-green-400">✓</span>
+                        <span class="font-medium">Unlimited blogs</span>
+                    </li>
+                    <li class="flex items-center gap-3">
+                        <span class="text-green-400">✓</span>
+                        <span class="font-medium">Full E-E-A-T scoring</span>
+                    </li>
+                    <li class="flex items-center gap-3">
+                        <span class="text-green-400">✓</span>
+                        <span class="font-medium">AI voice guide</span>
+                    </li>
+                    <li class="flex items-center gap-3">
+                        <span class="text-green-400">✓</span>
+                        <span class="font-medium">Indexing monitor</span>
+                    </li>
+                    <li class="flex items-center gap-3">
+                        <span class="text-green-400">✓</span>
+                        <span class="font-medium">Priority support</span>
+                    </li>
+                </ul>
+                <a href="#download" class="block w-full py-3 bg-purple-600 hover:bg-purple-700 rounded-xl font-semibold text-center transition">
+                    Upgrade to Pro
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- FAQ -->
+<section id="faq" class="py-20 px-6">
+    <div class="max-w-3xl mx-auto">
+        <div class="text-center mb-16">
+            <h2 class="text-4xl font-bold mb-4">FAQ</h2>
+        </div>
+        
+        <div class="space-y-6">
+            <div class="bg-gray-800/50 rounded-xl p-6">
+                <h3 class="font-semibold mb-2">What AI providers are supported?</h3>
+                <p class="text-gray-400">Any OpenAI-compatible API: OpenAI, DeepSeek, Ollama (local), OpenRouter, Groq, and more. You can also use custom endpoints.</p>
+            </div>
+            <div class="bg-gray-800/50 rounded-xl p-6">
+                <h3 class="font-semibold mb-2">Is my data safe?</h3>
+                <p class="text-gray-400">Yes! Your API keys are encrypted and never stored in plain text. We don't have access to your content or AI provider.</p>
+            </div>
+            <div class="bg-gray-800/50 rounded-xl p-6">
+                <h3 class="font-semibold mb-2">Can I use it offline?</h3>
+                <p class="text-gray-400">ContentPilot is a desktop app that requires internet for AI generation and publishing. However, you can edit existing drafts offline.</p>
+            </div>
+            <div class="bg-gray-800/50 rounded-xl p-6">
+                <h3 class="font-semibold mb-2">Which platforms are supported?</h3>
+                <p class="text-gray-400">Currently Blogger and WordPress (via REST API). More platforms coming soon.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Download CTA -->
+<section id="download" class="py-20 px-6 gradient-bg">
+    <div class="max-w-4xl mx-auto text-center">
+        <h2 class="text-4xl font-bold mb-4">Ready to automate your blog?</h2>
+        <p class="text-xl text-purple-100 mb-8">Download ContentPilot for free and start creating better content today.</p>
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            <a href="#" class="px-8 py-4 bg-white text-purple-600 hover:bg-gray-100 rounded-xl font-semibold text-lg transition">
+                🖥️ Download for Windows
+            </a>
+            <a href="#" class="px-8 py-4 bg-purple-700 hover:bg-purple-800 rounded-xl font-semibold text-lg transition">
+                🍎 Download for Mac
+            </a>
+            <a href="#" class="px-8 py-4 bg-purple-700 hover:bg-purple-800 rounded-xl font-semibold text-lg transition">
+                🐧 Download for Linux
+            </a>
+        </div>
+        <p class="text-purple-200 text-sm mt-6">Free forever • No credit card required • BYOM</p>
+    </div>
+</section>
+
+<!-- Footer -->
+<footer class="py-12 px-6 border-t border-gray-800">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
+        <div class="flex items-center gap-2">
+            <span class="text-2xl">🚀</span>
+            <span class="text-xl font-bold">ContentPilot</span>
+        </div>
+        <div class="flex items-center gap-6">
+            <a href="#" class="text-gray-400 hover:text-white transition">GitHub</a>
+            <a href="#" class="text-gray-400 hover:text-white transition">Twitter</a>
+            <a href="#" class="text-gray-400 hover:text-white transition">Discord</a>
+        </div>
+        <p class="text-gray-500 text-sm">© 2026 ContentPilot. All rights reserved.</p>
+    </div>
+</footer>
+
+</body>
+</html>

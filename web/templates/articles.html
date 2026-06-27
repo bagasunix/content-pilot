@@ -81,6 +81,39 @@
                 </div>
             </div>
             <div class="flex items-center gap-3 flex-shrink-0">
+                <!-- Platform badge -->
+                {% if article.platform %}
+                <span class="px-2 py-1 text-xs font-medium rounded
+                    {% if article.platform == 'wordpress' %}bg-blue-500/20 text-blue-400
+                    {% elif article.platform == 'blogger' %}bg-orange-500/20 text-orange-400
+                    {% else %}bg-surface-700 text-surface-300{% endif %}">
+                    {{ article.platform|capitalize }}
+                </span>
+                {% endif %}
+                
+                <!-- E-E-A-T Score -->
+                {% if article.eeat_score %}
+                <span class="px-2 py-1 text-xs font-medium rounded
+                    {% if article.eeat_score >= 70 %}bg-green-500/20 text-green-400
+                    {% elif article.eeat_score >= 50 %}bg-yellow-500/20 text-yellow-400
+                    {% else %}bg-red-500/20 text-red-400{% endif %}">
+                    EEAT: {{ article.eeat_score }}
+                </span>
+                {% endif %}
+                
+                <!-- Indexing Status -->
+                {% if article.indexing_status %}
+                <span class="px-2 py-1 text-xs font-medium rounded
+                    {% if article.indexing_status == 'indexed' %}bg-green-500/20 text-green-400
+                    {% elif article.indexing_status == 'pending' %}bg-yellow-500/20 text-yellow-400
+                    {% else %}bg-red-500/20 text-red-400{% endif %}">
+                    {% if article.indexing_status == 'indexed' %}✓ Indexed
+                    {% elif article.indexing_status == 'pending' %}⏳ Pending
+                    {% else %}✗ Not Indexed{% endif %}
+                </span>
+                {% endif %}
+                
+                <!-- Stage badge -->
                 <span class="px-3 py-1 text-xs font-medium rounded-full
                     {% if article.stage == 'published' %}bg-green-500/20 text-green-400
                     {% elif article.stage == 'gated' %}bg-yellow-500/20 text-yellow-400

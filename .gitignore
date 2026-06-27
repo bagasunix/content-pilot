@@ -1,39 +1,61 @@
-# Build
-dist/
-build/
-*.egg-info/
-
 # Python
 __pycache__/
-*.pyc
-*.pyo
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
 
-# Environment
-.env
-.venv/
+# Virtual Environment
 venv/
+env/
+ENV/
 
 # IDE
 .vscode/
 .idea/
+*.swp
+*.swo
+*~
+
+# Environment
+.env
+.env.local
+.env.production
+
+# Database
+*.db
+*.sqlite3
+
+# Logs
+*.log
+logs/
 
 # OS
 .DS_Store
 Thumbs.db
 
-# ContentPilot specific
-workspace/.license
-workspace/drafts/
-workspace/journal.jsonl
+# PyWebView
+webview/
+*.webview
 
-# Server config (JANGAN di-push ke public repo)
-config/mcporter.json
-config/.env
-cookies.txt
-
-# License server
-license-server/
-
-# Generated files
-*.log
-*.tmp
+# Distribution
+*.tar.gz
+*.zip
+dist/
+build/
+*.spec
