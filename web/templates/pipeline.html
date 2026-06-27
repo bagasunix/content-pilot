@@ -30,13 +30,19 @@
             
             <div>
                 <label class="block text-sm font-medium text-surface-300 mb-2">Blog</label>
-                <select name="blog_id" id="pipeline_blog_id" required
-                        class="w-full px-4 py-3 bg-surface-800 border border-surface-700 rounded-xl text-white">
-                    <option value="">Select a blog...</option>
-                    {% for blog in blogs %}
-                    <option value="{{ blog.id }}">{{ blog.domain }} ({{ blog.platform }})</option>
-                    {% endfor %}
-                </select>
+                <div data-pick="blog_id">
+                    <div class="space-y-2">
+                        {% for blog in blogs %}
+                        <button type="button" data-val="{{ blog.id }}"
+                                class="w-full text-left py-3 px-4 rounded-xl text-sm transition-all border-2 border-surface-700 bg-surface-800/50 text-surface-400 hover:border-surface-600">
+                            {{ blog.domain }} ({{ blog.platform }})
+                        </button>
+                        {% else %}
+                        <p class="text-sm text-surface-500">No blogs yet — add one in Settings → Blog.</p>
+                        {% endfor %}
+                    </div>
+                    <input type="hidden" name="blog_id" id="pipeline_blog_id" value="">
+                </div>
             </div>
             
             <div>

@@ -30,13 +30,19 @@
             
             <div>
                 <label class="block text-sm font-medium text-surface-300 mb-2">Blog</label>
-                <select name="blog_id" id="voice_blog_id" required
-                        class="w-full px-4 py-3 bg-surface-800 border border-surface-700 rounded-xl text-white">
-                    <option value="">Select a blog...</option>
-                    {% for blog in blogs %}
-                    <option value="{{ blog.id }}">{{ blog.domain }}</option>
-                    {% endfor %}
-                </select>
+                <div data-pick="blog_id">
+                    <div class="space-y-2">
+                        {% for blog in blogs %}
+                        <button type="button" data-val="{{ blog.id }}"
+                                class="w-full text-left py-3 px-4 rounded-xl text-sm transition-all border-2 border-surface-700 bg-surface-800/50 text-surface-400 hover:border-surface-600">
+                            {{ blog.domain }}
+                        </button>
+                        {% else %}
+                        <p class="text-sm text-surface-500">No blogs yet — add one in Settings → Blog.</p>
+                        {% endfor %}
+                    </div>
+                    <input type="hidden" name="blog_id" id="voice_blog_id" value="">
+                </div>
             </div>
             
             <button type="submit" 
@@ -61,33 +67,39 @@
         <form id="editForm" class="space-y-4">
             <div>
                 <label class="block text-sm font-medium text-surface-300 mb-2">Tone</label>
-                <select name="tone" id="voice_tone"
-                        class="w-full px-4 py-3 bg-surface-800 border border-surface-700 rounded-xl text-white">
-                    <option value="professional">Professional</option>
-                    <option value="casual">Casual</option>
-                    <option value="friendly">Friendly</option>
-                    <option value="authoritative">Authoritative</option>
-                </select>
+                <div data-pick="tone">
+                    <div class="grid grid-cols-2 gap-2">
+                        <button type="button" data-val="professional" class="py-2 px-3 rounded-xl text-sm border-2 border-surface-700 bg-surface-800/50 text-surface-400 hover:border-surface-600">Professional</button>
+                        <button type="button" data-val="casual" class="py-2 px-3 rounded-xl text-sm border-2 border-surface-700 bg-surface-800/50 text-surface-400 hover:border-surface-600">Casual</button>
+                        <button type="button" data-val="friendly" class="py-2 px-3 rounded-xl text-sm border-2 border-surface-700 bg-surface-800/50 text-surface-400 hover:border-surface-600">Friendly</button>
+                        <button type="button" data-val="authoritative" class="py-2 px-3 rounded-xl text-sm border-2 border-surface-700 bg-surface-800/50 text-surface-400 hover:border-surface-600">Authoritative</button>
+                    </div>
+                    <input type="hidden" name="tone" id="voice_tone" value="professional">
+                </div>
             </div>
             
             <div>
                 <label class="block text-sm font-medium text-surface-300 mb-2">Language</label>
-                <select name="language" id="voice_language"
-                        class="w-full px-4 py-3 bg-surface-800 border border-surface-700 rounded-xl text-white">
-                    <option value="english">English</option>
-                    <option value="indonesian">Indonesian</option>
-                    <option value="mixed">Mixed (EN+ID)</option>
-                </select>
+                <div data-pick="language">
+                    <div class="grid grid-cols-3 gap-2">
+                        <button type="button" data-val="english" class="py-2 px-3 rounded-xl text-sm border-2 border-surface-700 bg-surface-800/50 text-surface-400 hover:border-surface-600">English</button>
+                        <button type="button" data-val="indonesian" class="py-2 px-3 rounded-xl text-sm border-2 border-surface-700 bg-surface-800/50 text-surface-400 hover:border-surface-600">Indonesian</button>
+                        <button type="button" data-val="mixed" class="py-2 px-3 rounded-xl text-sm border-2 border-surface-700 bg-surface-800/50 text-surface-400 hover:border-surface-600">Mixed</button>
+                    </div>
+                    <input type="hidden" name="language" id="voice_language" value="english">
+                </div>
             </div>
             
             <div>
                 <label class="block text-sm font-medium text-surface-300 mb-2">Formality</label>
-                <select name="formality" id="voice_formality"
-                        class="w-full px-4 py-3 bg-surface-800 border border-surface-700 rounded-xl text-white">
-                    <option value="formal">Formal</option>
-                    <option value="semi-formal">Semi-Formal</option>
-                    <option value="casual">Casual</option>
-                </select>
+                <div data-pick="formality">
+                    <div class="grid grid-cols-3 gap-2">
+                        <button type="button" data-val="formal" class="py-2 px-3 rounded-xl text-sm border-2 border-surface-700 bg-surface-800/50 text-surface-400 hover:border-surface-600">Formal</button>
+                        <button type="button" data-val="semi-formal" class="py-2 px-3 rounded-xl text-sm border-2 border-surface-700 bg-surface-800/50 text-surface-400 hover:border-surface-600">Semi-Formal</button>
+                        <button type="button" data-val="casual" class="py-2 px-3 rounded-xl text-sm border-2 border-surface-700 bg-surface-800/50 text-surface-400 hover:border-surface-600">Casual</button>
+                    </div>
+                    <input type="hidden" name="formality" id="voice_formality" value="formal">
+                </div>
             </div>
             
             <div>

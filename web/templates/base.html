@@ -115,7 +115,41 @@
     <script>
         lucide.createIcons();
     </script>
-    
+
+    <!-- Crash-safe dropdown replacement.
+         QtWebEngine (PyWebView desktop) can crash on a native <select> popup,
+         so selects are rendered as button groups: a <div data-pick> wrapper
+         with [data-val] buttons and one hidden <input>. This delegated handler
+         keeps the hidden input in sync and highlights the active choice. -->
+    <script>
+    (function(){
+        const ACTIVE = ['border-primary-500','bg-primary-500/10','text-primary-400'];
+        const INACTIVE = ['border-surface-700','bg-surface-800/50','text-surface-400'];
+        function hiddenOf(group){ return group.querySelector('input[type="hidden"]'); }
+        function paint(group){
+            const inp = hiddenOf(group); if(!inp) return;
+            group.querySelectorAll('[data-val]').forEach(function(b){
+                const on = b.dataset.val === inp.value;
+                b.classList.remove.apply(b.classList, on ? INACTIVE : ACTIVE);
+                b.classList.add.apply(b.classList, on ? ACTIVE : INACTIVE);
+            });
+        }
+        document.addEventListener('click', function(e){
+            const btn = e.target.closest('[data-pick] [data-val]');
+            if(!btn) return;
+            const group = btn.closest('[data-pick]');
+            const inp = hiddenOf(group);
+            if(inp){ inp.value = btn.dataset.val; }
+            paint(group);
+            const cb = group.dataset.onpick;
+            if(cb && typeof window[cb] === 'function'){ window[cb](btn.dataset.val); }
+        });
+        window.addEventListener('DOMContentLoaded', function(){
+            document.querySelectorAll('[data-pick]').forEach(paint);
+        });
+    })();
+    </script>
+
     {% block scripts %}{% endblock %}
 </body>
 </html>
