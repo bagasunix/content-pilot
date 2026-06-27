@@ -18,6 +18,10 @@ import threading
 import time
 from pathlib import Path
 
+# Force Qt backend for PyWebView
+import os
+os.environ["WEBVIEW_GUI"] = "qt"
+
 # Ensure parent dirs are importable
 _HERE = Path(__file__).resolve().parent
 _ROOT = _HERE.parent
@@ -90,7 +94,7 @@ def main() -> None:
         fullscreen=args.fullscreen,
     )
 
-    webview.start()
+    webview.start(gui="qt")
 
 
 if __name__ == "__main__":
