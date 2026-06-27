@@ -12,7 +12,6 @@
     
     <!-- Left Column -->
     <div class="space-y-6">
-        
         <!-- Profile -->
         <div class="bg-surface-900/50 border border-surface-700/50 rounded-2xl p-6">
             <div class="flex items-center gap-3 mb-6">
@@ -43,7 +42,6 @@
                 </div>
             </div>
         </div>
-
         <!-- Blog -->
         <div class="bg-surface-900/50 border border-surface-700/50 rounded-2xl p-6">
             <div class="flex items-center gap-3 mb-6">
@@ -106,7 +104,6 @@
                 </button>
             </form>
         </div>
-
         <!-- Google / Blogger -->
         <div class="bg-surface-900/50 border border-surface-700/50 rounded-2xl p-6">
             <div class="flex items-center gap-3 mb-6">
@@ -151,7 +148,68 @@
             </p>
             {% endif %}
         </div>
-
+        <!-- WordPress -->
+        <div class="bg-surface-900/50 border border-surface-700/50 rounded-2xl p-6">
+            <div class="flex items-center gap-3 mb-6">
+                <div class="w-10 h-10 bg-blue-500/10 rounded-xl flex items-center justify-center">📝</div>
+                <div>
+                    <h2 class="text-lg font-semibold text-white">WordPress</h2>
+                    <p class="text-sm text-surface-400">Connect your WordPress blog</p>
+                </div>
+                {% if config.get('wordpress', {}).get('connected') %}
+                <div class="ml-auto px-3 py-1 bg-green-500/20 text-green-400 text-xs font-medium rounded-full">
+                    ✓ Connected
+                </div>
+                {% else %}
+                <div class="ml-auto px-3 py-1 bg-surface-700 text-surface-400 text-xs font-medium rounded-full">
+                    ○ Not connected
+                </div>
+                {% endif %}
+            </div>
+            
+            <form method="POST" action="/settings">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-surface-300 mb-2">Blog URL</label>
+                        <input type="url" name="wp_url" value="{{ config.get('wordpress', {}).get('url', '') }}" 
+                               placeholder="https://yourblog.com"
+                               class="w-full px-4 py-3 bg-surface-800 border border-surface-700 rounded-xl text-white focus:border-primary-500 focus:outline-none">
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-surface-300 mb-2">Username</label>
+                            <input type="text" name="wp_username" value="{{ config.get('wordpress', {}).get('username', '') }}" 
+                                   placeholder="admin"
+                                   class="w-full px-4 py-3 bg-surface-800 border border-surface-700 rounded-xl text-white focus:border-primary-500 focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-surface-300 mb-2">App Password</label>
+                            <input type="password" name="wp_app_password" value="{{ config.get('wordpress', {}).get('app_password', '') }}" 
+                                   placeholder="xxxx xxxx"
+                                   class="w-full px-4 py-3 bg-surface-800 border border-surface-700 rounded-xl text-white focus:border-primary-500 focus:outline-none">
+                        </div>
+                    </div>
+                    <p class="text-xs text-surface-500">Generate in WordPress → Users → Profile → Application Passwords</p>
+                </div>
+                
+                <div class="flex gap-3 mt-6">
+                    <button type="submit" class="flex-1 py-3 px-4 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-xl transition-colors">
+                        💾 Save
+                    </button>
+                    <button type="button" onclick="testWordPress()" 
+                            class="py-3 px-6 bg-surface-800 hover:bg-surface-700 text-white font-semibold rounded-xl transition-colors">
+                        🧪 Test
+                    </button>
+                </div>
+            </form>
+            
+            <div id="wp-test-result" class="hidden mt-4"></div>
+        </div>
+        
+    </div>
+    <!-- Right Column -->
+    <div class="space-y-6">
         <!-- AI Provider -->
         <div class="bg-surface-900/50 border border-surface-700/50 rounded-2xl p-6">
             <div class="flex items-center gap-3 mb-6">
@@ -246,8 +304,39 @@
             
             <div id="ai-test-result" class="hidden mt-4"></div>
         </div>
-        
-        <!-- Publishing (approval mode) -->
+                <!-- Voice Guide -->
+        <div class="bg-surface-900/50 border border-surface-700/50 rounded-2xl p-6">
+            <div class="flex items-center gap-3 mb-6">
+                <div class="w-10 h-10 bg-pink-500/10 rounded-xl flex items-center justify-center">🎙️</div>
+                <div>
+                    <h2 class="text-lg font-semibold text-white">Voice Guide</h2>
+                    <p class="text-sm text-surface-400">AI-generated writing style</p>
+                </div>
+            </div>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-surface-300 mb-2">Blog URL</label>
+                    <input type="url" id="voice_blog_url" placeholder="https://yourblog.com"
+                           class="w-full px-4 py-3 bg-surface-800 border border-surface-700 rounded-xl text-white focus:border-primary-500 focus:outline-none">
+                </div>
+                
+                <button onclick="generateVoiceGuide()" type="button" 
+                        class="w-full py-3 px-4 bg-pink-500 hover:bg-pink-600 text-white font-semibold rounded-xl transition-colors">
+                    🎙️ Generate Voice Guide
+                </button>
+                
+                <div id="voice_guide_result" class="hidden">
+                    <textarea id="voice_guide_content" rows="4"
+                              class="w-full px-4 py-3 bg-surface-800 border border-surface-700 rounded-xl text-white font-mono text-sm"></textarea>
+                    <button onclick="saveVoiceGuide()" type="button"
+                            class="mt-2 w-full py-2 px-4 bg-green-500 hover:bg-green-600 text-white font-medium rounded-xl">
+                        💾 Save
+                    </button>
+                </div>
+            </div>
+        </div>
+                <!-- Publishing (approval mode) -->
         <div class="bg-surface-900/50 border border-surface-700/50 rounded-2xl p-6">
             <div class="flex items-center gap-3 mb-6">
                 <div class="w-10 h-10 bg-yellow-500/10 rounded-xl flex items-center justify-center">✅</div>
@@ -306,105 +395,7 @@
                     💾 Save Publishing
                 </button>
             </form>
-        </div>
-    </div>
-    
-    <!-- Right Column -->
-    <div class="space-y-6">
-        
-        <!-- WordPress -->
-        <div class="bg-surface-900/50 border border-surface-700/50 rounded-2xl p-6">
-            <div class="flex items-center gap-3 mb-6">
-                <div class="w-10 h-10 bg-blue-500/10 rounded-xl flex items-center justify-center">📝</div>
-                <div>
-                    <h2 class="text-lg font-semibold text-white">WordPress</h2>
-                    <p class="text-sm text-surface-400">Connect your WordPress blog</p>
-                </div>
-                {% if config.get('wordpress', {}).get('connected') %}
-                <div class="ml-auto px-3 py-1 bg-green-500/20 text-green-400 text-xs font-medium rounded-full">
-                    ✓ Connected
-                </div>
-                {% else %}
-                <div class="ml-auto px-3 py-1 bg-surface-700 text-surface-400 text-xs font-medium rounded-full">
-                    ○ Not connected
-                </div>
-                {% endif %}
-            </div>
-            
-            <form method="POST" action="/settings">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                <div class="space-y-4">
-                    <div>
-                        <label class="block text-sm font-medium text-surface-300 mb-2">Blog URL</label>
-                        <input type="url" name="wp_url" value="{{ config.get('wordpress', {}).get('url', '') }}" 
-                               placeholder="https://yourblog.com"
-                               class="w-full px-4 py-3 bg-surface-800 border border-surface-700 rounded-xl text-white focus:border-primary-500 focus:outline-none">
-                    </div>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-surface-300 mb-2">Username</label>
-                            <input type="text" name="wp_username" value="{{ config.get('wordpress', {}).get('username', '') }}" 
-                                   placeholder="admin"
-                                   class="w-full px-4 py-3 bg-surface-800 border border-surface-700 rounded-xl text-white focus:border-primary-500 focus:outline-none">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-surface-300 mb-2">App Password</label>
-                            <input type="password" name="wp_app_password" value="{{ config.get('wordpress', {}).get('app_password', '') }}" 
-                                   placeholder="xxxx xxxx"
-                                   class="w-full px-4 py-3 bg-surface-800 border border-surface-700 rounded-xl text-white focus:border-primary-500 focus:outline-none">
-                        </div>
-                    </div>
-                    <p class="text-xs text-surface-500">Generate in WordPress → Users → Profile → Application Passwords</p>
-                </div>
-                
-                <div class="flex gap-3 mt-6">
-                    <button type="submit" class="flex-1 py-3 px-4 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-xl transition-colors">
-                        💾 Save
-                    </button>
-                    <button type="button" onclick="testWordPress()" 
-                            class="py-3 px-6 bg-surface-800 hover:bg-surface-700 text-white font-semibold rounded-xl transition-colors">
-                        🧪 Test
-                    </button>
-                </div>
-            </form>
-            
-            <div id="wp-test-result" class="hidden mt-4"></div>
-        </div>
-        
-        <!-- Voice Guide -->
-        <div class="bg-surface-900/50 border border-surface-700/50 rounded-2xl p-6">
-            <div class="flex items-center gap-3 mb-6">
-                <div class="w-10 h-10 bg-pink-500/10 rounded-xl flex items-center justify-center">🎙️</div>
-                <div>
-                    <h2 class="text-lg font-semibold text-white">Voice Guide</h2>
-                    <p class="text-sm text-surface-400">AI-generated writing style</p>
-                </div>
-            </div>
-            
-            <div class="space-y-4">
-                <div>
-                    <label class="block text-sm font-medium text-surface-300 mb-2">Blog URL</label>
-                    <input type="url" id="voice_blog_url" placeholder="https://yourblog.com"
-                           class="w-full px-4 py-3 bg-surface-800 border border-surface-700 rounded-xl text-white focus:border-primary-500 focus:outline-none">
-                </div>
-                
-                <button onclick="generateVoiceGuide()" type="button" 
-                        class="w-full py-3 px-4 bg-pink-500 hover:bg-pink-600 text-white font-semibold rounded-xl transition-colors">
-                    🎙️ Generate Voice Guide
-                </button>
-                
-                <div id="voice_guide_result" class="hidden">
-                    <textarea id="voice_guide_content" rows="4"
-                              class="w-full px-4 py-3 bg-surface-800 border border-surface-700 rounded-xl text-white font-mono text-sm"></textarea>
-                    <button onclick="saveVoiceGuide()" type="button"
-                            class="mt-2 w-full py-2 px-4 bg-green-500 hover:bg-green-600 text-white font-medium rounded-xl">
-                        💾 Save
-                    </button>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Pipeline Settings -->
+        </div>        <!-- Pipeline Settings -->
         <div class="bg-surface-900/50 border border-surface-700/50 rounded-2xl p-6">
             <div class="flex items-center gap-3 mb-6">
                 <div class="w-10 h-10 bg-green-500/10 rounded-xl flex items-center justify-center">⚡</div>

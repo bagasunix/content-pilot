@@ -561,9 +561,10 @@ AI_DEFAULT_BASE_URLS = {
 def api_ai_test():
     """Test the AI provider directly with the entered (or saved) credentials.
 
-    Hits the provider's OpenAI-compatible /models endpoint, so it validates the
-    exact key the user typed without needing to Save first or round-trip the
-    server. Works for OpenAI/DeepSeek/OpenRouter/Ollama and any custom gateway.
+    Validates the exact key the user typed without needing to Save first or
+    round-trip the server. When a model is given it sends a 1-token
+    /chat/completions request, so the model name is validated too; otherwise it
+    just checks the key via /models. Works for any OpenAI-compatible gateway.
     """
     if not session.get('logged_in'):
         return jsonify({"success": False, "error": "Not logged in"}), 401
@@ -581,13 +582,10 @@ def api_ai_test():
 
     import urllib.request
     import urllib.error
-    req = urllib.request.Request(base_url.rstrip('/') + '/models',
-                                 headers={'Authorization': f'Bearer {api_key}'})
-    try:
-        with urllib.request.urlopen(req, timeout=12) as resp:
-            resp.read()
-        return jsonify({"success": True, "provider": provider, "model": model or '(any)'})
-    except urllib.error.HTTPError as e:
+    base = base_url.rstrip('/')
+    headers = {'Authorization': f'Bearer {api_key}'}
+
+    def _http_error(e):
         msg = f"HTTP {e.code} {e.reason}"
         try:
             body = json.loads(e.read().decode())
@@ -597,7 +595,26 @@ def api_ai_test():
                 msg = f"HTTP {e.code}: {detail}"
         except Exception:
             pass
-        return jsonify({"success": False, "error": msg})
+        return msg
+
+    try:
+        if model:
+            # Validate key AND model with a minimal chat completion.
+            payload = json.dumps({
+                "model": model,
+                "messages": [{"role": "user", "content": "ping"}],
+                "max_tokens": 1,
+            }).encode()
+            req = urllib.request.Request(base + '/chat/completions', data=payload,
+                                         headers={**headers, 'Content-Type': 'application/json'},
+                                         method='POST')
+        else:
+            req = urllib.request.Request(base + '/models', headers=headers)
+        with urllib.request.urlopen(req, timeout=20) as resp:
+            resp.read()
+        return jsonify({"success": True, "provider": provider, "model": model or '(any)'})
+    except urllib.error.HTTPError as e:
+        return jsonify({"success": False, "error": _http_error(e)})
     except Exception as e:
         return jsonify({"success": False, "error": f"{type(e).__name__}: {e}"})
 
