@@ -139,13 +139,13 @@
             <div id="ai-test-result" class="hidden mt-4"></div>
         </div>
         
-        <!-- Approval Mode -->
+        <!-- Publishing (approval mode) -->
         <div class="bg-surface-900/50 border border-surface-700/50 rounded-2xl p-6">
             <div class="flex items-center gap-3 mb-6">
                 <div class="w-10 h-10 bg-yellow-500/10 rounded-xl flex items-center justify-center">✅</div>
                 <div>
-                    <h2 class="text-lg font-semibold text-white">Approval Mode</h2>
-                    <p class="text-sm text-surface-400">Control how articles are published</p>
+                    <h2 class="text-lg font-semibold text-white">Publishing</h2>
+                    <p class="text-sm text-surface-400">How much you approve before an article goes live</p>
                 </div>
             </div>
             
@@ -160,7 +160,7 @@
                         data-approval="manual">
                     <div class="text-2xl mb-2">📝</div>
                     <div class="text-sm font-medium {% if config.get('approval_mode', 'soft') == 'manual' %}text-primary-400{% else %}text-surface-400{% endif %}">Manual</div>
-                    <div class="text-xs text-surface-500 mt-1">Click publish</div>
+                    <div class="text-xs text-surface-500 mt-1">Saved as draft — you click Publish</div>
                 </button>
                 
                 <button onclick="selectApproval('soft')"
@@ -173,7 +173,7 @@
                         data-approval="soft">
                     <div class="text-2xl mb-2">⚡</div>
                     <div class="text-sm font-medium {% if config.get('approval_mode', 'soft') == 'soft' %}text-primary-400{% else %}text-surface-400{% endif %}">Soft</div>
-                    <div class="text-xs text-surface-500 mt-1">Auto if passes</div>
+                    <div class="text-xs text-surface-500 mt-1">Auto-publish live if it passes the quality gate</div>
                 </button>
                 
                 <button onclick="selectApproval('full_auto')"
@@ -186,7 +186,7 @@
                         data-approval="full_auto">
                     <div class="text-2xl mb-2">🚀</div>
                     <div class="text-sm font-medium {% if config.get('approval_mode', 'soft') == 'full_auto' %}text-primary-400{% else %}text-surface-400{% endif %}">Full Auto</div>
-                    <div class="text-xs text-surface-500 mt-1">Auto + rewrite</div>
+                    <div class="text-xs text-surface-500 mt-1">Auto-publish live + rewrite &amp; retry if it fails</div>
                 </button>
             </div>
             <input type="hidden" name="approval_mode" id="approval_input" value="{{ config.get('approval_mode', 'soft') }}">
@@ -195,7 +195,7 @@
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <input type="hidden" name="approval_mode" id="approval_form_input" value="{{ config.get('approval_mode', 'soft') }}">
                 <button type="submit" class="w-full py-3 px-4 bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-400 font-semibold rounded-xl transition-colors">
-                    💾 Save Approval Mode
+                    💾 Save Publishing
                 </button>
             </form>
         </div>
@@ -313,35 +313,12 @@
                         <label class="block text-sm font-medium text-surface-300 mb-2">WIP Limit</label>
                         <input type="number" name="wip_limit" value="{{ config.get('pipeline', {}).get('wip_limit', 3) }}" min="1" max="10"
                                class="w-full px-4 py-3 bg-surface-800 border border-surface-700 rounded-xl text-white focus:border-primary-500 focus:outline-none">
-                        <p class="text-xs text-surface-500 mt-1">Max articles in progress</p>
+                        <p class="text-xs text-surface-500 mt-1">Max articles in progress at once</p>
                     </div>
-                    
-                    <div>
-                        <label class="block text-sm font-medium text-surface-300 mb-2">Publish Mode</label>
-                        <div class="grid grid-cols-2 gap-3">
-                            <button type="button" onclick="selectPublish('draft')"
-                                    class="py-3 px-4 rounded-xl text-sm font-medium transition-all border-2
-                                    {% if config.get('pipeline', {}).get('publish_mode', 'draft') == 'draft' %}
-                                        border-primary-500 bg-primary-500/10 text-primary-400
-                                    {% else %}
-                                        border-surface-700 bg-surface-800/50 text-surface-400 hover:border-surface-600
-                                    {% endif %}"
-                                    data-publish="draft">
-                                📝 Draft
-                            </button>
-                            <button type="button" onclick="selectPublish('live')"
-                                    class="py-3 px-4 rounded-xl text-sm font-medium transition-all border-2
-                                    {% if config.get('pipeline', {}).get('publish_mode') == 'live' %}
-                                        border-green-500 bg-green-500/10 text-green-400
-                                    {% else %}
-                                        border-surface-700 bg-surface-800/50 text-surface-400 hover:border-surface-600
-                                    {% endif %}"
-                                    data-publish="live">
-                                🚀 Live
-                            </button>
-                        </div>
-                        <input type="hidden" name="publish_mode" id="publish_input" value="{{ config.get('pipeline', {}).get('publish_mode', 'draft') }}">
-                    </div>
+
+                    <p class="text-xs text-surface-500">
+                        Draft vs live is controlled by <span class="text-surface-300">Publishing</span> above.
+                    </p>
                 </div>
                 
                 <button type="submit" class="mt-6 w-full py-3 px-4 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-xl transition-colors">
@@ -384,25 +361,6 @@ function selectApproval(mode) {
         } else {
             btn.className = btn.className.replace('border-primary-500 bg-primary-500/10', 'border-surface-700 bg-surface-800/50');
             btn.className = btn.className.replace('text-primary-400', 'text-surface-400');
-        }
-    });
-}
-
-function selectPublish(mode) {
-    document.getElementById('publish_input').value = mode;
-    document.querySelectorAll('[data-publish]').forEach(btn => {
-        if (btn.dataset.publish === mode) {
-            btn.className = btn.className.replace('border-surface-700 bg-surface-800/50', 'border-primary-500 bg-primary-500/10');
-            btn.className = btn.className.replace('text-surface-400', 'text-primary-400');
-            if (mode === 'live') {
-                btn.className = btn.className.replace('border-primary-500', 'border-green-500');
-                btn.className = btn.className.replace('bg-primary-500/10', 'bg-green-500/10');
-                btn.className = btn.className.replace('text-primary-400', 'text-green-400');
-            }
-        } else {
-            btn.className = btn.className.replace('border-primary-500 bg-primary-500/10', 'border-surface-700 bg-surface-800/50');
-            btn.className = btn.className.replace('border-green-500 bg-green-500/10', 'border-surface-700 bg-surface-800/50');
-            btn.className = btn.className.replace('text-primary-400 text-green-400', 'text-surface-400');
         }
     });
 }

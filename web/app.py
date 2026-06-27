@@ -839,33 +839,46 @@ def load_config() -> dict:
     return {}
 
 def save_settings(form: dict):
-    """Save settings from form."""
+    """Merge submitted settings into the existing config.
+
+    Settings are split across several small forms that each POST to /settings,
+    so we update only the fields present in this submission. Rebuilding the whole
+    config from one form would wipe the other forms' values.
+    """
     import yaml
-    
-    config = {
-        "domain": form.get("domain", ""),
-        "blog_id": form.get("blog_id", ""),
-        "ai": {
+
+    config = load_config() or {}
+    config.setdefault("ai", {})
+    config.setdefault("pipeline", {})
+
+    if "domain" in form:
+        config["domain"] = form.get("domain", "")
+    if "blog_id" in form:
+        config["blog_id"] = form.get("blog_id", "")
+    # Publishing autonomy — single source of truth (also decides draft vs live).
+    if "approval_mode" in form:
+        config["approval_mode"] = form.get("approval_mode", "soft")
+    if "wip_limit" in form:
+        config["pipeline"]["wip_limit"] = int(form.get("wip_limit", 3))
+
+    ai_submitted = "ai_provider" in form
+    if ai_submitted:
+        config["ai"] = {
             "provider": form.get("ai_provider", "openai"),
             "model": form.get("ai_model", "gpt-4"),
-            "api_key": form.get("ai_api_key", "")
-        },
-        "pipeline": {
-            "wip_limit": int(form.get("wip_limit", 3)),
-            "publish_mode": form.get("publish_mode", "draft")
+            "api_key": form.get("ai_api_key", ""),
         }
-    }
-    
+
     CONFIG_FILE.parent.mkdir(parents=True, exist_ok=True)
     with open(CONFIG_FILE, 'w') as f:
         yaml.dump(config, f, default_flow_style=False)
-    
-    # Sync AI settings to server
-    license_data = load_license()
-    if license_data and license_data.get("key"):
+
+    # Sync AI settings to server only when the AI form was the one submitted
+    # (avoids re-sending a stale/blank key on every unrelated save).
+    if ai_submitted:
+        license_data = load_license()
         ai_config = config.get("ai", {})
-        if ai_config.get("api_key"):
-            # Send to server (API key will be encrypted server-side)
+        if license_data and license_data.get("key") and ai_config.get("api_key"):
             server_request("POST", "/api/settings/ai", {
                 "key": license_data["key"],
                 "provider": ai_config.get("provider"),
