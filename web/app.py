@@ -894,7 +894,17 @@ def monitor():
     if not session.get('logged_in'):
         return redirect(url_for('login'))
     license_data = load_license()
-    return render_template('monitor.html', license=license_data)
+    # Check blog connection status
+    config = load_config()
+    blog_connected = bool(config.get('domain') and config.get('blog_id'))
+    blog_url = config.get('domain', '')
+    platform = config.get('platform', 'blogger')
+    
+    return render_template('monitor.html', 
+                          license=license_data,
+                          blog_connected=blog_connected,
+                          blog_url=blog_url,
+                          platform=platform)
 
 @app.route('/trending')
 def trending():

@@ -151,6 +151,7 @@
     <div class="bg-surface-900/50 border border-surface-700/50 rounded-2xl p-6">
         <h2 class="text-lg font-semibold text-white mb-4">Quick Actions</h2>
         
+        {% if blog_connected %}
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <button @click="triggerJob('analysis')" 
                     class="flex items-center gap-3 p-4 bg-surface-800/50 hover:bg-surface-800 border border-surface-700/30 rounded-xl transition-all">
@@ -185,6 +186,15 @@
                 </div>
             </button>
         </div>
+        {% else %}
+        <div class="bg-yellow-500/10 border border-yellow-500/30 rounded-xl p-4 text-center">
+            <p class="text-yellow-400 text-sm font-medium mb-2">⚠️ Blog not connected</p>
+            <p class="text-surface-400 text-xs mb-3">Connect your blog in Settings to use Quick Actions</p>
+            <a href="/settings" class="inline-flex items-center gap-2 px-4 py-2 bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-400 text-sm rounded-lg transition-colors">
+                ⚙️ Go to Settings
+            </a>
+        </div>
+        {% endif %}
         
         <div x-show="jobTriggered" x-transition class="mt-4 text-center text-sm text-green-400">
             ✓ Job queued successfully!
