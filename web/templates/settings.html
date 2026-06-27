@@ -502,7 +502,7 @@ function testAIConnection() {
             resultDiv.innerHTML = '<p class="text-green-400 font-medium">✓ Connected</p><p class="text-sm text-surface-400 mt-1">' + data.provider + ' / ' + data.model + '</p>';
         } else {
             resultDiv.className = 'mt-4 p-4 rounded-xl bg-red-500/10 border border-red-500/20';
-            resultDiv.innerHTML = '<p class="text-red-400 font-medium">✗ Failed</p><p class="text-sm text-surface-400 mt-1">' + data.error + '</p>';
+            resultDiv.innerHTML = '<p class="text-red-400 font-medium">✗ Failed</p><p class="text-sm text-red-300 mt-1">' + (data.error || 'Unknown error') + '</p>';
         }
     })
     .catch(error => {
@@ -533,7 +533,7 @@ function testWordPress() {
             resultDiv.innerHTML = '<p class="text-green-400 font-medium">✓ Connected</p><p class="text-sm text-surface-400 mt-1">' + data.site_name + '</p>';
         } else {
             resultDiv.className = 'mt-4 p-4 rounded-xl bg-red-500/10 border border-red-500/20';
-            resultDiv.innerHTML = '<p class="text-red-400 font-medium">✗ Failed</p><p class="text-sm text-surface-400 mt-1">' + data.error + '</p>';
+            resultDiv.innerHTML = '<p class="text-red-400 font-medium">✗ Failed</p><p class="text-sm text-red-300 mt-1">' + (data.error || 'Unknown error') + '</p>';
         }
     })
     .catch(error => {

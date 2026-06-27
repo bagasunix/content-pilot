@@ -582,20 +582,48 @@ def api_ai_test():
 
     import urllib.request
     import urllib.error
+    import socket
     base = base_url.rstrip('/')
     headers = {'Authorization': f'Bearer {api_key}'}
 
-    def _http_error(e):
-        msg = f"HTTP {e.code} {e.reason}"
+    def _provider_detail(e):
         try:
             body = json.loads(e.read().decode())
-            detail = body.get('error', {})
-            detail = detail.get('message') if isinstance(detail, dict) else detail
-            if detail:
-                msg = f"HTTP {e.code}: {detail}"
+            d = body.get('error', body)
+            return (d.get('message') if isinstance(d, dict) else str(d)) or ''
         except Exception:
-            pass
-        return msg
+            return ''
+
+    def _friendly_http(e):
+        """Turn an HTTP status into a plain-language message."""
+        detail = _provider_detail(e)
+        code = e.code
+        if code in (401, 403):
+            return "API key was rejected — check that the key is correct and still active."
+        if code == 404:
+            if model and ('model' in detail.lower() or 'not found' in detail.lower() or 'exist' in detail.lower()):
+                return f'Model "{model}" was not found for this provider — check the model name.'
+            return "Endpoint not found — check the Base URL (it usually ends in /v1)."
+        if code == 422 and model:
+            return f'The provider rejected model "{model}" — check the model name.'
+        if code == 429:
+            return "Rate limited — too many requests. Wait a moment and try again."
+        if 500 <= code < 600:
+            return "The provider had a server error — try again in a bit."
+        return detail or f"Request failed (HTTP {code})."
+
+    def _friendly_network(reason):
+        r = str(reason).lower()
+        host = base.split('//')[-1].split('/')[0]
+        if 'refused' in r:
+            return f"Couldn't reach {host} — is the service running and the Base URL correct?"
+        if 'timed out' in r or 'timeout' in r:
+            return "Connection timed out — the server didn't respond. Check the Base URL."
+        if 'name' in r or 'resolve' in r or 'getaddrinfo' in r or 'nodename' in r:
+            return f"Couldn't resolve {host} — check the Base URL."
+        if 'ssl' in r or 'certificate' in r:
+            return "SSL error — the server's certificate couldn't be verified."
+        return f"Network error reaching {host} — check the Base URL and your connection."
 
     try:
         if model:
@@ -614,9 +642,12 @@ def api_ai_test():
             resp.read()
         return jsonify({"success": True, "provider": provider, "model": model or '(any)'})
     except urllib.error.HTTPError as e:
-        return jsonify({"success": False, "error": _http_error(e)})
+        return jsonify({"success": False, "error": _friendly_http(e)})
+    except (urllib.error.URLError, socket.timeout, TimeoutError) as e:
+        reason = getattr(e, 'reason', e)
+        return jsonify({"success": False, "error": _friendly_network(reason)})
     except Exception as e:
-        return jsonify({"success": False, "error": f"{type(e).__name__}: {e}"})
+        return jsonify({"success": False, "error": f"Couldn't test the connection: {e}"})
 
 
 @app.route('/api/wordpress/test', methods=['POST'])
