@@ -107,6 +107,46 @@
             </form>
         </div>
 
+        <!-- Google / Blogger -->
+        <div class="bg-surface-900/50 border border-surface-700/50 rounded-2xl p-6">
+            <div class="flex items-center gap-3 mb-6">
+                <div class="w-10 h-10 bg-red-500/10 rounded-xl flex items-center justify-center">🔗</div>
+                <div>
+                    <h2 class="text-lg font-semibold text-white">Google / Blogger</h2>
+                    <p class="text-sm text-surface-400">Connect your Google account to publish to Blogger</p>
+                </div>
+                {% if google_connected %}
+                <div class="ml-auto px-3 py-1 bg-green-500/20 text-green-400 text-xs font-medium rounded-full">✓ Connected</div>
+                {% else %}
+                <div class="ml-auto px-3 py-1 bg-surface-700 text-surface-400 text-xs font-medium rounded-full">○ Not connected</div>
+                {% endif %}
+            </div>
+
+            {% if google_status == 'connected' %}
+            <div class="mb-4 p-3 rounded-xl bg-green-500/10 border border-green-500/20 text-green-400 text-sm">✓ Google account connected.</div>
+            {% elif google_status == 'error' %}
+            <div class="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm">✗ Connection failed — please try again.</div>
+            {% elif google_status == 'noconfig' %}
+            <div class="mb-4 p-3 rounded-xl bg-yellow-500/10 border border-yellow-500/20 text-yellow-400 text-sm">⚠ No OAuth credentials configured yet.</div>
+            {% elif google_status == 'disconnected' %}
+            <div class="mb-4 p-3 rounded-xl bg-surface-800 border border-surface-700 text-surface-300 text-sm">Disconnected.</div>
+            {% endif %}
+
+            {% if google_connected %}
+            <form method="POST" action="/disconnect/google">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="w-full py-3 px-4 bg-surface-800 hover:bg-surface-700 text-white font-semibold rounded-xl transition-colors">🔌 Disconnect</button>
+            </form>
+            {% elif google_configured %}
+            <a href="/connect/google" class="block w-full text-center py-3 px-4 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-xl transition-colors">🔗 Connect Google</a>
+            {% else %}
+            <a href="/connect/google" class="block w-full text-center py-3 px-4 bg-surface-800 hover:bg-surface-700 text-surface-300 font-semibold rounded-xl transition-colors opacity-70">🔗 Connect Google</a>
+            <p class="text-xs text-surface-500 mt-2">
+                Needs Google OAuth credentials: set <span class="font-mono">GOOGLE_CLIENT_ID</span> / <span class="font-mono">GOOGLE_CLIENT_SECRET</span>, or drop <span class="font-mono">workspace/credentials.json</span>. In Google Cloud, register redirect <span class="font-mono">http://127.0.0.1:8080/oauth2/callback</span>.
+            </p>
+            {% endif %}
+        </div>
+
         <!-- AI Provider -->
         <div class="bg-surface-900/50 border border-surface-700/50 rounded-2xl p-6">
             <div class="flex items-center gap-3 mb-6">

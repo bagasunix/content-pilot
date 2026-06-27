@@ -291,7 +291,10 @@ def settings():
     if cached and isinstance(cached, dict) and not cached.get("error"):
         schedule = cached
     
-    return render_template('settings.html', license=license_data, config=config, schedule=schedule)
+    return render_template('settings.html', license=license_data, config=config, schedule=schedule,
+                           google_connected=google_connected(),
+                           google_configured=bool(load_google_client()[0]),
+                           google_status=request.args.get('google'))
 
 @app.route('/settings/save-schedule', methods=['POST'])
 def save_schedule():
@@ -573,10 +576,125 @@ def connect_blogger():
     """Connect Blogger page."""
     connected = session.get('blogger_connected', False)
     license_data = load_license()
-    return render_template('connect_blogger.html', license=license_data, 
+    return render_template('connect_blogger.html', license=license_data,
                          connected=connected,
                          blog_name=session.get('blog_name', ''),
                          blog_id=session.get('blog_id', ''))
+
+
+# ------------------------------------------------------------
+# Google / Blogger OAuth — desktop loopback flow.
+# Consent opens in the webview, Google redirects back to
+# /oauth2/callback on this localhost app, we exchange the code
+# for a token and store it in workspace/token.json. No external
+# domain and no extra dependencies (raw token endpoint call).
+# ------------------------------------------------------------
+
+GOOGLE_CRED_FILE = WORKSPACE / "credentials.json"
+GOOGLE_TOKEN_FILE = WORKSPACE / "token.json"
+GOOGLE_SCOPES = "https://www.googleapis.com/auth/blogger"
+
+
+def load_google_client():
+    """Return (client_id, client_secret) from env or workspace/credentials.json."""
+    cid = os.getenv("GOOGLE_CLIENT_ID", "")
+    csec = os.getenv("GOOGLE_CLIENT_SECRET", "")
+    if cid and csec:
+        return cid, csec
+    if GOOGLE_CRED_FILE.exists():
+        try:
+            data = json.loads(GOOGLE_CRED_FILE.read_text())
+            blob = data.get("installed") or data.get("web") or {}
+            return blob.get("client_id", ""), blob.get("client_secret", "")
+        except Exception:
+            pass
+    return "", ""
+
+
+def google_connected() -> bool:
+    """True if we hold a usable Google token."""
+    if not GOOGLE_TOKEN_FILE.exists():
+        return False
+    try:
+        t = json.loads(GOOGLE_TOKEN_FILE.read_text())
+        return bool(t.get("access_token") or t.get("refresh_token"))
+    except Exception:
+        return False
+
+
+@app.route('/connect/google')
+def connect_google():
+    """Kick off the Google OAuth consent flow."""
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
+    import secrets
+    import urllib.parse
+    client_id, _ = load_google_client()
+    if not client_id:
+        return redirect(url_for('settings', google='noconfig'))
+    state = secrets.token_urlsafe(16)
+    session['google_oauth_state'] = state
+    params = {
+        'client_id': client_id,
+        'redirect_uri': url_for('google_callback', _external=True),
+        'response_type': 'code',
+        'scope': GOOGLE_SCOPES,
+        'access_type': 'offline',
+        'prompt': 'consent',
+        'state': state,
+    }
+    return redirect('https://accounts.google.com/o/oauth2/v2/auth?' + urllib.parse.urlencode(params))
+
+
+@app.route('/oauth2/callback')
+def google_callback():
+    """Exchange the OAuth code for a token and store it."""
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
+    if request.args.get('error'):
+        return redirect(url_for('settings', google='error'))
+    code = request.args.get('code')
+    state = request.args.get('state')
+    if not code or not state or state != session.get('google_oauth_state'):
+        return redirect(url_for('settings', google='error'))
+
+    import urllib.request
+    import urllib.parse
+    client_id, client_secret = load_google_client()
+    payload = urllib.parse.urlencode({
+        'code': code,
+        'client_id': client_id,
+        'client_secret': client_secret,
+        'redirect_uri': url_for('google_callback', _external=True),
+        'grant_type': 'authorization_code',
+    }).encode()
+    try:
+        req = urllib.request.Request('https://oauth2.googleapis.com/token', data=payload, method='POST')
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            token = json.loads(resp.read().decode())
+    except Exception:
+        return redirect(url_for('settings', google='error'))
+    if not token.get('access_token'):
+        return redirect(url_for('settings', google='error'))
+
+    GOOGLE_TOKEN_FILE.parent.mkdir(parents=True, exist_ok=True)
+    GOOGLE_TOKEN_FILE.write_text(json.dumps(token, indent=2))
+    session.pop('google_oauth_state', None)
+    session['blogger_connected'] = True
+    return redirect(url_for('settings', google='connected'))
+
+
+@app.route('/disconnect/google', methods=['POST'])
+def disconnect_google():
+    """Remove the stored Google token."""
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
+    try:
+        GOOGLE_TOKEN_FILE.unlink(missing_ok=True)
+    except Exception:
+        pass
+    session.pop('blogger_connected', None)
+    return redirect(url_for('settings', google='disconnected'))
 
 @app.route('/monitor')
 def monitor():
