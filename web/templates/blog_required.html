@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto text-center py-16">
+    <div class="bg-surface-900/50 border border-surface-700/50 rounded-2xl p-8">
+        <div class="text-6xl mb-6">📝</div>
+        <h1 class="text-2xl font-bold text-white mb-4">Blog Not Connected</h1>
+        <p class="text-surface-400 mb-6">
+            You need to connect your blog (WordPress or Blogger) before using this feature.
+        </p>
+        
+        <div class="bg-surface-800/50 rounded-xl p-4 mb-6 text-left">
+            <h3 class="text-sm font-medium text-white mb-3">How to connect:</h3>
+            <ol class="text-sm text-surface-400 space-y-2">
+                <li>1. Go to <a href="/settings" class="text-primary-400 hover:text-primary-300">Settings</a></li>
+                <li>2. Enter your blog domain</li>
+                <li>3. Select platform (WordPress or Blogger)</li>
+                <li>4. Enter credentials (username + app password)</li>
+                <li>5. Click "Test Connection" to verify</li>
+            </ol>
+        </div>
+        
+        <div class="flex gap-4 justify-center">
+            <a href="/settings" class="px-6 py-3 bg-primary-500 hover:bg-primary-600 text-white font-medium rounded-xl transition-colors">
+                ⚙️ Go to Settings
+            </a>
+            <a href="/dashboard" class="px-6 py-3 bg-surface-700 hover:bg-surface-600 text-white font-medium rounded-xl transition-colors">
+                ← Back to Dashboard
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

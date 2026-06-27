@@ -70,6 +70,13 @@ def save_license(key: str, tier: str):
     with open(LICENSE_FILE, 'w') as f:
         json.dump(license_data, f, indent=2)
 
+
+
+def check_blog_connected():
+    """Check if blog is connected (has domain and blog_id)."""
+    config = load_config()
+    return bool(config.get('domain') and config.get('blog_id'))
+
 def get_sync_client():
     """Get sync client for server communication."""
     license_data = load_license()
@@ -257,6 +264,12 @@ def articles():
     if not session.get('logged_in'):
         return redirect(url_for('login'))
     license_data = load_license()
+    
+    # Check blog connection
+    blog_connected = check_blog_connected()
+    if not blog_connected:
+        return render_template('blog_required.html', license=license_data, page='articles')
+    
     articles_list = get_articles()
     
     # Get usage data for article limit display
