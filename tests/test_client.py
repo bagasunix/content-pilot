@@ -22,6 +22,9 @@ class TestFlaskApp(unittest.TestCase):
         """Set up test client."""
         app.config['TESTING'] = True
         app.config['SECRET_KEY'] = 'test-secret'
+        # Disable CSRF for form-post tests; real forms send csrf_token() and
+        # JSON APIs are @csrf.exempt, so this only affects the test client.
+        app.config['WTF_CSRF_ENABLED'] = False
         self.client = app.test_client()
     
     def test_login_page(self):

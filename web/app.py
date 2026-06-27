@@ -103,6 +103,32 @@ def server_request(method, path, data=None):
         return None
 
 
+def proxy_to_server(path, json_body=None, method="POST", timeout=60):
+    """Forward a request to ContentPilot Server, returning (data, status_code).
+
+    Unlike server_request(), this surfaces HTTP error bodies/status so the
+    frontend can show real errors instead of a silent None.
+    """
+    import urllib.request
+    import urllib.error
+
+    url = f"{SERVER_URL}{path}"
+    headers = {"Content-Type": "application/json"}
+    body = json.dumps(json_body).encode() if json_body is not None else None
+    req = urllib.request.Request(url, data=body, headers=headers, method=method)
+
+    try:
+        with urllib.request.urlopen(req, timeout=timeout) as resp:
+            return json.loads(resp.read().decode()), resp.status
+    except urllib.error.HTTPError as e:
+        try:
+            return json.loads(e.read().decode()), e.code
+        except Exception:
+            return {"success": False, "error": f"Server error {e.code}"}, e.code
+    except Exception as e:
+        return {"success": False, "error": f"Server not available: {e}"}, 503
+
+
 def startup_sync():
     """Fetch rules, suggestions, trends from server on startup."""
     cache = get_cache()
@@ -449,21 +475,73 @@ def api_queue_status():
     return jsonify({"error": "Server not available"}), 503
 
 @app.route('/api/trigger', methods=['POST'])
+@csrf.exempt
 def api_trigger():
     """Trigger a job on server."""
     if not session.get('logged_in'):
         return jsonify({"error": "Not logged in"}), 401
-    
+
     data = request.get_json()
     job_type = data.get('job_type')
     metadata = data.get('metadata', {})
-    
+
     client = get_sync_client()
     if client:
         result = client.trigger_job(job_type, metadata)
         return jsonify(result)
-    
+
     return jsonify({"error": "Server not available"}), 503
+
+
+# ------------------------------------------------------------
+# Proxy routes — forward JSON to ContentPilot Server (:5001).
+# The frontend fetch()es these on the client origin; without
+# them the Pipeline/Indexing pages 404. CSRF-exempt because they
+# are JSON APIs called by our own JS (session-gated), not forms.
+# ------------------------------------------------------------
+
+@app.route('/api/pipeline/run', methods=['POST'])
+@csrf.exempt
+def api_pipeline_run():
+    """Run full pipeline (proxied to server)."""
+    if not session.get('logged_in'):
+        return jsonify({"error": "Not logged in"}), 401
+    data = request.get_json(silent=True) or {}
+    result, status = proxy_to_server('/api/pipeline/run', data)
+    return jsonify(result), status
+
+
+@app.route('/api/indexing/check', methods=['POST'])
+@csrf.exempt
+def api_indexing_check():
+    """Check indexing status (proxied to server)."""
+    if not session.get('logged_in'):
+        return jsonify({"error": "Not logged in"}), 401
+    data = request.get_json(silent=True) or {}
+    result, status = proxy_to_server('/api/indexing/check', data)
+    return jsonify(result), status
+
+
+@app.route('/api/indexing/submit', methods=['POST'])
+@csrf.exempt
+def api_indexing_submit():
+    """Submit URL for indexing (proxied to server)."""
+    if not session.get('logged_in'):
+        return jsonify({"error": "Not logged in"}), 401
+    data = request.get_json(silent=True) or {}
+    result, status = proxy_to_server('/api/indexing/submit', data)
+    return jsonify(result), status
+
+
+@app.route('/api/indexing/coverage', methods=['POST'])
+@csrf.exempt
+def api_indexing_coverage():
+    """Get indexing coverage report (proxied to server)."""
+    if not session.get('logged_in'):
+        return jsonify({"error": "Not logged in"}), 401
+    data = request.get_json(silent=True) or {}
+    result, status = proxy_to_server('/api/indexing/coverage', data)
+    return jsonify(result), status
 
 @app.route('/api/pipeline/status/<task_id>')
 def api_pipeline_status(task_id):
