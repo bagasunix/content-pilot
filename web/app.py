@@ -170,6 +170,12 @@ def startup_sync():
 # ROUTES — EXISTING
 # ============================================================
 
+@app.route("/favicon.ico")
+def favicon():
+    """Serve favicon from root for browsers."""
+    from flask import send_from_directory
+    return send_from_directory("static/favicon", "favicon.ico", mimetype="image/x-icon")
+
 @app.route('/')
 def index():
     """Main dashboard."""
