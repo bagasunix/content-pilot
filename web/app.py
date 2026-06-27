@@ -851,15 +851,28 @@ def save_settings(form: dict):
     config.setdefault("ai", {})
     config.setdefault("pipeline", {})
 
+    # Blog identity
     if "domain" in form:
         config["domain"] = form.get("domain", "")
     if "blog_id" in form:
         config["blog_id"] = form.get("blog_id", "")
+    if "platform" in form:
+        config["platform"] = form.get("platform", "blogger")
+    if "language" in form:
+        config["language"] = form.get("language", "id")
     # Publishing autonomy — single source of truth (also decides draft vs live).
     if "approval_mode" in form:
         config["approval_mode"] = form.get("approval_mode", "soft")
     if "wip_limit" in form:
         config["pipeline"]["wip_limit"] = int(form.get("wip_limit", 3))
+    # WordPress credentials (only when the WordPress form was submitted)
+    if "wp_url" in form:
+        config["wordpress"] = {
+            "url": form.get("wp_url", ""),
+            "username": form.get("wp_username", ""),
+            "app_password": form.get("wp_app_password", ""),
+            "connected": bool(form.get("wp_url", "").strip()),
+        }
 
     ai_submitted = "ai_provider" in form
     if ai_submitted:

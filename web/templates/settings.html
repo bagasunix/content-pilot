@@ -43,7 +43,66 @@
                 </div>
             </div>
         </div>
-        
+
+        <!-- Blog -->
+        <div class="bg-surface-900/50 border border-surface-700/50 rounded-2xl p-6">
+            <div class="flex items-center gap-3 mb-6">
+                <div class="w-10 h-10 bg-cyan-500/10 rounded-xl flex items-center justify-center">🌐</div>
+                <div>
+                    <h2 class="text-lg font-semibold text-white">Blog</h2>
+                    <p class="text-sm text-surface-400">Which blog ContentPilot manages</p>
+                </div>
+            </div>
+
+            <form method="POST" action="/settings">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-surface-300 mb-2">Domain</label>
+                        <input type="text" name="domain" value="{{ config.get('domain', '') }}"
+                               placeholder="yourblog.com"
+                               class="w-full px-4 py-3 bg-surface-800 border border-surface-700 rounded-xl text-white focus:border-primary-500 focus:outline-none">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-surface-300 mb-2">Platform</label>
+                        <div class="grid grid-cols-2 gap-3">
+                            <button type="button" onclick="selectPlatform('blogger')"
+                                    class="py-3 px-4 rounded-xl text-sm font-medium transition-all border-2
+                                    {% if config.get('platform', 'blogger') == 'blogger' %}border-primary-500 bg-primary-500/10 text-primary-400{% else %}border-surface-700 bg-surface-800/50 text-surface-400 hover:border-surface-600{% endif %}"
+                                    data-platform="blogger">📰 Blogger</button>
+                            <button type="button" onclick="selectPlatform('wordpress')"
+                                    class="py-3 px-4 rounded-xl text-sm font-medium transition-all border-2
+                                    {% if config.get('platform', 'blogger') == 'wordpress' %}border-primary-500 bg-primary-500/10 text-primary-400{% else %}border-surface-700 bg-surface-800/50 text-surface-400 hover:border-surface-600{% endif %}"
+                                    data-platform="wordpress">📝 WordPress</button>
+                        </div>
+                        <input type="hidden" name="platform" id="platform_input" value="{{ config.get('platform', 'blogger') }}">
+                    </div>
+
+                    <div id="blogger_id_field" class="{% if config.get('platform', 'blogger') != 'blogger' %}hidden{% endif %}">
+                        <label class="block text-sm font-medium text-surface-300 mb-2">Blogger Blog ID</label>
+                        <input type="text" name="blog_id" value="{{ config.get('blog_id', '') }}"
+                               placeholder="123456789012345678"
+                               class="w-full px-4 py-3 bg-surface-800 border border-surface-700 rounded-xl text-white focus:border-primary-500 focus:outline-none">
+                        <p class="text-xs text-surface-500 mt-1">Blogger → Settings; the numeric ID in the dashboard URL. WordPress publishing uses the credentials on the right.</p>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-surface-300 mb-2">Language</label>
+                        <select name="language"
+                                class="w-full px-4 py-3 bg-surface-800 border border-surface-700 rounded-xl text-white focus:border-primary-500 focus:outline-none">
+                            <option value="id" {% if config.get('language', 'id') == 'id' %}selected{% endif %}>Indonesian (id)</option>
+                            <option value="en" {% if config.get('language', 'id') == 'en' %}selected{% endif %}>English (en)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button type="submit" class="mt-6 w-full py-3 px-4 bg-cyan-500 hover:bg-cyan-600 text-white font-semibold rounded-xl transition-colors">
+                    💾 Save Blog
+                </button>
+            </form>
+        </div>
+
         <!-- AI Provider -->
         <div class="bg-surface-900/50 border border-surface-700/50 rounded-2xl p-6">
             <div class="flex items-center gap-3 mb-6">
@@ -349,6 +408,21 @@ function selectProvider(provider) {
     } else {
         baseUrlField.classList.add('hidden');
     }
+}
+
+function selectPlatform(platform) {
+    document.getElementById('platform_input').value = platform;
+    document.querySelectorAll('[data-platform]').forEach(btn => {
+        if (btn.dataset.platform === platform) {
+            btn.className = btn.className.replace('border-surface-700 bg-surface-800/50', 'border-primary-500 bg-primary-500/10');
+            btn.className = btn.className.replace('text-surface-400', 'text-primary-400');
+        } else {
+            btn.className = btn.className.replace('border-primary-500 bg-primary-500/10', 'border-surface-700 bg-surface-800/50');
+            btn.className = btn.className.replace('text-primary-400', 'text-surface-400');
+        }
+    });
+    const bid = document.getElementById('blogger_id_field');
+    if (platform === 'blogger') { bid.classList.remove('hidden'); } else { bid.classList.add('hidden'); }
 }
 
 function selectApproval(mode) {
