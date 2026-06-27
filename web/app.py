@@ -545,6 +545,94 @@ def publish_page(idea_id):
     license_data = load_license()
     return render_template('publish.html', license=license_data, idea_id=idea_id)
 
+@app.route('/pipeline')
+def pipeline():
+    """Pipeline page."""
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
+    license_data = load_license()
+    blogs = get_user_blogs()
+    pipelines = get_user_pipelines()
+    return render_template('pipeline.html', license=license_data, blogs=blogs, pipelines=pipelines)
+
+@app.route('/voice-guide')
+def voice_guide():
+    """Voice Guide page."""
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
+    license_data = load_license()
+    blogs = get_user_blogs()
+    return render_template('voice-guide.html', license=license_data, blogs=blogs)
+
+@app.route('/indexing')
+def indexing():
+    """Indexing page."""
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
+    license_data = load_license()
+    articles = get_published_articles()
+    return render_template('indexing.html', license=license_data, articles=articles)
+
+def get_user_blogs():
+    """Get user's blogs from database."""
+    try:
+        import psycopg2
+        conn = psycopg2.connect(
+            host=os.getenv('DB_HOST', 'localhost'),
+            port=os.getenv('DB_PORT', '5432'),
+            database=os.getenv('DB_NAME', 'contentpilot'),
+            user=os.getenv('DB_USER', 'contentpilot'),
+            password=os.getenv('DB_PASSWORD', '')
+        )
+        cur = conn.cursor()
+        cur.execute('SELECT id, domain, platform FROM blogs LIMIT 10')
+        blogs = [{'id': row[0], 'domain': row[1], 'platform': row[2]} for row in cur.fetchall()]
+        cur.close()
+        conn.close()
+        return blogs
+    except:
+        return []
+
+def get_user_pipelines():
+    """Get user's pipeline runs."""
+    try:
+        import psycopg2
+        conn = psycopg2.connect(
+            host=os.getenv('DB_HOST', 'localhost'),
+            port=os.getenv('DB_PORT', '5432'),
+            database=os.getenv('DB_NAME', 'contentpilot'),
+            user=os.getenv('DB_USER', 'contentpilot'),
+            password=os.getenv('DB_PASSWORD', '')
+        )
+        cur = conn.cursor()
+        cur.execute('SELECT topic, status, created_at FROM pipeline_runs ORDER BY created_at DESC LIMIT 10')
+        pipelines = [{'topic': row[0], 'status': row[1], 'created_at': str(row[2])} for row in cur.fetchall()]
+        cur.close()
+        conn.close()
+        return pipelines
+    except:
+        return []
+
+def get_published_articles():
+    """Get published articles for indexing."""
+    try:
+        import psycopg2
+        conn = psycopg2.connect(
+            host=os.getenv('DB_HOST', 'localhost'),
+            port=os.getenv('DB_PORT', '5432'),
+            database=os.getenv('DB_NAME', 'contentpilot'),
+            user=os.getenv('DB_USER', 'contentpilot'),
+            password=os.getenv('DB_PASSWORD', '')
+        )
+        cur = conn.cursor()
+        cur.execute('SELECT title, published_url, indexing_status FROM articles WHERE status = %s ORDER BY created_at DESC LIMIT 10', ('published',))
+        articles = [{'title': row[0], 'published_url': row[1], 'indexing_status': row[2]} for row in cur.fetchall()]
+        cur.close()
+        conn.close()
+        return articles
+    except:
+        return []
+
 # ============================================================
 # API ROUTES — EXISTING
 # ============================================================
@@ -614,6 +702,14 @@ def validate_license_key(key: str) -> dict:
                     return {"valid": True, "tier": tier}
         except:
             pass
+    
+    # Check server API
+    try:
+        result = server_request("POST", "/api/validate", {"key": key})
+        if result and result.get("valid"):
+            return {"valid": True, "tier": result.get("tier", "free")}
+    except:
+        pass
     
     return {"valid": False, "error": "Invalid license key"}
 
