@@ -122,7 +122,12 @@
                 {% endif %}
             </div>
 
-            {% if google_status == 'connected' %}
+            {% if google_status == 'opened' %}
+            <div class="mb-4 p-3 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-300 text-sm">
+                🌐 Google sign-in opened in your browser. Approve there, then
+                <a href="/settings" class="underline font-medium">refresh this page</a>.
+            </div>
+            {% elif google_status == 'connected' %}
             <div class="mb-4 p-3 rounded-xl bg-green-500/10 border border-green-500/20 text-green-400 text-sm">✓ Google account connected.</div>
             {% elif google_status == 'error' %}
             <div class="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm">✗ Connection failed — please try again.</div>
@@ -492,7 +497,12 @@ function testAIConnection() {
     fetch('/api/ai/test', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ key: '{{ license.key|default("") }}' })
+        body: JSON.stringify({
+            provider: document.getElementById('provider_input').value,
+            base_url: (document.querySelector('[name="base_url"]') || {}).value || '',
+            model: (document.querySelector('[name="model"]') || {}).value || '',
+            api_key: (document.querySelector('[name="api_key"]') || {}).value || ''
+        })
     })
     .then(response => response.json())
     .then(data => {

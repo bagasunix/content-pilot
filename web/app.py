@@ -546,6 +546,109 @@ def api_indexing_coverage():
     result, status = proxy_to_server('/api/indexing/coverage', data)
     return jsonify(result), status
 
+
+# OpenAI-compatible base URLs for the built-in providers.
+AI_DEFAULT_BASE_URLS = {
+    'openai': 'https://api.openai.com/v1',
+    'deepseek': 'https://api.deepseek.com/v1',
+    'openrouter': 'https://openrouter.ai/api/v1',
+    'ollama': 'http://localhost:11434/v1',
+}
+
+
+@app.route('/api/ai/test', methods=['POST'])
+@csrf.exempt
+def api_ai_test():
+    """Test the AI provider directly with the entered (or saved) credentials.
+
+    Hits the provider's OpenAI-compatible /models endpoint, so it validates the
+    exact key the user typed without needing to Save first or round-trip the
+    server. Works for OpenAI/DeepSeek/OpenRouter/Ollama and any custom gateway.
+    """
+    if not session.get('logged_in'):
+        return jsonify({"success": False, "error": "Not logged in"}), 401
+    data = request.get_json(silent=True) or {}
+    saved = (load_config() or {}).get('ai', {})
+    provider = (data.get('provider') or saved.get('provider') or 'openai').strip()
+    base_url = (data.get('base_url') or saved.get('base_url') or AI_DEFAULT_BASE_URLS.get(provider, '')).strip()
+    model = (data.get('model') or saved.get('model') or '').strip()
+    api_key = (data.get('api_key') or saved.get('api_key') or '').strip()
+
+    if not base_url:
+        return jsonify({"success": False, "error": "No base URL — pick a provider or enter a custom URL"})
+    if not api_key:
+        return jsonify({"success": False, "error": "No API key entered"})
+
+    import urllib.request
+    import urllib.error
+    req = urllib.request.Request(base_url.rstrip('/') + '/models',
+                                 headers={'Authorization': f'Bearer {api_key}'})
+    try:
+        with urllib.request.urlopen(req, timeout=12) as resp:
+            resp.read()
+        return jsonify({"success": True, "provider": provider, "model": model or '(any)'})
+    except urllib.error.HTTPError as e:
+        msg = f"HTTP {e.code} {e.reason}"
+        try:
+            body = json.loads(e.read().decode())
+            detail = body.get('error', {})
+            detail = detail.get('message') if isinstance(detail, dict) else detail
+            if detail:
+                msg = f"HTTP {e.code}: {detail}"
+        except Exception:
+            pass
+        return jsonify({"success": False, "error": msg})
+    except Exception as e:
+        return jsonify({"success": False, "error": f"{type(e).__name__}: {e}"})
+
+
+@app.route('/api/wordpress/test', methods=['POST'])
+@csrf.exempt
+def api_wordpress_test():
+    """Test WordPress credentials (proxied to server)."""
+    if not session.get('logged_in'):
+        return jsonify({"success": False, "error": "Not logged in"}), 401
+    data = request.get_json(silent=True) or {}
+    result, status = proxy_to_server('/api/wordpress/test', data)
+    return jsonify(result), status
+
+
+@app.route('/api/queue/history')
+def api_queue_history():
+    """User's background job history (proxied to server)."""
+    if not session.get('logged_in'):
+        return jsonify({"error": "Not logged in"}), 401
+    client = get_sync_client()
+    if client:
+        return jsonify(client.get_queue_history())
+    return jsonify({"error": "Server not available"}), 503
+
+
+@app.route('/api/voice-guide/generate', methods=['POST'])
+@csrf.exempt
+def api_voice_guide_generate():
+    """Generate a voice guide (proxied to server)."""
+    if not session.get('logged_in'):
+        return jsonify({"error": "Not logged in"}), 401
+    data = request.get_json(silent=True) or {}
+    result, status = proxy_to_server('/api/voice-guide/generate', data)
+    return jsonify(result), status
+
+
+@app.route('/api/voice-guide/<int:blog_id>', methods=['GET', 'PUT'])
+@csrf.exempt
+def api_voice_guide(blog_id):
+    """Get or update a blog's voice guide (proxied to server)."""
+    if not session.get('logged_in'):
+        return jsonify({"error": "Not logged in"}), 401
+    if request.method == 'PUT':
+        data = request.get_json(silent=True) or {}
+        result, status = proxy_to_server(f'/api/voice-guide/{blog_id}', data, method='PUT')
+    else:
+        result, status = proxy_to_server(f'/api/voice-guide/{blog_id}', method='GET')
+    return jsonify(result), status
+
+
 @app.route('/api/pipeline/status/<task_id>')
 def api_pipeline_status(task_id):
     """Get pipeline task status from server."""
@@ -622,9 +725,51 @@ def google_connected() -> bool:
         return False
 
 
+# Pending OAuth state. The consent opens in the system browser, so the
+# callback arrives there (no app session/cookie) — we validate the state via
+# this server-side store instead of the session. Single-user desktop app.
+_OAUTH_STATE = {}
+
+
+def _open_external(url: str) -> bool:
+    """Open a URL in the host's default browser (WSL → Windows friendly)."""
+    import subprocess
+    attempts = (
+        ['explorer.exe', url],
+        ['powershell.exe', '-NoProfile', '-Command', 'Start-Process', url],
+        ['xdg-open', url],
+    )
+    for cmd in attempts:
+        try:
+            subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            return True
+        except Exception:
+            continue
+    try:
+        import webbrowser
+        return webbrowser.open(url)
+    except Exception:
+        return False
+
+
+def _oauth_done_page(message: str, ok: bool = True) -> str:
+    """Standalone page shown in the external browser after the callback."""
+    color = '#34d399' if ok else '#f87171'
+    icon = '✓' if ok else '✗'
+    return f"""<!doctype html><html><head><meta charset="utf-8">
+<title>ContentPilot</title></head>
+<body style="background:#0f172a;color:#e2e8f0;font-family:system-ui,sans-serif;
+display:flex;align-items:center;justify-content:center;height:100vh;margin:0">
+<div style="text-align:center;max-width:420px;padding:2rem">
+<div style="font-size:3rem;color:{color}">{icon}</div>
+<h1 style="font-size:1.25rem;font-weight:600">{message}</h1>
+<p style="color:#94a3b8">You can close this tab and return to ContentPilot.</p>
+</div></body></html>"""
+
+
 @app.route('/connect/google')
 def connect_google():
-    """Kick off the Google OAuth consent flow."""
+    """Open the Google consent screen in the system browser."""
     if not session.get('logged_in'):
         return redirect(url_for('login'))
     import secrets
@@ -633,7 +778,7 @@ def connect_google():
     if not client_id:
         return redirect(url_for('settings', google='noconfig'))
     state = secrets.token_urlsafe(16)
-    session['google_oauth_state'] = state
+    _OAUTH_STATE['state'] = state
     params = {
         'client_id': client_id,
         'redirect_uri': url_for('google_callback', _external=True),
@@ -643,20 +788,21 @@ def connect_google():
         'prompt': 'consent',
         'state': state,
     }
-    return redirect('https://accounts.google.com/o/oauth2/v2/auth?' + urllib.parse.urlencode(params))
+    auth_url = 'https://accounts.google.com/o/oauth2/v2/auth?' + urllib.parse.urlencode(params)
+    _open_external(auth_url)
+    return redirect(url_for('settings', google='opened'))
 
 
 @app.route('/oauth2/callback')
 def google_callback():
-    """Exchange the OAuth code for a token and store it."""
-    if not session.get('logged_in'):
-        return redirect(url_for('login'))
+    """Exchange the OAuth code for a token (hit by the external browser)."""
     if request.args.get('error'):
-        return redirect(url_for('settings', google='error'))
+        return _oauth_done_page("Sign-in was cancelled.", ok=False)
     code = request.args.get('code')
     state = request.args.get('state')
-    if not code or not state or state != session.get('google_oauth_state'):
-        return redirect(url_for('settings', google='error'))
+    if not code or not state or state != _OAUTH_STATE.get('state'):
+        return _oauth_done_page("Invalid or expired request — please try Connect again.", ok=False)
+    _OAUTH_STATE.pop('state', None)
 
     import urllib.request
     import urllib.parse
@@ -672,16 +818,14 @@ def google_callback():
         req = urllib.request.Request('https://oauth2.googleapis.com/token', data=payload, method='POST')
         with urllib.request.urlopen(req, timeout=15) as resp:
             token = json.loads(resp.read().decode())
-    except Exception:
-        return redirect(url_for('settings', google='error'))
+    except Exception as e:
+        return _oauth_done_page(f"Token exchange failed: {e}", ok=False)
     if not token.get('access_token'):
-        return redirect(url_for('settings', google='error'))
+        return _oauth_done_page("Google did not return a token — please try again.", ok=False)
 
     GOOGLE_TOKEN_FILE.parent.mkdir(parents=True, exist_ok=True)
     GOOGLE_TOKEN_FILE.write_text(json.dumps(token, indent=2))
-    session.pop('google_oauth_state', None)
-    session['blogger_connected'] = True
-    return redirect(url_for('settings', google='connected'))
+    return _oauth_done_page("Connected to Google!", ok=True)
 
 
 @app.route('/disconnect/google', methods=['POST'])
@@ -992,12 +1136,14 @@ def save_settings(form: dict):
             "connected": bool(form.get("wp_url", "").strip()),
         }
 
-    ai_submitted = "ai_provider" in form
+    # AI form uses field names provider/base_url/model/api_key.
+    ai_submitted = "provider" in form
     if ai_submitted:
         config["ai"] = {
-            "provider": form.get("ai_provider", "openai"),
-            "model": form.get("ai_model", "gpt-4"),
-            "api_key": form.get("ai_api_key", ""),
+            "provider": form.get("provider", "openai"),
+            "base_url": form.get("base_url", ""),
+            "model": form.get("model", "gpt-4"),
+            "api_key": form.get("api_key", ""),
         }
 
     CONFIG_FILE.parent.mkdir(parents=True, exist_ok=True)
