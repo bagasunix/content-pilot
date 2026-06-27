@@ -130,7 +130,7 @@
             {% elif google_status == 'error' %}
             <div class="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm">✗ Connection failed — please try again.</div>
             {% elif google_status == 'noconfig' %}
-            <div class="mb-4 p-3 rounded-xl bg-yellow-500/10 border border-yellow-500/20 text-yellow-400 text-sm">⚠ No OAuth credentials configured yet.</div>
+            <div class="mb-4 p-3 rounded-xl bg-surface-800 border border-surface-700 text-surface-400 text-sm">Google OAuth not configured. Only needed for Blogger.</div>
             {% elif google_status == 'disconnected' %}
             <div class="mb-4 p-3 rounded-xl bg-surface-800 border border-surface-700 text-surface-300 text-sm">Disconnected.</div>
             {% endif %}
@@ -145,7 +145,7 @@
             {% else %}
             <a href="/connect/google" class="block w-full text-center py-3 px-4 bg-surface-800 hover:bg-surface-700 text-surface-300 font-semibold rounded-xl transition-colors opacity-70">🔗 Connect Google</a>
             <p class="text-xs text-surface-500 mt-2">
-                Needs Google OAuth credentials: set <span class="font-mono">GOOGLE_CLIENT_ID</span> / <span class="font-mono">GOOGLE_CLIENT_SECRET</span>, or drop <span class="font-mono">workspace/credentials.json</span>. In Google Cloud, register redirect <span class="font-mono">http://127.0.0.1:8080/oauth2/callback</span>.
+                Only needed for Blogger. WordPress users can skip this.
             </p>
             {% endif %}
         </div>
