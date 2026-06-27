@@ -83,7 +83,6 @@ ContentPilot supports any OpenAI-compatible API:
 |----------|----------|-------|
 | OpenAI | https://api.openai.com/v1 | GPT-4, GPT-3.5 |
 | DeepSeek | https://api.deepseek.com/v1 | Affordable |
-| Ollama | http://localhost:11434/v1 | Local, free |
 | OpenRouter | https://openrouter.ai/api/v1 | Multi-model |
 | Custom | Your endpoint | Any OpenAI-compatible |
 

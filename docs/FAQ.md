@@ -19,8 +19,8 @@ A: ContentPilot adalah tool blog automation yang menggunakan AI untuk:
 A: | Tier | Harga | Features |
 |------|-------|----------|
 | Free | $0 | 10 articles/month |
-| Pro | $29/bulan | Unlimited |
-| Business | $99/bulan | Unlimited + Priority |
+| Pro | $9-19/bulan | Unlimited |
+| Enterprise | $49-99/bulan | Custom |
 
 ### Q: Bisa dipakai di Windows/Linux/Mac?
 
@@ -112,7 +112,7 @@ A:
 
 ### Q: Bisa dipakai di multiple machine?
 
-A: Free tier: 1 machine. Pro: 3 machines. Business: Unlimited.
+A: Free tier: 1 blog. Pro: Unlimited blogs. Enterprise: Custom.
 
 ### Q: Expired gimana?
 
