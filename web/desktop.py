@@ -36,6 +36,7 @@ WINDOW_CONFIG = {
     "height": 800,
     "min_size": (800, 600),
     "resizable": True,
+    "icon": os.path.join(os.path.dirname(__file__), "static", "favicon", "app-icon-256x256.png"),
     "text_select": True,
 }
 
