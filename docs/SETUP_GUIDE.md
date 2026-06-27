@@ -55,17 +55,14 @@ Lihat `docs/TELEGRAM_SETUP.md` untuk panduan lengkap.
 
 ### 5. Setup OAuth (untuk Publish)
 
-```bash
-# 1. Buat Google Cloud Project
-# 2. Enable Blogger API v3
-# 3. Buat OAuth 2.0 credentials
-# 4. Download credentials.json ke workspace/
+1. Buat Google Cloud Project, enable **Blogger API v3**
+2. Buat **OAuth 2.0 Client ID** (type *Web application*) dengan redirect
+   `http://127.0.0.1:8080/oauth2/callback`
+3. Sediakan `GOOGLE_CLIENT_ID`/`GOOGLE_CLIENT_SECRET` (env) atau
+   `workspace/credentials.json`
+4. Di aplikasi: **Settings → Google / Blogger → Connect Google**
 
-# Jalankan setup
-python3 scripts/setup_oauth.py
-```
-
-Ikuti instruksi di layar untuk authorize.
+Detail lengkap: `docs/setup-credentials.md`.
 
 ### 5. Verifikasi Setup
 

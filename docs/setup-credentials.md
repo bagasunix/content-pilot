@@ -10,29 +10,21 @@ Panduan setup credentials untuk ContentPilot.
 1. https://console.cloud.google.com → **New Project** (mis. "ContentPilot")
 2. Enable **Blogger API v3**
 3. **Credentials** → **Create Credentials** → **OAuth 2.0 Client ID**
-4. Type: **Desktop App**
-5. Download `credentials.json` → taruh di `workspace/credentials.json`
+4. Type: **Web application**
+5. **Authorized redirect URIs** → tambahkan:
+   - `http://127.0.0.1:8080/oauth2/callback`
+   - `http://localhost:8080/oauth2/callback`
+6. Sediakan kredensialnya dengan salah satu cara:
+   - Set env `GOOGLE_CLIENT_ID` dan `GOOGLE_CLIENT_SECRET`, **atau**
+   - Download `credentials.json` → taruh di `workspace/credentials.json`
 
-### Generate Token
-```bash
-contentpilot setup
-```
+### Connect (Generate Token)
+Buka aplikasi desktop → **Settings → Google / Blogger → Connect Google**.
+Consent terbuka di browser sistem; setelah approve, token tersimpan otomatis
+di `workspace/token.json` dan status berubah jadi **Connected**.
 
-Browser akan buka → login → authorize → token.json auto-saved.
-
-### Token Refresh
-Token auto-refresh oleh publisher.py. Kalau expired:
-```bash
-python3 -c "
-from google.auth.transport.requests import Request
-from google.oauth2.credentials import Credentials
-from pathlib import Path
-c = Credentials.from_authorized_user_file('workspace/token.json')
-c.refresh(Request())
-Path('workspace/token.json').write_text(c.to_json())
-print('Token refreshed')
-"
-```
+> Catatan: token disimpan apa adanya (raw, termasuk `refresh_token`). Auto-refresh
+> saat publish belum diwire — itu langkah lanjutan yang terpisah.
 
 ## 2. AI Provider
 
