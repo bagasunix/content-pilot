@@ -1,0 +1,172 @@
+<!-- ContentPilot Help Guide Component -->
+<!-- Usage: {% include 'help_guide.html' with context %} -->
+
+<div id="help-modal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+    <div class="bg-surface-900 border border-surface-700 rounded-2xl max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+        <div class="p-6">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-xl font-bold text-white">📚 Help Guide</h2>
+                <button onclick="closeHelp()" class="text-surface-400 hover:text-white text-2xl">&times;</button>
+            </div>
+            
+            <div id="help-content" class="space-y-6">
+                <!-- Content loaded dynamically -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Help guides content
+const helpGuides = {
+    'ai-provider': {
+        title: '🤖 AI Provider Setup',
+        sections: [
+            {
+                title: 'What is this?',
+                content: 'ContentPilot uses AI to write articles. You need to connect your own AI provider (BYOM - Bring Your Own Model).'
+            },
+            {
+                title: 'Supported Providers',
+                content: '<ul class="list-disc list-inside text-surface-300 space-y-1"><li><strong>OpenAI:</strong> GPT-4, GPT-3.5 (https://api.openai.com/v1)</li><li><strong>DeepSeek:</strong> Affordable option (https://api.deepseek.com/v1)</li><li><strong>Custom:</strong> Any OpenAI-compatible API</li></ul>'
+            },
+            {
+                title: 'How to Setup',
+                content: '<ol class="list-decimal list-inside text-surface-300 space-y-1"><li>Choose your provider from the buttons above</li><li>Enter your API Key (from provider dashboard)</li><li>Enter Model name (e.g., gpt-4, deepseek-chat)</li><li>Click "Test" to verify connection</li><li>Click "Save" to store settings</li></ol>'
+            },
+            {
+                title: 'Where to get API Key',
+                content: '<ul class="list-disc list-inside text-surface-300 space-y-1"><li><strong>OpenAI:</strong> platform.openai.com → API Keys</li><li><strong>DeepSeek:</strong> platform.deepseek.com → API Keys</li><li><strong>Custom:</strong> Check your provider documentation</li></ul>'
+            }
+        ]
+    },
+    'pipeline': {
+        title: '⚡ Pipeline Guide',
+        sections: [
+            {
+                title: 'What is Pipeline?',
+                content: 'Pipeline automates your entire blog workflow: Research → Write → Optimize → Review → Publish.'
+            },
+            {
+                title: 'How to Run',
+                content: '<ol class="list-decimal list-inside text-surface-300 space-y-1"><li>Enter your topic in the "Topic" field</li><li>Select your blog from the dropdown</li><li>Choose approval mode:
+                <ul class="list-disc list-inside ml-4 mt-1"><li><strong>Manual:</strong> You approve each article</li><li><strong>Soft:</strong> Auto-publish if passes quality gates</li><li><strong>Full Auto:</strong> Auto-publish + auto-rewrite if fails</li></ul></li><li>Click "Start Pipeline"</li></ol>'
+            },
+            {
+                title: 'Prerequisites',
+                content: '<ul class="list-disc list-inside text-surface-300 space-y-1"><li>AI Provider configured in Settings</li><li>Blog connected (Blogger or WordPress)</li><li>Internet connection</li></ul>'
+            }
+        ]
+    },
+    'voice-guide': {
+        title: '🎙️ Voice Guide',
+        sections: [
+            {
+                title: 'What is Voice Guide?',
+                content: 'Voice Guide analyzes your existing blog posts to understand your writing style, then uses that style when generating new content.'
+            },
+            {
+                title: 'How to Use',
+                content: '<ol class="list-decimal list-inside text-surface-300 space-y-1"><li>Enter your blog URL</li><li>Select your blog from dropdown</li><li>Click "Generate Voice Guide"</li><li>AI will analyze your writing style</li><li>Review the generated guide</li><li>Edit if needed (Tone, Language, Formality)</li><li>Click "Save Voice Guide"</li></ol>'
+            },
+            {
+                title: 'What Gets Analyzed',
+                content: '<ul class="list-disc list-inside text-surface-300 space-y-1"><li>Writing tone (formal, casual, friendly)</li><li>Language (English, Indonesian, Mixed)</li><li>Sentence structure</li><li>Paragraph length</li><li>Vocabulary level</li></ul>'
+            }
+        ]
+    },
+    'indexing': {
+        title: '🔍 Indexing Monitor',
+        sections: [
+            {
+                title: 'What is Indexing?',
+                content: 'Google "indexes" your pages to include them in search results. If your page isn\'t indexed, it won\'t appear in Google searches.'
+            },
+            {
+                title: 'Check URL Status',
+                content: '<ol class="list-decimal list-inside text-surface-300 space-y-1"><li>Enter the URL you want to check</li><li>Click "Check Status"</li><li>See if the URL is indexed or not</li></ol>'
+            },
+            {
+                title: 'Submit URL',
+                content: '<ol class="list-decimal list-inside text-surface-300 space-y-1"><li>Enter the URL to submit</li><li>Click "Submit URL"</li><li>Google will crawl and index the URL</li><li>Check status again later to confirm</li></ol>'
+            },
+            {
+                title: 'Coverage Report',
+                content: '<ul class="list-disc list-inside text-surface-300 space-y-1"><li><strong>Valid:</strong> Pages indexed successfully</li><li><strong>Errors:</strong> Pages with issues</li><li><strong>Warnings:</strong> Pages with minor issues</li><li><strong>Excluded:</strong> Pages intentionally excluded</li></ul>'
+            }
+        ]
+    },
+    'wordpress': {
+        title: '📝 WordPress Setup',
+        sections: [
+            {
+                title: 'What is this?',
+                content: 'Connect your WordPress blog to publish articles directly from ContentPilot.'
+            },
+            {
+                title: 'How to Setup',
+                content: '<ol class="list-decimal list-inside text-surface-300 space-y-1"><li>Go to your WordPress dashboard</li><li>Go to Users → Profile</li><li>Scroll to "Application Passwords"</li><li>Enter name: "ContentPilot"</li><li>Click "Add New Application Password"</li><li>Copy the generated password</li><li>Paste in ContentPilot Settings → WordPress</li></ol>'
+            },
+            {
+                title: 'Important Notes',
+                content: '<ul class="list-disc list-inside text-surface-300 space-y-1"><li>Application Password is different from your login password</li><li>Keep it secure, same as your password</li><li>You can revoke it anytime from WordPress</li></ul>'
+            }
+        ]
+    },
+    'approval-mode': {
+        title: '✅ Approval Mode',
+        sections: [
+            {
+                title: 'What is this?',
+                content: 'Control how articles are published after the pipeline completes.'
+            },
+            {
+                title: 'Modes',
+                content: '<ul class="list-disc list-inside text-surface-300 space-y-1"><li><strong>📝 Manual:</strong> You click "Publish" for each article. Full control.</li><li><strong>⚡ Soft:</strong> Auto-publish if article passes quality gates. Notifications for issues.</li><li><strong>🚀 Full Auto:</strong> Auto-publish + auto-rewrite if fails. No intervention needed.</li></ul>'
+            },
+            {
+                title: 'Recommendation',
+                content: 'Start with <strong>Soft</strong> mode. It auto-publishes good articles but notifies you of problems. Switch to Full Auto once you trust the system.'
+            }
+        ]
+    }
+};
+
+// Open help modal
+function openHelp(topic) {
+    const modal = document.getElementById('help-modal');
+    const content = document.getElementById('help-content');
+    
+    const guide = helpGuides[topic];
+    if (!guide) return;
+    
+    let html = `<h3 class="text-lg font-semibold text-white mb-4">${guide.title}</h3>`;
+    
+    guide.sections.forEach(section => {
+        html += `
+            <div class="bg-surface-800/50 rounded-xl p-4">
+                <h4 class="font-medium text-white mb-2">${section.title}</h4>
+                <div class="text-sm">${section.content}</div>
+            </div>
+        `;
+    });
+    
+    content.innerHTML = html;
+    modal.classList.remove('hidden');
+}
+
+// Close help modal
+function closeHelp() {
+    document.getElementById('help-modal').classList.add('hidden');
+}
+
+// Close on outside click
+document.getElementById('help-modal').addEventListener('click', function(e) {
+    if (e.target === this) closeHelp();
+});
+
+// Close on Escape key
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeHelp();
+});
+</script>
