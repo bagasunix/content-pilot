@@ -9,13 +9,20 @@ Usage:
 
 Then open: http://localhost:8080
 """
+import os
+import sys
+
+# Load .env from server directory
+from dotenv import load_dotenv
+server_env = os.path.join(os.path.dirname(__file__), '..', 'content-pilot-server', 'central-server', '.env')
+if os.path.exists(server_env):
+    load_dotenv(server_env)
+
 from flask import Flask, render_template, request, jsonify, redirect, url_for, session
 from flask_wtf import CSRFProtect
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 import json
-import os
-import sys
 from pathlib import Path
 
 app = Flask(__name__)
