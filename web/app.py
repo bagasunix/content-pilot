@@ -80,9 +80,24 @@ def save_license(key: str, tier: str):
 
 
 def check_blog_connected():
-    """Check if blog is connected (has domain and blog_id)."""
-    config = load_config()
-    return bool(config.get('domain') and config.get('blog_id'))
+    """Check if blog is connected (has domain in database)."""
+    try:
+        import psycopg2
+        conn = psycopg2.connect(
+            host=os.getenv('DB_HOST', 'localhost'),
+            port=os.getenv('DB_PORT', '5432'),
+            database=os.getenv('DB_NAME', 'contentpilot'),
+            user=os.getenv('DB_USER', 'contentpilot'),
+            password=os.getenv('DB_PASSWORD', '')
+        )
+        cur = conn.cursor()
+        cur.execute('SELECT COUNT(*) FROM blogs WHERE domain IS NOT NULL AND domain != %s', ('',))
+        count = cur.fetchone()[0]
+        cur.close()
+        conn.close()
+        return count > 0
+    except:
+        return False
 
 def get_sync_client():
     """Get sync client for server communication."""
@@ -1162,19 +1177,34 @@ def get_pipeline_status() -> dict:
     }
 
 def get_articles() -> list:
-    """Get list of articles."""
-    journal = WORKSPACE / "journal.jsonl"
-    
-    if not journal.exists():
+    """Get list of articles from PostgreSQL database."""
+    try:
+        import psycopg2
+        conn = psycopg2.connect(
+            host=os.getenv('DB_HOST', 'localhost'),
+            port=os.getenv('DB_PORT', '5432'),
+            database=os.getenv('DB_NAME', 'contentpilot'),
+            user=os.getenv('DB_USER', 'contentpilot'),
+            password=os.getenv('DB_PASSWORD', '')
+        )
+        cur = conn.cursor()
+        cur.execute('SELECT id, title, stage, seo_score, eeat_score, created_at FROM articles ORDER BY created_at DESC LIMIT 20')
+        articles = [
+            {
+                'id': row[0],
+                'title': row[1],
+                'stage': row[2],
+                'seo_score': row[3],
+                'eeat_score': row[4],
+                'created_at': str(row[5]) if row[5] else ''
+            }
+            for row in cur.fetchall()
+        ]
+        cur.close()
+        conn.close()
+        return articles
+    except:
         return []
-    
-    articles = []
-    with open(journal, 'r') as f:
-        for line in f:
-            if line.strip():
-                articles.append(json.loads(line))
-    
-    return articles
 
 def load_config() -> dict:
     """Load configuration."""
