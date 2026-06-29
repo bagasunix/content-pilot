@@ -198,6 +198,16 @@ def favicon():
     from flask import send_from_directory
     return send_from_directory("static/favicon", "favicon.ico", mimetype="image/x-icon")
 
+@app.route('/api/health')
+def api_health():
+    """Health check endpoint for desktop mode server detection."""
+    import datetime
+    return jsonify({
+        'status': 'ok',
+        'server': SERVER_URL,
+        'timestamp': datetime.datetime.now().isoformat()
+    })
+
 @app.route('/')
 def index():
     """Main dashboard."""

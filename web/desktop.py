@@ -202,9 +202,12 @@ Examples:
 
     log.info(f"Opening window: {args.width}x{args.height} {'fullscreen' if args.fullscreen else ''}")
 
+    # Add desktop=1 parameter for frontend detection
+    desktop_url = url + ("&" if "?" in url else "?") + "desktop=1"
+
     window = webview.create_window(
         title=WINDOW_CONFIG["title"],
-        url=url,
+        url=desktop_url,
         width=args.width,
         height=args.height,
         min_size=WINDOW_CONFIG["min_size"],

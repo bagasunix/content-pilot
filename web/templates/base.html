@@ -38,6 +38,9 @@
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     
+    <!-- Desktop CSS (only loaded in desktop mode) -->
+    <link rel="stylesheet" href="/static/css/desktop.css" id="desktop-css">
+    
     <style>
         [x-cloak] { display: none !important; }
         body { font-family: 'Inter', sans-serif; }
@@ -47,11 +50,84 @@
 </head>
 <body class="bg-surface-950 text-surface-50 min-h-screen">
     
+    <!-- Desktop Mode Detection -->
+    <script>
+    (function() {
+        // Detect PyWebView (desktop mode)
+        window.__isDesktop = !!window.pywebview || 
+            navigator.userAgent.includes('QtWebEngine') ||
+            window.location.search.includes('desktop=1');
+        
+        if (window.__isDesktop) {
+            document.body.classList.add('desktop-mode');
+            // Load desktop CSS
+            document.getElementById('desktop-css').disabled = false;
+        } else {
+            // Disable desktop CSS in browser
+            document.getElementById('desktop-css').disabled = true;
+        }
+    })();
+    </script>
+    
+    <!-- Server Health Check (desktop only) -->
+    <script>
+    if (window.__isDesktop) {
+        window.__serverStatus = 'connecting';
+        window.__healthCheckInterval = null;
+        
+        function checkServerHealth() {
+            fetch('/api/health', { method: 'GET', cache: 'no-cache' })
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    var wasDisconnected = window.__serverStatus === 'disconnected';
+                    window.__serverStatus = 'connected';
+                    updateStatusUI();
+                    if (wasDisconnected) {
+                        // Server is back, reload page
+                        window.location.reload();
+                    }
+                })
+                .catch(function() {
+                    window.__serverStatus = 'disconnected';
+                    updateStatusUI();
+                });
+        }
+        
+        function updateStatusUI() {
+            var el = document.getElementById('server-status');
+            if (!el) return;
+            el.className = 'server-status ' + window.__serverStatus;
+            var labels = { connected: 'Connected', disconnected: 'Disconnected', connecting: 'Connecting...' };
+            el.querySelector('.status-label').textContent = labels[window.__serverStatus] || '';
+            
+            // Show/hide offline overlay
+            var overlay = document.getElementById('offline-overlay');
+            if (overlay) {
+                overlay.classList.toggle('visible', window.__serverStatus === 'disconnected');
+            }
+        }
+        
+        // Start health checks every 5 seconds
+        window.__healthCheckInterval = setInterval(checkServerHealth, 5000);
+        checkServerHealth();
+    }
+    </script>
+    
+    <!-- Offline Overlay (desktop only) -->
+    <div id="offline-overlay" class="offline-overlay">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M1 1l22 22M16.72 11.06A10.94 10.94 0 0 1 19 12.55M5 12.55a10.94 10.94 0 0 1 5.17-2.39M10.71 5.05A16 16 0 0 1 22.56 9M1.42 9a15.91 15.91 0 0 1 4.7-2.88M8.53 16.11a6 6 0 0 1 6.95 0M12 20h.01"/>
+        </svg>
+        <h2>Server Disconnected</h2>
+        <p>ContentPilot server is not responding. Please check if the server is running.</p>
+        <button class="retry-btn" onclick="checkServerHealth()">Retry Connection</button>
+    </div>
+    
     {% block body %}
     <div class="min-h-screen flex flex-col">
         
-        <!-- Navbar -->
-        <nav class="bg-surface-900/80 backdrop-blur-xl border-b border-surface-700/50 sticky top-0 z-50">
+        <!-- Navbar (draggable in desktop mode) -->
+        <nav class="bg-surface-900/80 backdrop-blur-xl border-b border-surface-700/50 sticky top-0 z-50 desktop-titlebar">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex items-center justify-between h-16">
                     <!-- Brand -->
@@ -88,6 +164,13 @@
                     
                     <!-- Actions -->
                     <div class="flex items-center gap-3">
+                        <!-- Server Status (desktop only) -->
+                        <div id="server-status" class="server-status connecting" style="display: none;">
+                            <span class="status-dot"></span>
+                            <span class="status-label">Connecting...</span>
+                        </div>
+                        <script>if (window.__isDesktop) document.getElementById('server-status').style.display = '';</script>
+                        
                         <span class="px-3 py-1 text-xs font-semibold rounded-full bg-primary-500/20 text-primary-400">
                             {{ license.tier|default('FREE')|upper }}
                         </span>

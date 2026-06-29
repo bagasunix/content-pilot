@@ -1,0 +1,253 @@
+/* ContentPilot Desktop — Native Window Styles */
+
+/* ── Desktop Mode Detection ─────────────────────────────────────── */
+/* Applied when running inside PyWebView (not browser) */
+body.desktop-mode {
+    /* Remove browser-specific margins */
+    margin: 0;
+    padding: 0;
+    
+    /* Smoother font rendering in Qt WebEngine */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    
+    /* Disable text selection on UI chrome (keep content selectable) */
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+body.desktop-mode main,
+body.desktop-mode [data-selectable] {
+    -webkit-user-select: text;
+    user-select: text;
+}
+
+/* ── Window Title Bar Drag Area ──────────────────────────────────── */
+/* Makes the navbar draggable as a window title bar */
+body.desktop-mode .desktop-titlebar {
+    -webkit-app-region: drag;
+    app-region: drag;
+}
+
+body.desktop-mode .desktop-titlebar a,
+body.desktop-mode .desktop-titlebar button,
+body.desktop-mode .desktop-titlebar [data-no-drag] {
+    -webkit-app-region: no-drag;
+    app-region: no-drag;
+}
+
+/* ── Server Status Indicator ─────────────────────────────────────── */
+.server-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 9999px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    transition: all 0.3s ease;
+}
+
+.server-status .status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+}
+
+.server-status.connected {
+    background: rgba(34, 197, 94, 0.15);
+    color: #4ade80;
+}
+
+.server-status.connected .status-dot {
+    background: #22c55e;
+}
+
+.server-status.disconnected {
+    background: rgba(239, 68, 68, 0.15);
+    color: #f87171;
+}
+
+.server-status.disconnected .status-dot {
+    background: #ef4444;
+    animation: none;
+}
+
+.server-status.connecting {
+    background: rgba(250, 204, 21, 0.15);
+    color: #facc15;
+}
+
+.server-status.connecting .status-dot {
+    background: #eab308;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+/* ── Offline Overlay ─────────────────────────────────────────────── */
+.offline-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(2, 6, 23, 0.95);
+    backdrop-filter: blur(10px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.offline-overlay.visible {
+    opacity: 1;
+    pointer-events: all;
+}
+
+.offline-overlay .icon {
+    width: 64px;
+    height: 64px;
+    margin-bottom: 24px;
+    color: #64748b;
+}
+
+.offline-overlay h2 {
+    font-size: 20px;
+    font-weight: 600;
+    color: #e2e8f0;
+    margin-bottom: 8px;
+}
+
+.offline-overlay p {
+    font-size: 14px;
+    color: #64748b;
+    margin-bottom: 24px;
+}
+
+.offline-overlay .retry-btn {
+    padding: 10px 24px;
+    background: #6366f1;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.offline-overlay .retry-btn:hover {
+    background: #4f46e5;
+}
+
+/* ── Desktop Window Controls ─────────────────────────────────────── */
+/* Custom window controls area (if needed) */
+.desktop-window-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 8px;
+}
+
+.desktop-window-controls .control {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+.desktop-window-controls .control:hover {
+    opacity: 0.8;
+}
+
+.desktop-window-controls .close {
+    background: #ef4444;
+}
+
+.desktop-window-controls .minimize {
+    background: #eab308;
+}
+
+.desktop-window-controls .maximize {
+    background: #22c55e;
+}
+
+/* ── Scrollbar Styling ───────────────────────────────────────────── */
+body.desktop-mode ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+body.desktop-mode ::-webkit-scrollbar-track {
+    background: #0f172a;
+}
+
+body.desktop-mode ::-webkit-scrollbar-thumb {
+    background: #334155;
+    border-radius: 4px;
+}
+
+body.desktop-mode ::-webkit-scrollbar-thumb:hover {
+    background: #475569;
+}
+
+/* ── Loading Spinner ─────────────────────────────────────────────── */
+.desktop-spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid #334155;
+    border-top-color: #6366f1;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* ── Toast Notifications ─────────────────────────────────────────── */
+.desktop-toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    z-index: 10000;
+    transform: translateY(100px);
+    opacity: 0;
+    transition: all 0.3s ease;
+}
+
+.desktop-toast.visible {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+.desktop-toast.success {
+    background: rgba(34, 197, 94, 0.15);
+    color: #4ade80;
+    border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+.desktop-toast.error {
+    background: rgba(239, 68, 68, 0.15);
+    color: #f87171;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.desktop-toast.info {
+    background: rgba(99, 102, 241, 0.15);
+    color: #818cf8;
+    border: 1px solid rgba(99, 102, 241, 0.3);
+}
