@@ -1,0 +1,261 @@
+# ContentPilot Desktop — Cross-Platform Build
+#
+# Builds standalone executables for Windows, macOS, and Linux.
+# Triggered on:
+#   - Push to main (with desktop changes)
+#   - Manual dispatch
+#   - Release tag (v*)
+#
+# Output: Artifacts in GitHub Actions (download per platform)
+
+name: Build Desktop
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'web/desktop.py'
+      - 'web/app.py'
+      - 'web/templates/**'
+      - 'web/static/**'
+      - 'src/**'
+      - 'contentpilot.spec'
+      - 'requirements.txt'
+      - '.github/workflows/build-desktop.yml'
+  workflow_dispatch:
+    inputs:
+      debug:
+        description: 'Enable debug build'
+        required: false
+        default: false
+        type: boolean
+  release:
+    types: [published]
+
+env:
+  PYTHON_VERSION: '3.11'
+
+jobs:
+  # ── Linux Build ──────────────────────────────────────────────────
+  build-linux:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libgtk-3-dev \
+            libwebkit2gtk-4.0-dev \
+            libgirepository1.0-dev \
+            gir1.2-webkit2-4.0 \
+            python3-gi \
+            python3-gi-cairo
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyinstaller
+          pip install -r requirements.txt
+          pip install pywebview[qt]
+
+      - name: Build with PyInstaller
+        run: |
+          pyinstaller contentpilot.spec \
+            --noconfirm \
+            --clean \
+            ${{ inputs.debug == 'true' && '--debug=all' || '' }}
+
+      - name: Create AppImage
+        run: |
+          # Create AppDir structure
+          mkdir -p AppDir/usr/bin
+          mkdir -p AppDir/usr/share/applications
+          mkdir -p AppDir/usr/share/icons/hicolor/256x256/apps
+
+          # Copy executable
+          cp dist/ContentPilot AppDir/usr/bin/
+          chmod +x AppDir/usr/bin/ContentPilot
+
+          # Create desktop file
+          cat > AppDir/usr/share/applications/contentpilot.desktop << EOF
+          [Desktop Entry]
+          Name=ContentPilot
+          Comment=AI-powered blog automation
+          Exec=ContentPilot
+          Icon=contentpilot
+          Type=Application
+          Categories=Office;Network;
+          EOF
+
+          # Copy icon if available
+          cp web/static/favicon/app-icon-256x256.png \
+            AppDir/usr/share/icons/hicolor/256x256/apps/contentpilot.png 2>/dev/null || true
+
+      - name: Upload Linux artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ContentPilot-Linux
+          path: |
+            dist/ContentPilot
+            AppDir/
+          retention-days: 30
+
+  # ── Windows Build ────────────────────────────────────────────────
+  build-windows:
+    runs-on: windows-2022
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyinstaller
+          pip install -r requirements.txt
+          pip install pywebview[qt]
+          # Windows-specific: PyQt5 wheels
+          pip install PyQt5
+
+      - name: Build with PyInstaller
+        run: |
+          pyinstaller contentpilot.spec `
+            --noconfirm `
+            --clean `
+            ${{ inputs.debug == 'true' && '--debug=all' || '' }}
+        shell: pwsh
+
+      - name: Create installer (NSIS)
+        run: |
+          # Download NSIS
+          choco install nsis -y
+
+          # Create NSIS script
+          cat > installer.nsis << 'EOF'
+          !include "MUI2.nsh"
+
+          Name "ContentPilot"
+          OutFile "ContentPilot-Setup.exe"
+          InstallDir "$PROGRAMFILES\ContentPilot"
+
+          !insertmacro MUI_PAGE_DIRECTORY
+          !insertmacro MUI_PAGE_INSTFILES
+          !insertmacro MUI_UNPAGE_CONFIRM
+          !insertmacro MUI_UNPAGE_INSTFILES
+
+          Section "Install"
+            SetOutPath "$INSTDIR"
+            File "dist\ContentPilot.exe"
+            CreateShortCut "$DESKTOP\ContentPilot.lnk" "$INSTDIR\ContentPilot.exe"
+            CreateShortCut "$SMPROGRAMS\ContentPilot.lnk" "$INSTDIR\ContentPilot.exe"
+            WriteUninstaller "$INSTDIR\Uninstall.exe"
+          SectionEnd
+
+          Section "Uninstall"
+            Delete "$INSTDIR\ContentPilot.exe"
+            Delete "$INSTDIR\Uninstall.exe"
+            Delete "$DESKTOP\ContentPilot.lnk"
+            Delete "$SMPROGRAMS\ContentPilot.lnk"
+            RMDir "$INSTDIR"
+          SectionEnd
+          EOF
+
+          # Build installer
+          makensis installer.nsis
+
+      - name: Upload Windows artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ContentPilot-Windows
+          path: |
+            dist/ContentPilot.exe
+            ContentPilot-Setup.exe
+          retention-days: 30
+
+  # ── macOS Build ──────────────────────────────────────────────────
+  build-macos:
+    runs-on: macos-13
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyinstaller
+          pip install -r requirements.txt
+          pip install pywebview
+          # macOS uses native WebKit, no Qt needed
+
+      - name: Build with PyInstaller
+        run: |
+          pyinstaller contentpilot.spec \
+            --noconfirm \
+            --clean \
+            --windowed \
+            ${{ inputs.debug == 'true' && '--debug=all' || '' }}
+
+      - name: Create DMG
+        run: |
+          # Create DMG using create-dmg
+          brew install create-dmg
+
+          create-dmg \
+            --volname "ContentPilot" \
+            --volicon "web/static/favicon/favicon.icns" \
+            --window-pos 200 120 \
+            --window-size 600 300 \
+            --icon-size 100 \
+            --icon "ContentPilot.app" 175 120 \
+            --hide-extension "ContentPilot.app" \
+            --app-drop-link 425 120 \
+            "ContentPilot.dmg" \
+            "dist/ContentPilot.app" || true
+
+      - name: Upload macOS artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ContentPilot-macOS
+          path: |
+            dist/ContentPilot.app
+            ContentPilot.dmg
+          retention-days: 30
+
+  # ── Release (only on tag) ────────────────────────────────────────
+  release:
+    needs: [build-linux, build-windows, build-macos]
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: write
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            ContentPilot-Linux/*
+            ContentPilot-Windows/*
+            ContentPilot-macOS/*
+          generate_release_notes: true
+          draft: false
+          prerelease: false
