@@ -80,29 +80,13 @@ def save_license(key: str, tier: str):
 
 
 def check_blog_connected():
-    """Check if current user has a blog connected (via license → user → blog)."""
+    """Check if current user has a blog connected (via server)."""
     license_key = session.get('license_key', '')
     if not license_key:
         return False
     try:
-        import psycopg2
-        conn = psycopg2.connect(
-            host=os.getenv('DB_HOST', 'localhost'),
-            port=os.getenv('DB_PORT', '5432'),
-            database=os.getenv('DB_NAME', 'contentpilot'),
-            user=os.getenv('DB_USER', 'contentpilot'),
-            password=os.getenv('DB_PASSWORD', '')
-        )
-        cur = conn.cursor()
-        cur.execute("""
-            SELECT COUNT(*) FROM blogs b
-            JOIN licenses l ON l.user_id = b.user_id
-            WHERE l.key = %s AND b.domain IS NOT NULL AND b.domain != ''
-        """, (license_key,))
-        count = cur.fetchone()[0]
-        cur.close()
-        conn.close()
-        return count > 0
+        result = server_request("GET", f"/api/blogs/check?key={license_key}")
+        return bool(result and result.get("connected"))
     except:
         return False
 
@@ -1478,46 +1462,19 @@ def save_settings(form: dict):
 
 
 def _save_blog_to_db(domain: str, blog_id: str, platform: str = "blogger"):
-    """Save or update blog in PostgreSQL blogs table."""
+    """Save blog via server API (no direct DB)."""
+    license_key = session.get('license_key', '')
+    if not license_key:
+        return
     try:
-        import psycopg2
-        conn = psycopg2.connect(
-            host=os.getenv('DB_HOST', 'localhost'),
-            port=os.getenv('DB_PORT', '5432'),
-            database=os.getenv('DB_NAME', 'contentpilot'),
-            user=os.getenv('DB_USER', 'contentpilot'),
-            password=os.getenv('DB_PASSWORD', '')
-        )
-        cur = conn.cursor()
-        
-        # Get user_id from license
-        license_data = load_license()
-        license_key = license_data.get("key", "") if license_data else ""
-        
-        cur.execute("SELECT id FROM users WHERE id = (SELECT user_id FROM licenses WHERE key = %s LIMIT 1)", (license_key,))
-        user_row = cur.fetchone()
-        user_id = user_row[0] if user_row else None
-        
-        if not user_id:
-            cur.close()
-            conn.close()
-            return
-        
-        # Upsert blog
-        cur.execute("""
-            INSERT INTO blogs (user_id, domain, blog_id, platform, updated_at)
-            VALUES (%s, %s, %s, %s, CURRENT_TIMESTAMP)
-            ON CONFLICT (user_id, blog_id) DO UPDATE SET
-                domain = EXCLUDED.domain,
-                platform = EXCLUDED.platform,
-                updated_at = CURRENT_TIMESTAMP
-        """, (user_id, domain, blog_id, platform))
-        
-        conn.commit()
-        cur.close()
-        conn.close()
+        server_request("POST", "/api/blogs/save", {
+            "license_key": license_key,
+            "domain": domain,
+            "blog_id": blog_id,
+            "platform": platform,
+        })
     except Exception as e:
-        print(f"[DB] Failed to save blog: {e}")
+        print(f"[API] Failed to save blog: {e}")
 
 def slugify(text: str) -> str:
     """Convert text to slug."""
