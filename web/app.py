@@ -1090,62 +1090,29 @@ def indexing():
                            page=page, per_page=per_page, total=total, total_pages=total_pages)
 
 def get_user_blogs():
-    """Get user's blogs from database."""
+    """Get user's blogs via server API."""
+    license_key = session.get('license_key', '')
     try:
-        import psycopg2
-        conn = psycopg2.connect(
-            host=os.getenv('DB_HOST', 'localhost'),
-            port=os.getenv('DB_PORT', '5432'),
-            database=os.getenv('DB_NAME', 'contentpilot'),
-            user=os.getenv('DB_USER', 'contentpilot'),
-            password=os.getenv('DB_PASSWORD', '')
-        )
-        cur = conn.cursor()
-        cur.execute('SELECT id, domain, platform FROM blogs LIMIT 10')
-        blogs = [{'id': row[0], 'domain': row[1], 'platform': row[2]} for row in cur.fetchall()]
-        cur.close()
-        conn.close()
-        return blogs
+        result = server_request("GET", f"/api/blogs/list?key={license_key}")
+        return result.get("blogs", []) if result else []
     except:
         return []
 
 def get_user_pipelines():
-    """Get user's pipeline runs."""
+    """Get user's pipeline runs via server API."""
+    license_key = session.get('license_key', '')
     try:
-        import psycopg2
-        conn = psycopg2.connect(
-            host=os.getenv('DB_HOST', 'localhost'),
-            port=os.getenv('DB_PORT', '5432'),
-            database=os.getenv('DB_NAME', 'contentpilot'),
-            user=os.getenv('DB_USER', 'contentpilot'),
-            password=os.getenv('DB_PASSWORD', '')
-        )
-        cur = conn.cursor()
-        cur.execute('SELECT topic, status, created_at FROM pipeline_runs ORDER BY created_at DESC LIMIT 10')
-        pipelines = [{'topic': row[0], 'status': row[1], 'created_at': str(row[2])} for row in cur.fetchall()]
-        cur.close()
-        conn.close()
-        return pipelines
+        result = server_request("GET", f"/api/pipelines/user?key={license_key}")
+        return result.get("pipelines", []) if result else []
     except:
         return []
 
 def get_published_articles():
-    """Get published articles for indexing."""
+    """Get published articles for indexing via server API."""
+    license_key = session.get('license_key', '')
     try:
-        import psycopg2
-        conn = psycopg2.connect(
-            host=os.getenv('DB_HOST', 'localhost'),
-            port=os.getenv('DB_PORT', '5432'),
-            database=os.getenv('DB_NAME', 'contentpilot'),
-            user=os.getenv('DB_USER', 'contentpilot'),
-            password=os.getenv('DB_PASSWORD', '')
-        )
-        cur = conn.cursor()
-        cur.execute('SELECT title, published_url, indexing_status FROM articles WHERE status = %s ORDER BY created_at DESC LIMIT 10', ('published',))
-        articles = [{'title': row[0], 'published_url': row[1], 'indexing_status': row[2]} for row in cur.fetchall()]
-        cur.close()
-        conn.close()
-        return articles
+        result = server_request("GET", f"/api/articles/published?key={license_key}&per_page=10")
+        return result.get("articles", []) if result else []
     except:
         return []
 
@@ -1271,107 +1238,47 @@ def get_pipeline_status() -> dict:
     }
 
 def get_articles() -> list:
-    """Get list of articles from PostgreSQL database."""
+    """Get list of articles via server API."""
+    license_key = session.get('license_key', '')
     try:
-        import psycopg2
-        conn = psycopg2.connect(
-            host=os.getenv('DB_HOST', 'localhost'),
-            port=os.getenv('DB_PORT', '5432'),
-            database=os.getenv('DB_NAME', 'contentpilot'),
-            user=os.getenv('DB_USER', 'contentpilot'),
-            password=os.getenv('DB_PASSWORD', '')
-        )
-        cur = conn.cursor()
-        cur.execute('SELECT id, title, stage, seo_score, eeat_score, created_at FROM articles ORDER BY created_at DESC LIMIT 20')
-        articles = [
-            {
-                'id': row[0],
-                'title': row[1],
-                'stage': row[2],
-                'seo_score': row[3],
-                'eeat_score': row[4],
-                'created_at': str(row[5]) if row[5] else ''
-            }
-            for row in cur.fetchall()
-        ]
-        cur.close()
-        conn.close()
-        return articles
+        result = server_request("GET", f"/api/articles/paginated?key={license_key}&per_page=20")
+        return result.get("articles", []) if result else []
     except:
         return []
 
 def get_paginated_articles(page: int = 1, per_page: int = 10, filter_stage: str = '') -> tuple:
-    """Get paginated articles. Returns (articles, total_count)."""
+    """Get paginated articles via server API. Returns (articles, total_count)."""
+    license_key = session.get('license_key', '')
     try:
-        import psycopg2
-        conn = psycopg2.connect(
-            host=os.getenv('DB_HOST', 'localhost'),
-            port=os.getenv('DB_PORT', '5432'),
-            database=os.getenv('DB_NAME', 'contentpilot'),
-            user=os.getenv('DB_USER', 'contentpilot'),
-            password=os.getenv('DB_PASSWORD', '')
-        )
-        cur = conn.cursor()
+        url = f"/api/articles/paginated?key={license_key}&page={page}&per_page={per_page}"
         if filter_stage:
-            cur.execute('SELECT COUNT(*) FROM articles WHERE stage = %s', (filter_stage,))
-        else:
-            cur.execute('SELECT COUNT(*) FROM articles')
-        total = cur.fetchone()[0]
-        offset = (page - 1) * per_page
-        if filter_stage:
-            cur.execute('SELECT id, title, stage, seo_score, eeat_score, created_at FROM articles WHERE stage = %s ORDER BY created_at DESC LIMIT %s OFFSET %s', (filter_stage, per_page, offset))
-        else:
-            cur.execute('SELECT id, title, stage, seo_score, eeat_score, created_at FROM articles ORDER BY created_at DESC LIMIT %s OFFSET %s', (per_page, offset))
-        articles = [{'id': r[0], 'title': r[1], 'stage': r[2], 'seo_score': r[3], 'eeat_score': r[4], 'created_at': str(r[5]) if r[5] else ''} for r in cur.fetchall()]
-        cur.close()
-        conn.close()
-        return articles, total
+            url += f"&filter={filter_stage}"
+        result = server_request("GET", url)
+        if result:
+            return result.get("articles", []), result.get("total", 0)
+        return [], 0
     except:
         return [], 0
 
 def get_paginated_pipelines(page: int = 1, per_page: int = 10) -> tuple:
-    """Get paginated pipelines. Returns (pipelines, total_count)."""
+    """Get paginated pipelines via server API. Returns (pipelines, total_count)."""
+    license_key = session.get('license_key', '')
     try:
-        import psycopg2
-        conn = psycopg2.connect(
-            host=os.getenv('DB_HOST', 'localhost'),
-            port=os.getenv('DB_PORT', '5432'),
-            database=os.getenv('DB_NAME', 'contentpilot'),
-            user=os.getenv('DB_USER', 'contentpilot'),
-            password=os.getenv('DB_PASSWORD', '')
-        )
-        cur = conn.cursor()
-        cur.execute('SELECT COUNT(*) FROM pipeline_runs')
-        total = cur.fetchone()[0]
-        offset = (page - 1) * per_page
-        cur.execute('SELECT id, topic, status, created_at FROM pipeline_runs ORDER BY created_at DESC LIMIT %s OFFSET %s', (per_page, offset))
-        pipelines = [{'id': r[0], 'topic': r[1], 'status': r[2], 'created_at': str(r[3]) if r[3] else ''} for r in cur.fetchall()]
-        cur.close()
-        conn.close()
-        return pipelines, total
+        result = server_request("GET", f"/api/pipelines/paginated?key={license_key}&page={page}&per_page={per_page}")
+        if result:
+            return result.get("pipelines", []), result.get("total", 0)
+        return [], 0
     except:
         return [], 0
 
 def get_paginated_published_articles(page: int = 1, per_page: int = 10) -> tuple:
-    """Get paginated published articles for indexing. Returns (articles, total_count)."""
+    """Get paginated published articles via server API. Returns (articles, total_count)."""
+    license_key = session.get('license_key', '')
     try:
-        import psycopg2
-        conn = psycopg2.connect(
-            host=os.getenv('DB_HOST', 'localhost'),
-            port=os.getenv('DB_PORT', '5432'),
-            database=os.getenv('DB_NAME', 'contentpilot'),
-            user=os.getenv('DB_USER', 'contentpilot'),
-            password=os.getenv('DB_PASSWORD', '')
-        )
-        cur = conn.cursor()
-        cur.execute("SELECT COUNT(*) FROM articles WHERE stage = 'published'")
-        total = cur.fetchone()[0]
-        offset = (page - 1) * per_page
-        cur.execute("SELECT id, title, stage, created_at FROM articles WHERE stage = 'published' ORDER BY created_at DESC LIMIT %s OFFSET %s", (per_page, offset))
-        articles = [{'id': r[0], 'title': r[1], 'stage': r[2], 'created_at': str(r[3]) if r[3] else ''} for r in cur.fetchall()]
-        cur.close()
-        conn.close()
-        return articles, total
+        result = server_request("GET", f"/api/articles/published?key={license_key}&page={page}&per_page={per_page}")
+        if result:
+            return result.get("articles", []), result.get("total", 0)
+        return [], 0
     except:
         return [], 0
 
