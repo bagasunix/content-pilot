@@ -80,7 +80,10 @@ def save_license(key: str, tier: str):
 
 
 def check_blog_connected():
-    """Check if blog is connected (has domain in database)."""
+    """Check if current user has a blog connected (via license → user → blog)."""
+    license_key = session.get('license_key', '')
+    if not license_key:
+        return False
     try:
         import psycopg2
         conn = psycopg2.connect(
@@ -91,7 +94,11 @@ def check_blog_connected():
             password=os.getenv('DB_PASSWORD', '')
         )
         cur = conn.cursor()
-        cur.execute('SELECT COUNT(*) FROM blogs WHERE domain IS NOT NULL AND domain != %s', ('',))
+        cur.execute("""
+            SELECT COUNT(*) FROM blogs b
+            JOIN licenses l ON l.user_id = b.user_id
+            WHERE l.key = %s AND b.domain IS NOT NULL AND b.domain != ''
+        """, (license_key,))
         count = cur.fetchone()[0]
         cur.close()
         conn.close()
