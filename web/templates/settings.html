@@ -84,7 +84,7 @@
                         {% set active_blog = blogger_blogs|selectattr('id', 'equalto', config.get('blog_id', ''))|first if blogger_blogs else none %}
                         
                         {% if active_blog %}
-                        <!-- Active blog from API -->
+                        <!-- Google connected + blog selected: show info + change option -->
                         <div class="mb-3 p-3 rounded-xl bg-green-500/10 border border-green-500/20 flex items-center gap-3">
                             <div class="w-8 h-8 bg-green-500/20 rounded-lg flex items-center justify-center text-green-400">✓</div>
                             <div class="flex-1 min-w-0">
@@ -92,37 +92,49 @@
                                 <p class="text-xs text-surface-500 truncate">{{ active_blog.url }}</p>
                             </div>
                         </div>
-                        {% elif config.get('blog_id') %}
-                        <!-- Blog ID set but no API data — show raw info -->
-                        <div class="mb-3 p-3 rounded-xl bg-yellow-500/10 border border-yellow-500/20 flex items-center gap-3">
-                            <div class="w-8 h-8 bg-yellow-500/20 rounded-lg flex items-center justify-center text-yellow-400">📝</div>
-                            <div class="flex-1 min-w-0">
-                                <p class="text-sm font-medium text-yellow-400">Blog ID: {{ config.get('blog_id') }}</p>
-                                <p class="text-xs text-surface-500">{{ config.get('domain', 'Domain belum di-set') }}</p>
-                            </div>
-                        </div>
-                        {% endif %}
-                        
-                        {% if blogger_blogs %}
-                        <!-- Google connected: show dropdown -->
                         <select name="blog_id" id="blog_id_select"
                                 onchange="updateDomainFromBlog(this)"
                                 class="w-full px-4 py-3 bg-surface-800 border border-surface-700 rounded-xl text-white focus:border-primary-500 focus:outline-none">
-                            <option value="">— Ganti blog —</option>
+                            <option value="{{ active_blog.id }}" selected data-url="{{ active_blog.url }}">✓ {{ active_blog.name }}</option>
                             {% for blog in blogger_blogs %}
-                            <option value="{{ blog.id }}" data-url="{{ blog.url }}" {% if config.get('blog_id') == blog.id %}selected{% endif %}>
-                                {{ blog.name }} ({{ blog.url }})
-                            </option>
+                                {% if blog.id != active_blog.id %}
+                                <option value="{{ blog.id }}" data-url="{{ blog.url }}">{{ blog.name }} ({{ blog.url }})</option>
+                                {% endif %}
                             {% endfor %}
                         </select>
                         <input type="hidden" name="domain" id="blog_domain_input" value="{{ config.get('domain', '') }}">
+                        
+                        {% elif blogger_blogs %}
+                        <!-- Google connected but no blog selected yet -->
+                        <select name="blog_id" id="blog_id_select"
+                                onchange="updateDomainFromBlog(this)"
+                                class="w-full px-4 py-3 bg-surface-800 border border-surface-700 rounded-xl text-white focus:border-primary-500 focus:outline-none">
+                            <option value="">— Pilih blog kamu —</option>
+                            {% for blog in blogger_blogs %}
+                            <option value="{{ blog.id }}" data-url="{{ blog.url }}">{{ blog.name }} ({{ blog.url }})</option>
+                            {% endfor %}
+                        </select>
+                        <input type="hidden" name="domain" id="blog_domain_input" value="">
+                        
+                        {% elif config.get('blog_id') %}
+                        <!-- Google not available but blog already set: show info only -->
+                        <div class="p-3 rounded-xl bg-surface-800/50 border border-surface-700/50 flex items-center gap-3">
+                            <div class="w-8 h-8 bg-surface-700 rounded-lg flex items-center justify-center text-surface-400">📝</div>
+                            <div class="flex-1 min-w-0">
+                                <p class="text-sm font-medium text-white">Blog ID: {{ config.get('blog_id') }}</p>
+                                <p class="text-xs text-surface-500">{{ config.get('domain', 'Connect Google untuk update') }}</p>
+                            </div>
+                        </div>
+                        <input type="hidden" name="blog_id" value="{{ config.get('blog_id', '') }}">
+                        <input type="hidden" name="domain" value="{{ config.get('domain', '') }}">
+                        
                         {% else %}
-                        <!-- Google not connected: manual input -->
+                        <!-- Fresh start: no Google, no blog -->
                         <div class="space-y-3">
-                            <input type="text" name="domain" value="{{ config.get('domain', '') }}"
+                            <input type="text" name="domain" value=""
                                    placeholder="yourblog.com"
                                    class="w-full px-4 py-3 bg-surface-800 border border-surface-700 rounded-xl text-white focus:border-primary-500 focus:outline-none">
-                            <input type="text" name="blog_id" value="{{ config.get('blog_id', '') }}"
+                            <input type="text" name="blog_id" value=""
                                    placeholder="Blog ID (angka)"
                                    class="w-full px-4 py-3 bg-surface-800 border border-surface-700 rounded-xl text-white focus:border-primary-500 focus:outline-none">
                         </div>
