@@ -95,16 +95,17 @@
                         
                         {% if blogger_blogs %}
                         <!-- Google connected: show dropdown -->
-                        <select name="blog_id" 
+                        <select name="blog_id" id="blog_id_select"
+                                onchange="updateDomainFromBlog(this)"
                                 class="w-full px-4 py-3 bg-surface-800 border border-surface-700 rounded-xl text-white focus:border-primary-500 focus:outline-none">
                             <option value="">— Ganti blog —</option>
                             {% for blog in blogger_blogs %}
-                            <option value="{{ blog.id }}" {% if config.get('blog_id') == blog.id %}selected{% endif %}>
+                            <option value="{{ blog.id }}" data-url="{{ blog.url }}" {% if config.get('blog_id') == blog.id %}selected{% endif %}>
                                 {{ blog.name }} ({{ blog.url }})
                             </option>
                             {% endfor %}
                         </select>
-                        <input type="hidden" name="domain" value="{{ config.get('domain', '') }}">
+                        <input type="hidden" name="domain" id="blog_domain_input" value="{{ config.get('domain', '') }}">
                         {% else %}
                         <!-- Google not connected: manual input -->
                         <div class="space-y-3">
@@ -489,6 +490,19 @@ function selectProvider(provider) {
         baseUrlField.classList.remove('hidden');
     } else {
         baseUrlField.classList.add('hidden');
+    }
+}
+
+function updateDomainFromBlog(select) {
+    var option = select.options[select.selectedIndex];
+    var url = option.getAttribute('data-url') || '';
+    // Extract domain from URL (e.g., https://www.bagasunix.com/ → bagasunix.com)
+    if (url) {
+        try {
+            var hostname = new URL(url).hostname;
+            hostname = hostname.replace(/^www\./, '');
+            document.getElementById('blog_domain_input').value = hostname;
+        } catch(e) {}
     }
 }
 
