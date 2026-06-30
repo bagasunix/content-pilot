@@ -148,9 +148,11 @@
                         <div data-pick="language">
                             <div class="grid grid-cols-2 gap-3">
                                 <button type="button" data-val="id"
-                                        class="py-3 px-4 rounded-xl text-sm font-medium transition-all border-2 border-surface-700 bg-surface-800/50 text-surface-400 hover:border-surface-600">🇮🇩 Indonesia</button>
+                                        class="py-3 px-4 rounded-xl text-sm font-medium transition-all border-2
+                                        {% if config.get('language', 'id') == 'id' %}border-primary-500 bg-primary-500/10 text-primary-400{% else %}border-surface-700 bg-surface-800/50 text-surface-400 hover:border-surface-600{% endif %}">🇮🇩 Indonesia</button>
                                 <button type="button" data-val="en"
-                                        class="py-3 px-4 rounded-xl text-sm font-medium transition-all border-2 border-surface-700 bg-surface-800/50 text-surface-400 hover:border-surface-600">🇬🇧 English</button>
+                                        class="py-3 px-4 rounded-xl text-sm font-medium transition-all border-2
+                                        {% if config.get('language', 'id') == 'en' %}border-primary-500 bg-primary-500/10 text-primary-400{% else %}border-surface-700 bg-surface-800/50 text-surface-400 hover:border-surface-600{% endif %}">🇬🇧 English</button>
                             </div>
                             <input type="hidden" name="language" id="language_input" value="{{ config.get('language', 'id') }}">
                         </div>
@@ -514,6 +516,29 @@ function selectProvider(provider) {
         baseUrlField.classList.add('hidden');
     }
 }
+
+// Handle data-pick button groups (language, etc.)
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('[data-pick]').forEach(function(group) {
+        var inputId = group.id ? group.id + '_input' : null;
+        // Find hidden input by convention: data-pick="language" → #language_input
+        var pickName = group.getAttribute('data-pick');
+        var hiddenInput = document.getElementById(pickName + '_input');
+        
+        group.querySelectorAll('[data-val]').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                var val = this.getAttribute('data-val');
+                if (hiddenInput) hiddenInput.value = val;
+                
+                // Update visual state
+                group.querySelectorAll('[data-val]').forEach(function(b) {
+                    b.className = b.className.replace('border-primary-500 bg-primary-500/10 text-primary-400', 'border-surface-700 bg-surface-800/50 text-surface-400');
+                });
+                this.className = this.className.replace('border-surface-700 bg-surface-800/50 text-surface-400', 'border-primary-500 bg-primary-500/10 text-primary-400');
+            });
+        });
+    });
+});
 
 function updateDomainFromBlog(select) {
     var option = select.options[select.selectedIndex];

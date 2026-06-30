@@ -4,7 +4,7 @@ ai:
   provider: openai
 autonomy: gated
 blog_id: '317173010530865805'
-domain: bagasunix.com
+domain: bercobaan.blogspot.com
 gsc:
   verification_tag: ''
 language: id
