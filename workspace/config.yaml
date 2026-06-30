@@ -7,3 +7,12 @@ domain: ''
 pipeline:
   publish_mode: draft
   wip_limit: 3
+autonomy: gated
+language: id
+platform: blogger
+notifications:
+  telegram:
+    bot_token: ''
+    chat_id: ''
+gsc:
+  verification_tag: ''

@@ -801,7 +801,7 @@ def connect_blogger():
 
 GOOGLE_CRED_FILE = WORKSPACE / "credentials.json"
 GOOGLE_TOKEN_FILE = WORKSPACE / "token.json"
-GOOGLE_SCOPES = "https://www.googleapis.com/auth/blogger"
+GOOGLE_SCOPES = "https://www.googleapis.com/auth/blogger https://www.googleapis.com/auth/webmasters.readonly"
 
 
 def load_google_client():
