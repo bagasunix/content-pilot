@@ -338,7 +338,7 @@ def settings():
     
     if request.method == 'POST':
         save_settings(request.form)
-        return redirect(url_for('settings'))
+        return redirect(url_for('settings', saved='1'))
     
     config = load_config()
     
