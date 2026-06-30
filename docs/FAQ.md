@@ -122,6 +122,37 @@ A:
 
 ---
 
+## 🔗 Google Connection
+
+### Q: Gimana cara connect Google account?
+
+A:
+1. Buka Settings → Google / Blogger
+2. Klik "Connect Google"
+3. Browser terbuka → login & approve consent
+4. Token disimpan otomatis di server
+5. Status berubah jadi "Connected"
+
+### Q: Credential (credentials.json) perlu di-setup sendiri?
+
+A: Tidak. OAuth client credentials sudah disediakan di server. User cukup
+klik "Connect Google" dan login di browser.
+
+### Q: Token hilang setelah restart?
+
+A: Tidak. Token disimpan di database server (`google_tokens`), bukan di file lokal.
+Token akan tetap ada selama tidak di-disconnect manual.
+
+### Q: Disconnect gimana?
+
+A: Settings → Google / Blogger → "Disconnect". Token dihapus dari server.
+
+### Q: Bisa connect multiple Google accounts?
+
+A: Setiap license key punya satu connection. Hubungi support untuk multi-account.
+
+---
+
 ## 🌐 Publish
 
 ### Q: Platform apa yang didukung?

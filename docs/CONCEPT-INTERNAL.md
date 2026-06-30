@@ -1,8 +1,8 @@
 # ContentPilot — Internal Concept
 
 > Catatan internal arsitektur dan concept. BUKAN untuk publik.
-> Last updated: 2026-06-27
-> Updated: Online-backed + BYOM flexibility
+> Last updated: 2026-06-30
+> Updated: Server-side Google OAuth, multi-user token storage, pagination
 
 ## Overview
 
@@ -24,6 +24,7 @@ User (blogger)
 │  ├── Flask API endpoints            │
 │  ├── Celery + Redis (background)    │
 │  ├── PostgreSQL (database)          │
+│  ├── Google OAuth (server-side)     │
 │  ├── AI Provider (BYOM - any)       │
 │  ├── Research Tools (Exa, YouTube)  │
 │  ├── Quality Gates (19 AI-tells)    │
@@ -217,6 +218,29 @@ job_queue (pending/processing/completed jobs)
 rules (AI-tells, hoax domains, SEO rules)
 trending_cache (cached trending topics)
 suggestions_cache (cached suggestions per user)
+google_tokens (per-user OAuth tokens, keyed by license_key)
+```
+
+## Google OAuth Architecture
+
+```
+Google OAuth = Server-side flow (multi-user)
+├── credentials.json = OAuth client, bundled in server (NOT in git)
+├── Server stores tokens in google_tokens table (PostgreSQL)
+├── Tokens keyed by license_key (supports multi-user)
+├── Client proxies all Google calls to server
+└── Credential caching: local → server → cache
+
+Endpoints:
+├── GET  /api/google/auth-url   → returns Google consent URL
+├── GET  /api/google/callback   → handles OAuth redirect
+├── GET  /api/google/status     → returns connection status
+├── POST /api/google/token      → exchanges code for token
+├── POST /api/google/disconnect → revokes & deletes token
+├── GET  /api/google/gsc/sites  → list GSC sites
+└── POST /api/google/gsc/add    → add site to GSC
+
+Token refresh: automatic via google-auth library
 ```
 
 ## Code Protection

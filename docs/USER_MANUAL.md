@@ -36,7 +36,17 @@ ContentPilot adalah tool blog automation yang membantu kamu:
 3. Masukkan API key
 4. Klik "Save Settings"
 
-### 4. Buat Artikel Pertama
+### 4. Connect Google (untuk publish)
+
+1. Buka Settings → Google / Blogger
+2. Klik **Connect Google**
+3. Browser terbuka → login & approve consent
+4. Token disimpan otomatis di server
+5. Status berubah jadi **Connected**
+
+> Credential OAuth disediakan server. Tidak perlu setup Cloud Project sendiri.
+
+### 5. Buat Artikel Pertama
 
 1. Klik "New Article" di dashboard
 2. Masukkan topik (misal: "cara install docker")

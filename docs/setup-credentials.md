@@ -6,25 +6,28 @@ Panduan setup credentials untuk ContentPilot.
 
 ## 1. Blogger OAuth (Wajib untuk publish)
 
-### Buat Google Cloud Project
-1. https://console.cloud.google.com → **New Project** (mis. "ContentPilot")
-2. Enable **Blogger API v3**
-3. **Credentials** → **Create Credentials** → **OAuth 2.0 Client ID**
-4. Type: **Web application**
-5. **Authorized redirect URIs** → tambahkan:
-   - `http://127.0.0.1:8080/oauth2/callback`
-   - `http://localhost:8080/oauth2/callback`
-6. Sediakan kredensialnya dengan salah satu cara:
-   - Set env `GOOGLE_CLIENT_ID` dan `GOOGLE_CLIENT_SECRET`, **atau**
-   - Download `credentials.json` → taruh di `workspace/credentials.json`
+### Setup (Server-Side)
+Google OAuth sekarang ditangani sepenuhnya oleh server. Tidak perlu lagi
+membuat Cloud Project atau mengunduh `credentials.json` sendiri.
 
-### Connect (Generate Token)
-Buka aplikasi desktop → **Settings → Google / Blogger → Connect Google**.
-Consent terbuka di browser sistem; setelah approve, token tersimpan otomatis
-di `workspace/token.json` dan status berubah jadi **Connected**.
+### Connect Google
+1. Buka aplikasi desktop → **Settings → Google / Blogger**
+2. Klik **Connect Google**
+3. Browser terbuka → login & approve consent
+4. Token disimpan otomatis di server (database `google_tokens`)
+5. Status berubah jadi **Connected**
 
-> Catatan: token disimpan apa adanya (raw, termasuk `refresh_token`). Auto-refresh
-> saat publish belum diwire — itu langkah lanjutan yang terpisah.
+### Bagaimana cara kerjanya
+- OAuth client (`credentials.json`) sudah disediakan di server
+- Token disimpan per-user di database (keyed by `license_key`)
+- Token refresh otomatis (via `google-auth` library)
+- Client tidak menyimpan credential — semua di-proxy ke server
+
+### Disconnect
+Settings → Google / Blogger → **Disconnect**. Token dihapus dari server.
+
+> Catatan: Tidak perlu `workspace/credentials.json` atau `workspace/token.json` lagi.
+> Semua credential ditangani server-side.
 
 ## 2. AI Provider
 
@@ -80,7 +83,6 @@ gsc:
 
 ## Checklist
 
-- [ ] `workspace/credentials.json` ada (Blogger OAuth)
-- [ ] `workspace/token.json` ada (auto-generated)
+- [ ] Google account connected (Settings → Connect Google)
 - [ ] AI provider configured di `workspace/config.yaml`
 - [ ] `workspace/config.yaml` punya domain + blog_id

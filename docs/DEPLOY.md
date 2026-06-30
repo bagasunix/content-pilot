@@ -32,40 +32,42 @@ Wizard akan minta:
 ## Jalankan
 
 ```bash
-# Cek status
-contentpilot status
+# Start server + client
+./start.sh
 
-# Mulai riset
-contentpilot research "cara install docker"
-
-# Lihat draft
-ls workspace/drafts/
-
-# Full pipeline
-contentpilot full "cara install docker"
+# Atau manual:
+cd standalone && ./start.sh
 ```
+
+## Standalone Mode
+
+```bash
+cd standalone
+pip install -r requirements.txt
+./start.sh
+# Buka http://localhost:8080
+```
+
+## Google Connection
+
+Google OAuth sekarang ditangani server-side. Tidak perlu setup Cloud Project sendiri.
+
+1. Buka Settings → Google / Blogger
+2. Klik **Connect Google**
+3. Login & approve consent di browser
+4. Token disimpan otomatis di server
+
+> Lihat [setup-credentials.md](setup-credentials.md) untuk detail lengkap.
 
 ## Publish ke Blogger
 
 ```bash
-# 1. Setup OAuth
-contentpilot setup
-
+# 1. Connect Google (via Settings → Connect Google)
 # 2. Push draft
 contentpilot push-draft <idea_id>
 
 # 3. Attach images
 contentpilot attach-images <idea_id>
-```
-
-## Standalone
-
-```bash
-cd standalone
-pip install -r requirements.txt
-contentpilot setup
-contentpilot activate --key SB-XXXX-XXXX-XXXX
-contentpilot status
 ```
 
 ## Web UI
@@ -76,3 +78,9 @@ pip install flask
 ./start.sh
 # Buka http://localhost:8080
 ```
+
+## Config
+
+Config path priority:
+1. `config/config.yaml` (per INSTALLATION.md)
+2. `workspace/config.yaml` (fallback)
