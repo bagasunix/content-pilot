@@ -79,11 +79,24 @@
                     </div>
 
                     <div id="blogger_id_field" class="{% if config.get('platform', 'blogger') != 'blogger' %}hidden{% endif %}">
-                        <label class="block text-sm font-medium text-surface-300 mb-2">Blogger Blog ID</label>
+                        <label class="block text-sm font-medium text-surface-300 mb-2">Blogger Blog</label>
+                        {% if blogger_blogs %}
+                        <select name="blog_id" 
+                                class="w-full px-4 py-3 bg-surface-800 border border-surface-700 rounded-xl text-white focus:border-primary-500 focus:outline-none">
+                            <option value="">— Pilih blog kamu —</option>
+                            {% for blog in blogger_blogs %}
+                            <option value="{{ blog.id }}" {% if config.get('blog_id') == blog.id %}selected{% endif %}>
+                                {{ blog.name }} ({{ blog.url }})
+                            </option>
+                            {% endfor %}
+                        </select>
+                        <p class="text-xs text-surface-500 mt-1">Blog otomatis terdeteksi dari akun Google kamu.</p>
+                        {% else %}
                         <input type="text" name="blog_id" value="{{ config.get('blog_id', '') }}"
                                placeholder="123456789012345678"
                                class="w-full px-4 py-3 bg-surface-800 border border-surface-700 rounded-xl text-white focus:border-primary-500 focus:outline-none">
-                        <p class="text-xs text-surface-500 mt-1">Blogger → Settings; the numeric ID in the dashboard URL. WordPress publishing uses the credentials on the right.</p>
+                        <p class="text-xs text-surface-500 mt-1">Connect Google dulu untuk auto-detect blog, atau masukkan ID manual.</p>
+                        {% endif %}
                     </div>
 
                     <div>

@@ -349,10 +349,22 @@ def settings():
     if cached and isinstance(cached, dict) and not cached.get("error"):
         schedule = cached
     
+    # Fetch blogger blogs list if Google connected
+    blogger_blogs = []
+    if google_connected():
+        try:
+            license_key = session.get('license_key', '')
+            result = server_request("GET", f"/api/google/blogger/blogs?key={license_key}")
+            if result and result.get("blogs"):
+                blogger_blogs = result["blogs"]
+        except Exception:
+            pass
+    
     return render_template('settings.html', license=license_data, config=config, schedule=schedule,
                            google_connected=google_connected(),
                            google_configured=bool(load_google_client()[0]),
-                           google_status=request.args.get('google'))
+                           google_status=request.args.get('google'),
+                           blogger_blogs=blogger_blogs)
 
 @app.route('/settings/save-schedule', methods=['POST'])
 def save_schedule():
