@@ -822,8 +822,11 @@ def load_google_client():
 
 def google_connected() -> bool:
     """Check if Google is connected via server."""
+    license_key = session.get('license_key', '')
+    if not license_key:
+        return False
     try:
-        result = server_request("GET", "/api/google/status")
+        result = server_request("GET", f"/api/google/status?key={license_key}")
         return bool(result and result.get("connected"))
     except Exception:
         # Fallback: check local token file
@@ -893,8 +896,9 @@ def connect_google():
         return redirect(url_for('login'))
     
     # Get auth URL from server
+    license_key = session.get('license_key', '')
     try:
-        result = server_request("GET", "/api/google/auth-url")
+        result = server_request("GET", f"/api/google/auth-url?key={license_key}")
         if result and result.get("url"):
             _open_external(result["url"])
             return redirect(url_for('settings', google='opened'))
