@@ -579,6 +579,7 @@ def api_indexing_check():
     if not session.get('logged_in'):
         return jsonify({"error": "Not logged in"}), 401
     data = request.get_json(silent=True) or {}
+    data['license_key'] = session.get('license_key', '')
     result, status = proxy_to_server('/api/indexing/check', data)
     return jsonify(result), status
 
@@ -590,6 +591,7 @@ def api_indexing_submit():
     if not session.get('logged_in'):
         return jsonify({"error": "Not logged in"}), 401
     data = request.get_json(silent=True) or {}
+    data['license_key'] = session.get('license_key', '')
     result, status = proxy_to_server('/api/indexing/submit', data)
     return jsonify(result), status
 
@@ -601,6 +603,7 @@ def api_indexing_coverage():
     if not session.get('logged_in'):
         return jsonify({"error": "Not logged in"}), 401
     data = request.get_json(silent=True) or {}
+    data['license_key'] = session.get('license_key', '')
     result, status = proxy_to_server('/api/indexing/coverage', data)
     return jsonify(result), status
 
@@ -805,7 +808,14 @@ GOOGLE_SCOPES = "https://www.googleapis.com/auth/blogger https://www.googleapis.
 
 
 def load_google_client():
-    """Return (client_id, client_secret) from env or workspace/credentials.json."""
+    """Check if Google OAuth is configured on server."""
+    try:
+        result = server_request("GET", "/api/google/status")
+        if result and result.get("connected") is not None:
+            return ("server-configured", "")
+    except Exception:
+        pass
+    # Fallback: check local credentials
     cid = os.getenv("GOOGLE_CLIENT_ID", "")
     csec = os.getenv("GOOGLE_CLIENT_SECRET", "")
     if cid and csec:
@@ -945,13 +955,24 @@ def google_callback():
 
 @app.route('/disconnect/google', methods=['POST'])
 def disconnect_google():
-    """Remove the stored Google token."""
+    """Disconnect Google — remove token from server and local."""
     if not session.get('logged_in'):
         return redirect(url_for('login'))
+    
+    license_key = session.get('license_key', '')
+    
+    # Disconnect on server
+    try:
+        server_request("POST", "/api/google/disconnect", {"license_key": license_key})
+    except Exception:
+        pass
+    
+    # Also remove local token (fallback)
     try:
         GOOGLE_TOKEN_FILE.unlink(missing_ok=True)
     except Exception:
         pass
+    
     session.pop('blogger_connected', None)
     return redirect(url_for('settings', google='disconnected'))
 
