@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-
+{% from "_pagination.html" import render_pagination %}
 
 {% include 'help_guide.html' %}
 
@@ -134,6 +134,8 @@
         {% else %}
             <p class="text-surface-400 text-center py-4">No pipeline history</p>
         {% endif %}
+
+        {{ render_pagination(page, total_pages, total, per_page, '/pipeline') }}
     </div>
 </div>
 

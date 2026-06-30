@@ -1,0 +1,8 @@
+# ContentPilot Workspace Config
+wip_limit: 3
+min_words: 600
+ai:
+  provider: xiaomi
+  model: MiMo-V2
+  api_key: ""
+  base_url: ""

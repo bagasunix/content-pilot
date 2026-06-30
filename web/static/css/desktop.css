@@ -90,62 +90,8 @@ body.desktop-mode .desktop-titlebar [data-no-drag] {
     50% { opacity: 0.5; }
 }
 
-/* ── Offline Overlay ─────────────────────────────────────────────── */
-.offline-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(2, 6, 23, 0.95);
-    backdrop-filter: blur(10px);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    z-index: 9999;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.3s ease;
-}
-
-.offline-overlay.visible {
-    opacity: 1;
-    pointer-events: all;
-}
-
-.offline-overlay .icon {
-    width: 64px;
-    height: 64px;
-    margin-bottom: 24px;
-    color: #64748b;
-}
-
-.offline-overlay h2 {
-    font-size: 20px;
-    font-weight: 600;
-    color: #e2e8f0;
-    margin-bottom: 8px;
-}
-
-.offline-overlay p {
-    font-size: 14px;
-    color: #64748b;
-    margin-bottom: 24px;
-}
-
-.offline-overlay .retry-btn {
-    padding: 10px 24px;
-    background: #6366f1;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: background 0.2s;
-}
-
-.offline-overlay .retry-btn:hover {
-    background: #4f46e5;
-}
+/* ── Server Status Banner ──────────────────────────────────────── */
+/* Banner styles are inline in base.html via Tailwind classes */
 
 /* ── Desktop Window Controls ─────────────────────────────────────── */
 /* Custom window controls area (if needed) */

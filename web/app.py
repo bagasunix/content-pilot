@@ -308,7 +308,13 @@ def articles():
     if not blog_connected:
         return render_template('blog_required.html', license=license_data, page='articles')
     
-    articles_list = get_articles()
+    # Pagination
+    page = request.args.get('page', 1, type=int)
+    per_page = 10
+    filter_stage = request.args.get('filter', '')
+    
+    articles_list, total = get_paginated_articles(page, per_page, filter_stage)
+    total_pages = max(1, (total + per_page - 1) // per_page)
     
     # Get usage data for article limit display
     usage = {}
@@ -320,7 +326,8 @@ def articles():
         except:
             pass
     
-    return render_template('articles.html', license=license_data, articles=articles_list, usage=usage)
+    return render_template('articles.html', license=license_data, articles=articles_list, usage=usage,
+                           page=page, per_page=per_page, total=total, total_pages=total_pages, filter_stage=filter_stage)
 
 @app.route('/settings', methods=['GET', 'POST'])
 def settings():
@@ -984,7 +991,8 @@ def trending():
             "style": analyzer.analyze_writing_style(posts),
         }
     
-    return render_template('trending.html', license=license_data, topics=topics, blog_analysis=blog_analysis)
+    return render_template('trending.html', license=license_data, topics=topics, blog_analysis=blog_analysis,
+                           page=1, per_page=12, total=len(topics), total_pages=max(1, (len(topics) + 11) // 12))
 
 @app.route('/publish/<idea_id>')
 def publish_page(idea_id):
@@ -1001,8 +1009,12 @@ def pipeline():
         return redirect(url_for('login'))
     license_data = load_license()
     blogs = get_user_blogs()
-    pipelines = get_user_pipelines()
-    return render_template('pipeline.html', license=license_data, blogs=blogs, pipelines=pipelines)
+    page = request.args.get('page', 1, type=int)
+    per_page = 10
+    pipelines, total = get_paginated_pipelines(page, per_page)
+    total_pages = max(1, (total + per_page - 1) // per_page)
+    return render_template('pipeline.html', license=license_data, blogs=blogs, pipelines=pipelines,
+                           page=page, per_page=per_page, total=total, total_pages=total_pages)
 
 @app.route('/voice-guide')
 def voice_guide():
@@ -1019,8 +1031,12 @@ def indexing():
     if not session.get('logged_in'):
         return redirect(url_for('login'))
     license_data = load_license()
-    articles = get_published_articles()
-    return render_template('indexing.html', license=license_data, articles=articles)
+    page = request.args.get('page', 1, type=int)
+    per_page = 10
+    articles, total = get_paginated_published_articles(page, per_page)
+    total_pages = max(1, (total + per_page - 1) // per_page)
+    return render_template('indexing.html', license=license_data, articles=articles,
+                           page=page, per_page=per_page, total=total, total_pages=total_pages)
 
 def get_user_blogs():
     """Get user's blogs from database."""
@@ -1113,9 +1129,20 @@ def api_status():
 
 @app.route('/api/articles')
 def api_articles():
-    """API endpoint for articles."""
-    articles_list = get_articles()
-    return jsonify(articles_list)
+    """API endpoint for articles with pagination."""
+    if not session.get('logged_in'):
+        return jsonify({'error': 'Unauthorized'}), 401
+    page = request.args.get('page', 1, type=int)
+    per_page = request.args.get('per_page', 10, type=int)
+    filter_stage = request.args.get('filter', '')
+    articles_list, total = get_paginated_articles(page, per_page, filter_stage)
+    return jsonify({
+        'articles': articles_list,
+        'total': total,
+        'page': page,
+        'per_page': per_page,
+        'total_pages': max(1, (total + per_page - 1) // per_page)
+    })
 
 # ============================================================
 # HELPER FUNCTIONS
@@ -1137,10 +1164,20 @@ def validate_license_key(key: str) -> dict:
         return {"valid": False, "error": "Invalid key length"}
     
     # Format check: CP-XXXX-XXXX or SB-XXXX-XXXX (alphanumeric only)
-    if not re.match(r'^(CP|SB)-[A-Z0-9]{4,}-[A-Z0-9]{4,}$', key):
+    if not re.match(r'^(CP|SB)-[A-Z0-9]{4,}-[A-Z0-9]{4,}(-[A-Z0-9]{4,})?$', key):
         return {"valid": False, "error": "Invalid key format"}
     
-    # Check if key exists in local license file
+    # Server validation FIRST (always check)
+    server_reachable = False
+    try:
+        result = server_request("POST", "/api/validate", {"key": key})
+        server_reachable = True
+        if result and result.get("valid"):
+            return {"valid": True, "tier": result.get("tier", "free")}
+    except:
+        pass
+    
+    # Fallback: local license file (if server unreachable OR server rejected but local matches)
     if LICENSE_FILE.exists():
         try:
             with open(LICENSE_FILE, 'r') as f:
@@ -1152,15 +1189,11 @@ def validate_license_key(key: str) -> dict:
         except:
             pass
     
-    # Check server API
-    try:
-        result = server_request("POST", "/api/validate", {"key": key})
-        if result and result.get("valid"):
-            return {"valid": True, "tier": result.get("tier", "free")}
-    except:
-        pass
+    # If server was reachable and explicitly rejected, show that error
+    if server_reachable:
+        return {"valid": False, "error": "Invalid license key"}
     
-    return {"valid": False, "error": "Invalid license key"}
+    return {"valid": False, "error": "Cannot validate license — server unreachable"}
 
 def get_pipeline_status() -> dict:
     """Get pipeline status."""
@@ -1215,6 +1248,87 @@ def get_articles() -> list:
         return articles
     except:
         return []
+
+def get_paginated_articles(page: int = 1, per_page: int = 10, filter_stage: str = '') -> tuple:
+    """Get paginated articles. Returns (articles, total_count)."""
+    try:
+        import psycopg2
+        conn = psycopg2.connect(
+            host=os.getenv('DB_HOST', 'localhost'),
+            port=os.getenv('DB_PORT', '5432'),
+            database=os.getenv('DB_NAME', 'contentpilot'),
+            user=os.getenv('DB_USER', 'contentpilot'),
+            password=os.getenv('DB_PASSWORD', '')
+        )
+        cur = conn.cursor()
+        if filter_stage:
+            cur.execute('SELECT COUNT(*) FROM articles WHERE stage = %s', (filter_stage,))
+        else:
+            cur.execute('SELECT COUNT(*) FROM articles')
+        total = cur.fetchone()[0]
+        offset = (page - 1) * per_page
+        if filter_stage:
+            cur.execute('SELECT id, title, stage, seo_score, eeat_score, created_at FROM articles WHERE stage = %s ORDER BY created_at DESC LIMIT %s OFFSET %s', (filter_stage, per_page, offset))
+        else:
+            cur.execute('SELECT id, title, stage, seo_score, eeat_score, created_at FROM articles ORDER BY created_at DESC LIMIT %s OFFSET %s', (per_page, offset))
+        articles = [{'id': r[0], 'title': r[1], 'stage': r[2], 'seo_score': r[3], 'eeat_score': r[4], 'created_at': str(r[5]) if r[5] else ''} for r in cur.fetchall()]
+        cur.close()
+        conn.close()
+        return articles, total
+    except:
+        return [], 0
+
+def get_paginated_pipelines(page: int = 1, per_page: int = 10) -> tuple:
+    """Get paginated pipelines. Returns (pipelines, total_count)."""
+    try:
+        import psycopg2
+        conn = psycopg2.connect(
+            host=os.getenv('DB_HOST', 'localhost'),
+            port=os.getenv('DB_PORT', '5432'),
+            database=os.getenv('DB_NAME', 'contentpilot'),
+            user=os.getenv('DB_USER', 'contentpilot'),
+            password=os.getenv('DB_PASSWORD', '')
+        )
+        cur = conn.cursor()
+        cur.execute('SELECT COUNT(*) FROM pipeline_runs')
+        total = cur.fetchone()[0]
+        offset = (page - 1) * per_page
+        cur.execute('SELECT id, topic, status, created_at FROM pipeline_runs ORDER BY created_at DESC LIMIT %s OFFSET %s', (per_page, offset))
+        pipelines = [{'id': r[0], 'topic': r[1], 'status': r[2], 'created_at': str(r[3]) if r[3] else ''} for r in cur.fetchall()]
+        cur.close()
+        conn.close()
+        return pipelines, total
+    except:
+        return [], 0
+
+def get_paginated_published_articles(page: int = 1, per_page: int = 10) -> tuple:
+    """Get paginated published articles for indexing. Returns (articles, total_count)."""
+    try:
+        import psycopg2
+        conn = psycopg2.connect(
+            host=os.getenv('DB_HOST', 'localhost'),
+            port=os.getenv('DB_PORT', '5432'),
+            database=os.getenv('DB_NAME', 'contentpilot'),
+            user=os.getenv('DB_USER', 'contentpilot'),
+            password=os.getenv('DB_PASSWORD', '')
+        )
+        cur = conn.cursor()
+        cur.execute("SELECT COUNT(*) FROM articles WHERE stage = 'published'")
+        total = cur.fetchone()[0]
+        offset = (page - 1) * per_page
+        cur.execute("SELECT id, title, stage, created_at FROM articles WHERE stage = 'published' ORDER BY created_at DESC LIMIT %s OFFSET %s", (per_page, offset))
+        articles = [{'id': r[0], 'title': r[1], 'stage': r[2], 'created_at': str(r[3]) if r[3] else ''} for r in cur.fetchall()]
+        cur.close()
+        conn.close()
+        return articles, total
+    except:
+        return [], 0
+
+def get_paginated_topics(topics: list, page: int = 1, per_page: int = 12) -> tuple:
+    """Paginate a topics list in-memory. Returns (page_items, total)."""
+    total = len(topics)
+    offset = (page - 1) * per_page
+    return topics[offset:offset + per_page], total
 
 def load_config() -> dict:
     """Load configuration."""

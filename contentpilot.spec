@@ -62,6 +62,10 @@ hiddenimports = [
     "contentpilot.license",
     "contentpilot.seo",
     "contentpilot.blogger",
+    # API module
+    "contentpilot.api",
+    "contentpilot.api.client",
+    "contentpilot.api.exceptions",
     # Flask/Jinja2
     "jinja2",
     "markupsafe",
