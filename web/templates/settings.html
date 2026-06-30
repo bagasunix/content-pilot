@@ -145,17 +145,11 @@
                     <!-- Language -->
                     <div>
                         <label class="block text-sm font-medium text-surface-300 mb-2">Bahasa Artikel</label>
-                        <div data-pick="language">
-                            <div class="grid grid-cols-2 gap-3">
-                                <button type="button" data-val="id"
-                                        class="py-3 px-4 rounded-xl text-sm font-medium transition-all border-2
-                                        {% if config.get('language', 'id') == 'id' %}border-primary-500 bg-primary-500/10 text-primary-400{% else %}border-surface-700 bg-surface-800/50 text-surface-400 hover:border-surface-600{% endif %}">🇮🇩 Indonesia</button>
-                                <button type="button" data-val="en"
-                                        class="py-3 px-4 rounded-xl text-sm font-medium transition-all border-2
-                                        {% if config.get('language', 'id') == 'en' %}border-primary-500 bg-primary-500/10 text-primary-400{% else %}border-surface-700 bg-surface-800/50 text-surface-400 hover:border-surface-600{% endif %}">🇬🇧 English</button>
-                            </div>
-                            <input type="hidden" name="language" id="language_input" value="{{ config.get('language', 'id') }}">
-                        </div>
+                        <select name="language"
+                                class="w-full px-4 py-3 bg-surface-800 border border-surface-700 rounded-xl text-white focus:border-primary-500 focus:outline-none">
+                            <option value="id" {% if config.get('language', 'id') == 'id' %}selected{% endif %}>🇮🇩 Indonesia</option>
+                            <option value="en" {% if config.get('language', 'id') == 'en' %}selected{% endif %}>🇬🇧 English</option>
+                        </select>
                     </div>
                 </div>
 
