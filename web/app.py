@@ -821,14 +821,19 @@ def load_google_client():
 
 
 def google_connected() -> bool:
-    """True if we hold a usable Google token."""
-    if not GOOGLE_TOKEN_FILE.exists():
-        return False
+    """Check if Google is connected via server."""
     try:
-        t = json.loads(GOOGLE_TOKEN_FILE.read_text())
-        return bool(t.get("access_token") or t.get("refresh_token"))
+        result = server_request("GET", "/api/google/status")
+        return bool(result and result.get("connected"))
     except Exception:
-        return False
+        # Fallback: check local token file
+        if not GOOGLE_TOKEN_FILE.exists():
+            return False
+        try:
+            t = json.loads(GOOGLE_TOKEN_FILE.read_text())
+            return bool(t.get("access_token") or t.get("refresh_token"))
+        except Exception:
+            return False
 
 
 # Pending OAuth state. The consent opens in the system browser, so the
@@ -875,28 +880,28 @@ display:flex;align-items:center;justify-content:center;height:100vh;margin:0">
 
 @app.route('/connect/google')
 def connect_google():
-    """Open the Google consent screen in the system browser."""
+    """Connect Google via server OAuth flow.
+    
+    Simplified flow:
+    1. Get auth URL from server
+    2. Open in browser
+    3. User approves
+    4. Server captures token
+    5. Done!
+    """
     if not session.get('logged_in'):
         return redirect(url_for('login'))
-    import secrets
-    import urllib.parse
-    client_id, _ = load_google_client()
-    if not client_id:
-        return redirect(url_for('settings', google='noconfig'))
-    state = secrets.token_urlsafe(16)
-    _OAUTH_STATE['state'] = state
-    params = {
-        'client_id': client_id,
-        'redirect_uri': url_for('google_callback', _external=True),
-        'response_type': 'code',
-        'scope': GOOGLE_SCOPES,
-        'access_type': 'offline',
-        'prompt': 'consent',
-        'state': state,
-    }
-    auth_url = 'https://accounts.google.com/o/oauth2/v2/auth?' + urllib.parse.urlencode(params)
-    _open_external(auth_url)
-    return redirect(url_for('settings', google='opened'))
+    
+    # Get auth URL from server
+    try:
+        result = server_request("GET", "/api/google/auth-url")
+        if result and result.get("url"):
+            _open_external(result["url"])
+            return redirect(url_for('settings', google='opened'))
+        else:
+            return redirect(url_for('settings', google='noconfig'))
+    except Exception as e:
+        return redirect(url_for('settings', google='error'))
 
 
 @app.route('/oauth2/callback')
