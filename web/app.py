@@ -1447,6 +1447,14 @@ def save_settings(form: dict):
     CONFIG_FILE.parent.mkdir(parents=True, exist_ok=True)
     with open(CONFIG_FILE, 'w') as f:
         yaml.dump(config, f, default_flow_style=False)
+    
+    # Also save to database if blog_id present
+    if "blog_id" in form and form.get("blog_id"):
+        _save_blog_to_db(
+            domain=form.get("domain", ""),
+            blog_id=form.get("blog_id", ""),
+            platform=form.get("platform", "blogger"),
+        )
 
     # Sync AI settings to server only when the AI form was the one submitted
     # (avoids re-sending a stale/blank key on every unrelated save).
@@ -1460,6 +1468,49 @@ def save_settings(form: dict):
                 "model": ai_config.get("model"),
                 "api_key": ai_config.get("api_key")
             })
+
+
+def _save_blog_to_db(domain: str, blog_id: str, platform: str = "blogger"):
+    """Save or update blog in PostgreSQL blogs table."""
+    try:
+        import psycopg2
+        conn = psycopg2.connect(
+            host=os.getenv('DB_HOST', 'localhost'),
+            port=os.getenv('DB_PORT', '5432'),
+            database=os.getenv('DB_NAME', 'contentpilot'),
+            user=os.getenv('DB_USER', 'contentpilot'),
+            password=os.getenv('DB_PASSWORD', '')
+        )
+        cur = conn.cursor()
+        
+        # Get user_id from license
+        license_data = load_license()
+        license_key = license_data.get("key", "") if license_data else ""
+        
+        cur.execute("SELECT id FROM users WHERE id = (SELECT user_id FROM licenses WHERE key = %s LIMIT 1)", (license_key,))
+        user_row = cur.fetchone()
+        user_id = user_row[0] if user_row else None
+        
+        if not user_id:
+            cur.close()
+            conn.close()
+            return
+        
+        # Upsert blog
+        cur.execute("""
+            INSERT INTO blogs (user_id, domain, blog_id, platform, updated_at)
+            VALUES (%s, %s, %s, %s, CURRENT_TIMESTAMP)
+            ON CONFLICT (user_id, blog_id) DO UPDATE SET
+                domain = EXCLUDED.domain,
+                platform = EXCLUDED.platform,
+                updated_at = CURRENT_TIMESTAMP
+        """, (user_id, domain, blog_id, platform))
+        
+        conn.commit()
+        cur.close()
+        conn.close()
+    except Exception as e:
+        print(f"[DB] Failed to save blog: {e}")
 
 def slugify(text: str) -> str:
     """Convert text to slug."""
