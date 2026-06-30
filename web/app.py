@@ -877,9 +877,10 @@ _OAUTH_STATE = {}
 def _open_external(url: str) -> bool:
     """Open a URL in the host's default browser (WSL → Windows friendly)."""
     import subprocess
+    # PowerShell Start-Process opens URL in default browser (works in WSL)
     attempts = (
-        ['explorer.exe', url],
-        ['powershell.exe', '-NoProfile', '-Command', 'Start-Process', url],
+        ['powershell.exe', '-NoProfile', '-Command', f'Start-Process "{url}"'],
+        ['cmd.exe', '/c', 'start', url],
         ['xdg-open', url],
     )
     for cmd in attempts:
@@ -888,17 +889,20 @@ def _open_external(url: str) -> bool:
             return True
         except Exception:
             continue
-    try:
-        import webbrowser
-        return webbrowser.open(url)
-    except Exception:
-        return False
+    return False
 
 
 def _oauth_done_page(message: str, ok: bool = True) -> str:
     """Standalone page shown in the external browser after the callback."""
     color = '#34d399' if ok else '#f87171'
     icon = '✓' if ok else '✗'
+    # Detect which host the user is accessing from
+    host = request.host or '127.0.0.1:8080'
+    scheme = request.scheme or 'http'
+    settings_url = f"{scheme}://{host}/settings?google=connected"
+    redirect_js = ''
+    if ok:
+        redirect_js = f'<script>setTimeout(() => {{ window.location.href = "{settings_url}"; }}, 3000);</script>'
     return f"""<!doctype html><html><head><meta charset="utf-8">
 <title>ContentPilot</title></head>
 <body style="background:#0f172a;color:#e2e8f0;font-family:system-ui,sans-serif;
@@ -906,70 +910,65 @@ display:flex;align-items:center;justify-content:center;height:100vh;margin:0">
 <div style="text-align:center;max-width:420px;padding:2rem">
 <div style="font-size:3rem;color:{color}">{icon}</div>
 <h1 style="font-size:1.25rem;font-weight:600">{message}</h1>
-<p style="color:#94a3b8">You can close this tab and return to ContentPilot.</p>
+<p style="color:#94a3b8">Redirecting to settings in 3 seconds...</p>
+{redirect_js}
 </div></body></html>"""
 
 
 @app.route('/connect/google')
 def connect_google():
-    """Connect Google via server OAuth flow.
-    
-    Simplified flow:
-    1. Get auth URL from server
-    2. Open in browser
-    3. User approves
-    4. Server captures token
-    5. Done!
-    """
+    """Connect Google via server OAuth flow."""
     if not session.get('logged_in'):
         return redirect(url_for('login'))
     
-    # Get auth URL from server
     license_key = session.get('license_key', '')
     try:
         result = server_request("GET", f"/api/google/auth-url?key={license_key}")
         if result and result.get("url"):
-            _open_external(result["url"])
-            return redirect(url_for('settings', google='opened'))
+            auth_url = result["url"]
+            # Try opening browser automatically
+            _open_external(auth_url)
+            # Pass URL to template as fallback
+            return redirect(url_for('settings', google='opened', auth_url=auth_url))
         else:
             return redirect(url_for('settings', google='noconfig'))
-    except Exception as e:
+    except Exception:
         return redirect(url_for('settings', google='error'))
 
 
 @app.route('/oauth2/callback')
 def google_callback():
-    """Exchange the OAuth code for a token (hit by the external browser)."""
+    """Handle OAuth callback — forward code to server for token exchange."""
     if request.args.get('error'):
         return _oauth_done_page("Sign-in was cancelled.", ok=False)
+    
     code = request.args.get('code')
-    state = request.args.get('state')
-    if not code or not state or state != _OAUTH_STATE.get('state'):
-        return _oauth_done_page("Invalid or expired request — please try Connect again.", ok=False)
-    _OAUTH_STATE.pop('state', None)
-
+    state = request.args.get('state', '')
+    
+    if not code:
+        return _oauth_done_page("No authorization code received.", ok=False)
+    
+    # Forward code + state to server
     import urllib.request
     import urllib.parse
-    client_id, client_secret = load_google_client()
-    payload = urllib.parse.urlencode({
-        'code': code,
-        'client_id': client_id,
-        'client_secret': client_secret,
-        'redirect_uri': url_for('google_callback', _external=True),
-        'grant_type': 'authorization_code',
-    }).encode()
+    import urllib.error
+    
     try:
-        req = urllib.request.Request('https://oauth2.googleapis.com/token', data=payload, method='POST')
+        callback_url = f"{SERVER_URL}/api/google/callback?code={urllib.parse.quote(code)}&state={urllib.parse.quote(state)}"
+        req = urllib.request.Request(callback_url, method='GET')
         with urllib.request.urlopen(req, timeout=15) as resp:
-            token = json.loads(resp.read().decode())
+            # Server returns HTML, just show it directly
+            html = resp.read().decode()
+            if '✅' in html or 'Connected' in html:
+                return _oauth_done_page("Google Connected! You can close this tab.", ok=True)
+            return html
+    except urllib.error.HTTPError as e:
+        body = e.read().decode()
+        if '✅' in body or 'Connected' in body:
+            return _oauth_done_page("Google Connected! You can close this tab.", ok=True)
+        return _oauth_done_page(f"Connection failed: {body[:200]}", ok=False)
     except Exception as e:
-        return _oauth_done_page(f"Token exchange failed: {e}", ok=False)
-    if not token.get('access_token'):
-        return _oauth_done_page("Google did not return a token — please try again.", ok=False)
-
-    GOOGLE_TOKEN_FILE.parent.mkdir(parents=True, exist_ok=True)
-    GOOGLE_TOKEN_FILE.write_text(json.dumps(token, indent=2))
-    return _oauth_done_page("Connected to Google!", ok=True)
+        return _oauth_done_page(f"Error: {e}", ok=False)
 
 
 @app.route('/disconnect/google', methods=['POST'])
