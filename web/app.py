@@ -831,22 +831,41 @@ def load_google_client():
 
 
 def google_connected() -> bool:
-    """Check if Google is connected via server."""
+    """Check if Google is connected. Local first, server fallback, cache result."""
+    # 1. Check local token file (fastest)
+    if GOOGLE_TOKEN_FILE.exists():
+        try:
+            t = json.loads(GOOGLE_TOKEN_FILE.read_text())
+            if t.get("access_token") or t.get("refresh_token"):
+                return True
+        except Exception:
+            pass
+    
+    # 2. Check server (network call)
     license_key = session.get('license_key', '')
     if not license_key:
         return False
     try:
         result = server_request("GET", f"/api/google/status?key={license_key}")
-        return bool(result and result.get("connected"))
+        if result and result.get("connected"):
+            # 3. Cache server token locally for next time
+            _cache_server_token(license_key)
+            return True
     except Exception:
-        # Fallback: check local token file
-        if not GOOGLE_TOKEN_FILE.exists():
-            return False
-        try:
-            t = json.loads(GOOGLE_TOKEN_FILE.read_text())
-            return bool(t.get("access_token") or t.get("refresh_token"))
-        except Exception:
-            return False
+        pass
+    
+    return False
+
+
+def _cache_server_token(license_key: str):
+    """Fetch token from server and save locally for faster future checks."""
+    try:
+        result = server_request("GET", f"/api/google/token?key={license_key}")
+        if result and result.get("token"):
+            GOOGLE_TOKEN_FILE.parent.mkdir(parents=True, exist_ok=True)
+            GOOGLE_TOKEN_FILE.write_text(json.dumps(result["token"], indent=2))
+    except Exception:
+        pass  # Caching is optional, don't break if it fails
 
 
 # Pending OAuth state. The consent opens in the system browser, so the
