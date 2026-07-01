@@ -1331,10 +1331,12 @@ def load_config() -> dict:
 
 def save_settings(form: dict):
     """Merge submitted settings into the existing config.
-
+    
     Settings are split across several small forms that each POST to /settings,
     so we update only the fields present in this submission. Rebuilding the whole
     config from one form would wipe the other forms' values.
+    
+    Also syncs ALL settings to server database for consistency.
     """
     import yaml
 
@@ -1356,6 +1358,9 @@ def save_settings(form: dict):
         config["approval_mode"] = form.get("approval_mode", "soft")
     if "wip_limit" in form:
         config["pipeline"]["wip_limit"] = int(form.get("wip_limit", 3))
+    # Schedule frequency
+    if "schedule_freq" in form:
+        config["schedule_freq"] = int(form.get("schedule_freq", 3))
     # WordPress credentials (only when the WordPress form was submitted)
     if "wp_url" in form:
         config["wordpress"] = {
@@ -1387,18 +1392,32 @@ def save_settings(form: dict):
             platform=form.get("platform", "blogger"),
         )
 
-    # Sync AI settings to server only when the AI form was the one submitted
-    # (avoids re-sending a stale/blank key on every unrelated save).
-    if ai_submitted:
-        license_data = load_license()
-        ai_config = config.get("ai", {})
-        if license_data and license_data.get("key") and ai_config.get("api_key"):
-            server_request("POST", "/api/settings/ai", {
+    # Sync ALL settings to server database
+    license_data = load_license()
+    if license_data and license_data.get("key"):
+        try:
+            settings_payload = {
+                "language": config.get("language", "id"),
+                "approval_mode": config.get("approval_mode", "auto"),
+                "schedule_freq": config.get("schedule_freq", 3),
+                "wip_limit": config.get("pipeline", {}).get("wip_limit", 3),
+            }
+            
+            # Include AI settings if AI form was submitted
+            if ai_submitted:
+                settings_payload["ai"] = {
+                    "provider": config.get("ai", {}).get("provider", "openai"),
+                    "model": config.get("ai", {}).get("model", "gpt-4"),
+                    "api_key": config.get("ai", {}).get("api_key", ""),
+                }
+            
+            server_request("POST", "/api/settings/all", {
                 "key": license_data["key"],
-                "provider": ai_config.get("provider"),
-                "model": ai_config.get("model"),
-                "api_key": ai_config.get("api_key")
+                "settings": settings_payload
             })
+        except Exception as e:
+            # Log error but don't fail the save
+            print(f"Warning: Failed to sync settings to server: {e}")
 
 
 def _save_blog_to_db(domain: str, blog_id: str, platform: str = "blogger"):
