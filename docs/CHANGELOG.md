@@ -1,5 +1,18 @@
 # ContentPilot — Changelog
 
+## 2026-07-01 — Pipeline Auto-Trigger & Schedule
+
+### Added
+- **Auto-trigger pipeline** — after blog + voice guide configured, automatically trigger first pipeline run
+- **Schedule configuration** — articles per week (1-7) with slider UI
+- **Setup Complete banner** — shows when all setup steps are done, with "Start Pipeline" button
+- **Setup Progress indicator** — sidebar shows completion status with checkmarks
+
+### Changed
+- **Default publishing mode** — now defaults to "Auto-publish after quality gate" instead of "Manual"
+- **AI Provider required first** — Blog Connection tab disabled until AI is configured
+- **Sidebar navigation order** — AI Provider → Blog → Publishing → Voice Guide (required flow)
+
 ## 2026-07-01 — Settings Page Redesign
 
 ### Updated
