@@ -79,24 +79,25 @@ ContentPilot adalah tool blog automation yang membantu kamu:
 
 ## ⚙️ Settings
 
-### Domain
+### UI Settings (Web)
+
+Settings page uses a **2-column layout** with sidebar navigation:
+
+- **Blog Connection** — Platform (Blogger/WordPress), blog selection, language
+- **AI Provider** — Provider (OpenAI/DeepSeek/Custom), API key, model
+- **Publishing** — Approval mode (Draft, Auto-publish, Full Auto)
+- **Voice Guide** — AI-generated writing style from your blog
+
+### Config File
 
 ```yaml
 domain: "yourblog.com"
-```
 
-### AI Provider
-
-```yaml
 ai:
   provider: openai  # openai | deepseek | ollama
   model: gpt-4
   api_key: "***"
-```
 
-### Pipeline
-
-```yaml
 pipeline:
   wip_limit: 3      # Max artikel in-flight
   publish_mode: draft  # draft | live

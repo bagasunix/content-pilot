@@ -1,5 +1,20 @@
 # ContentPilot — Changelog
 
+## 2026-07-01 — Settings Page Redesign
+
+### Updated
+- **Settings page redesigned** — 2-column layout (sidebar nav + content area)
+  - Left sidebar: section navigation (Blog, AI, Publishing, Voice) + status indicators
+  - Right content: only active section visible with smooth Alpine.js transitions
+  - Clean minimal design, no heavy card borders
+  - Sticky sidebar navigation
+  - Save buttons per-section instead of global
+- **Platform toggle** — Blogger/WordPress with conditional field switching
+- **AI Provider** — provider toggle with conditional Base URL for custom
+- **Publishing** — 3 approval modes with icon containers (Draft, Auto, Full Auto)
+- **Voice Guide** — inline generate with status feedback
+- **Telegram notifier** — fixed config path (was referencing blog-lifecycle-pro)
+
 ## 2026-07-01 — Settings Page & Platform Switching
 
 ### Added

@@ -3,1032 +3,431 @@
 {% block title %}ContentPilot — Settings{% endblock %}
 
 {% block content %}
-{% include 'help_guide.html' %}
-<div class="mb-8">
-    <h1 class="text-3xl font-bold text-white">⚙️ Settings</h1>
-    <p class="text-surface-400 mt-1">Configure your account and preferences</p>
-</div>
+<div class="flex gap-8 max-w-5xl mx-auto min-h-[80vh]" x-data="settingsPage()">
 
-{% if request.args.get('saved') == '1' %}
-<div class="mb-6 p-3 rounded-xl bg-green-500/10 border border-green-500/20 text-green-400 text-sm flex items-center gap-2">
-    ✅ Settings saved successfully!
-</div>
-{% endif %}
-
-<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-    
-    <!-- Left Column -->
-    <div class="space-y-6">
-        <!-- Profile -->
-        <div class="bg-surface-900/50 border border-surface-700/50 rounded-2xl p-6">
-            <div class="flex items-center gap-3 mb-6">
-                <div class="w-10 h-10 bg-primary-500/10 rounded-xl flex items-center justify-center">👤</div>
-                <div>
-                    <h2 class="text-lg font-semibold text-white">Profile</h2>
-                    <p class="text-sm text-surface-400">Your account information</p>
-                </div>
+    <!-- ========== LEFT: SIDEBAR NAV ========== -->
+    <nav class="w-56 flex-shrink-0 pt-1">
+        <div class="sticky top-24">
+            <p class="text-xs font-semibold text-surface-500 uppercase tracking-wider mb-4 px-3">Settings</p>
+            <div class="space-y-1">
+                <button @click="activeTab = 'blog'" :class="activeTab === 'blog' ? 'bg-surface-800 text-white' : 'text-surface-400 hover:text-white hover:bg-surface-800/50'"
+                        class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors">
+                    <i data-lucide="globe" class="w-4 h-4"></i> Blog Connection
+                </button>
+                <button @click="activeTab = 'ai'" :class="activeTab === 'ai' ? 'bg-surface-800 text-white' : 'text-surface-400 hover:text-white hover:bg-surface-800/50'"
+                        class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors">
+                    <i data-lucide="bot" class="w-4 h-4"></i> AI Provider
+                </button>
+                <button @click="activeTab = 'publish'" :class="activeTab === 'publish' ? 'bg-surface-800 text-white' : 'text-surface-400 hover:text-white hover:bg-surface-800/50'"
+                        class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors">
+                    <i data-lucide="rocket" class="w-4 h-4"></i> Publishing
+                </button>
+                <button @click="activeTab = 'voice'" :class="activeTab === 'voice' ? 'bg-surface-800 text-white' : 'text-surface-400 hover:text-white hover:bg-surface-800/50'"
+                        class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors">
+                    <i data-lucide="mic" class="w-4 h-4"></i> Voice Guide
+                </button>
             </div>
-            
-            <div class="space-y-4">
-                <div class="flex items-center justify-between p-4 bg-surface-800/50 rounded-xl">
-                    <div>
-                        <p class="text-sm text-surface-400">License Tier</p>
-                        <p class="text-white font-medium">
-                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-primary-500/20 text-primary-400">
-                                {{ license.tier|default('FREE')|upper }}
-                            </span>
-                        </p>
+
+            <!-- Status -->
+            <div class="mt-8 px-3">
+                <p class="text-xs font-semibold text-surface-500 uppercase tracking-wider mb-3">Status</p>
+                <div class="space-y-2 text-sm">
+                    <div class="flex items-center justify-between">
+                        <span class="text-surface-400">Blog</span>
+                        <span class="{% if blog_connected %}text-green-400{% else %}text-surface-500{% endif %}">
+                            {% if blog_connected %}● Connected{% else %}○ None{% endif %}
+                        </span>
                     </div>
-                </div>
-                
-                <div class="flex items-center justify-between p-4 bg-surface-800/50 rounded-xl">
-                    <div>
-                        <p class="text-sm text-surface-400">License Key</p>
-                        <p class="text-white font-medium font-mono text-sm">{{ license.key|default('N/A') }}</p>
+                    <div class="flex items-center justify-between">
+                        <span class="text-surface-400">AI</span>
+                        <span class="{% if config.get('ai', {}).get('api_key') %}text-green-400{% else %}text-surface-500{% endif %}">
+                            {% if config.get('ai', {}).get('api_key') %}● Set{% else %}○ None{% endif %}
+                        </span>
                     </div>
                 </div>
             </div>
         </div>
-        <!-- Blog -->
-        <div class="bg-surface-900/50 border border-surface-700/50 rounded-2xl p-6">
-            <div class="flex items-center gap-3 mb-6">
-                <div class="w-10 h-10 bg-cyan-500/10 rounded-xl flex items-center justify-center">🌐</div>
-                <div>
-                    <h2 class="text-lg font-semibold text-white">Blog</h2>
-                    <p class="text-sm text-surface-400">Which blog ContentPilot manages</p>
+    </nav>
+
+    <!-- ========== RIGHT: CONTENT ========== -->
+    <div class="flex-1 min-w-0">
+
+        <!-- Success Banner -->
+        {% if saved %}
+        <div class="mb-6 p-4 bg-green-500/10 border border-green-500/20 rounded-xl flex items-center gap-3" x-data="{ show: true }" x-show="show" x-transition>
+            <i data-lucide="check-circle" class="w-5 h-5 text-green-400"></i>
+            <p class="text-green-400 text-sm flex-1">Settings saved successfully</p>
+            <button @click="show = false" class="text-surface-400 hover:text-white transition-colors">
+                <i data-lucide="x" class="w-4 h-4"></i>
+            </button>
+        </div>
+        {% endif %}
+
+        <form method="POST" action="/settings" id="settings-form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+            <!-- ====== BLOG TAB ====== -->
+            <div x-show="activeTab === 'blog'" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-y-1" x-transition:enter-end="opacity-100 translate-y-0">
+                <div class="mb-8">
+                    <h2 class="text-2xl font-bold text-white">Blog Connection</h2>
+                    <p class="text-surface-400 mt-1">Which blog ContentPilot manages</p>
                 </div>
-            </div>
 
-            <form method="POST" action="/settings">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                <div class="space-y-4">
-                    <div>
-                        <label class="block text-sm font-medium text-surface-300 mb-2">Platform</label>
-                        <div class="grid grid-cols-2 gap-3">
-                            <button type="button" onclick="selectPlatform('blogger')"
-                                    class="py-3 px-4 rounded-xl text-sm font-medium transition-all border-2
-                                    {% if config.get('platform', 'blogger') == 'blogger' %}border-primary-500 bg-primary-500/10 text-primary-400{% else %}border-surface-700 bg-surface-800/50 text-surface-400 hover:border-surface-600{% endif %}"
-                                    data-platform="blogger">📰 Blogger</button>
-                            <button type="button" onclick="selectPlatform('wordpress')"
-                                    class="py-3 px-4 rounded-xl text-sm font-medium transition-all border-2
-                                    {% if config.get('platform', 'blogger') == 'wordpress' %}border-primary-500 bg-primary-500/10 text-primary-400{% else %}border-surface-700 bg-surface-800/50 text-surface-400 hover:border-surface-600{% endif %}"
-                                    data-platform="wordpress">📝 WordPress</button>
-                        </div>
+                <!-- Platform -->
+                <div class="mb-8">
+                    <label class="block text-sm font-medium text-surface-300 mb-3">Platform</label>
+                    <div class="grid grid-cols-2 gap-3" data-pick="platform" id="platform-picker">
                         <input type="hidden" name="platform" id="platform_input" value="{{ config.get('platform', 'blogger') }}">
-                    </div>
-
-                    <!-- Blogger Section -->
-                    <div id="blogger_id_field" class="{% if config.get('platform', 'blogger') != 'blogger' %}hidden{% endif %}">
-                        <label class="block text-sm font-medium text-surface-300 mb-2">Blogger Blog</label>
-                        
-                        {% set active_blog = blogger_blogs|selectattr('id', 'equalto', config.get('blog_id', ''))|first if blogger_blogs else none %}
-                        
-                        {% if google_connected %}
-                            {% if active_blog %}
-                        <!-- Google connected + blog selected: show info + change option -->
-                        <div class="mb-3 p-3 rounded-xl bg-green-500/10 border border-green-500/20 flex items-center gap-3">
-                            <div class="w-8 h-8 bg-green-500/20 rounded-lg flex items-center justify-center text-green-400">✓</div>
-                            <div class="flex-1 min-w-0">
-                                <p class="text-sm font-medium text-green-400">{{ active_blog.name }}</p>
-                                <p class="text-xs text-surface-500 truncate">{{ active_blog.url }}</p>
-                            </div>
-                        </div>
-                        <select name="blog_id" id="blog_id_select"
-                                onchange="updateDomainFromBlog(this)"
-                                class="w-full px-4 py-3 bg-surface-800 border border-surface-700 rounded-xl text-white focus:border-primary-500 focus:outline-none">
-                            <option value="{{ active_blog.id }}" selected data-url="{{ active_blog.url }}">✓ {{ active_blog.name }}</option>
-                            {% for blog in blogger_blogs %}
-                                {% if blog.id != active_blog.id %}
-                                <option value="{{ blog.id }}" data-url="{{ blog.url }}">{{ blog.name }} ({{ blog.url }})</option>
-                                {% endif %}
-                            {% endfor %}
-                        </select>
-                        <input type="hidden" name="domain" id="blog_domain_input" value="{{ config.get('domain', '') }}">
-
-                            {% elif blogger_blogs %}
-                        <!-- Google connected but no blog selected yet -->
-                        <select name="blog_id" id="blog_id_select"
-                                onchange="updateDomainFromBlog(this)"
-                                class="w-full px-4 py-3 bg-surface-800 border border-surface-700 rounded-xl text-white focus:border-primary-500 focus:outline-none">
-                            <option value="">— Pilih blog kamu —</option>
-                            {% for blog in blogger_blogs %}
-                            <option value="{{ blog.id }}" data-url="{{ blog.url }}">{{ blog.name }} ({{ blog.url }})</option>
-                            {% endfor %}
-                        </select>
-                        <input type="hidden" name="domain" id="blog_domain_input" value="">
-
-                            {% elif config.get('blog_id') %}
-                        <!-- Google connected but API returned no blogs — show saved info -->
-                        <div class="p-3 rounded-xl bg-green-500/10 border border-green-500/20 flex items-center gap-3">
-                            <div class="w-8 h-8 bg-green-500/20 rounded-lg flex items-center justify-center text-green-400">✓</div>
-                            <div class="flex-1 min-w-0">
-                                <p class="text-sm font-medium text-green-400">Blog ID: {{ config.get('blog_id') }}</p>
-                                <p class="text-xs text-surface-500">{{ config.get('domain', '') }}</p>
-                            </div>
-                        </div>
-                        <input type="hidden" name="blog_id" value="{{ config.get('blog_id', '') }}">
-                        <input type="hidden" name="domain" value="{{ config.get('domain', '') }}">
-
-                            {% else %}
-                        <!-- Google connected but no blogs found -->
-                        <div class="p-3 rounded-xl bg-yellow-500/10 border border-yellow-500/20 text-yellow-400 text-sm">
-                            Tidak ditemukan blog di akun Google.
-                        </div>
-                            {% endif %}
-
-                        {% elif config.get('blog_id') %}
-                        <!-- Google not available but blog already set: show info only -->
-                        <div class="p-3 rounded-xl bg-surface-800/50 border border-surface-700/50 flex items-center gap-3">
-                            <div class="w-8 h-8 bg-surface-700 rounded-lg flex items-center justify-center text-surface-400">📝</div>
-                            <div class="flex-1 min-w-0">
-                                <p class="text-sm font-medium text-white">Blog ID: {{ config.get('blog_id') }}</p>
-                                <p class="text-xs text-surface-500">{{ config.get('domain', 'Connect Google untuk update') }}</p>
-                            </div>
-                        </div>
-                        <input type="hidden" name="blog_id" value="{{ config.get('blog_id', '') }}">
-                        <input type="hidden" name="domain" value="{{ config.get('domain', '') }}">
-                        
-                        {% else %}
-                        <!-- Fresh start: no Google, no blog -->
-                        <div class="space-y-3">
-                            <input type="text" name="domain" value=""
-                                   placeholder="yourblog.com"
-                                   class="w-full px-4 py-3 bg-surface-800 border border-surface-700 rounded-xl text-white focus:border-primary-500 focus:outline-none">
-                            <input type="text" name="blog_id" value=""
-                                   placeholder="Blog ID (angka)"
-                                   class="w-full px-4 py-3 bg-surface-800 border border-surface-700 rounded-xl text-white focus:border-primary-500 focus:outline-none">
-                        </div>
-                        <p class="text-xs text-surface-500 mt-2">Connect Google di bawah untuk auto-detect blog.</p>
-                        {% endif %}
-                    </div>
-
-                    <!-- Ganti Platform Button (only when blog is selected) -->
-                    {% if active_blog or config.get('blog_id') %}
-                    <div class="mt-3">
-                        <button type="button" onclick="openSwitchPlatform()"
-                                class="w-full py-2.5 px-4 bg-surface-800 hover:bg-surface-700 text-surface-300 text-sm rounded-xl transition-colors">
-                            🔄 Ganti Platform
+                        <button type="button" data-val="blogger"
+                                class="py-3.5 px-5 rounded-xl text-sm font-medium transition-all border-2
+                                {% if config.get('platform', 'blogger') == 'blogger' %}border-primary-500 bg-primary-500/10 text-primary-400{% else %}border-surface-700 bg-surface-800/50 text-surface-400 hover:border-surface-600{% endif %}">
+                            📰 Blogger
+                        </button>
+                        <button type="button" data-val="wordpress"
+                                class="py-3.5 px-5 rounded-xl text-sm font-medium transition-all border-2
+                                {% if config.get('platform', 'blogger') == 'wordpress' %}border-primary-500 bg-primary-500/10 text-primary-400{% else %}border-surface-700 bg-surface-800/50 text-surface-400 hover:border-surface-600{% endif %}">
+                            📝 WordPress
                         </button>
                     </div>
+                </div>
 
-                    <!-- Switch Platform Modal -->
-                    <div id="switch-modal" class="hidden mt-4 p-4 rounded-xl bg-surface-800/50 border border-surface-700/50">
-                        <!-- Step: Disconnect Google first -->
-                        <div id="switch-step-disconnect" class="hidden">
-                            <div class="flex items-center gap-3 mb-3">
-                                <div class="w-8 h-8 bg-yellow-500/20 rounded-lg flex items-center justify-center">⚠️</div>
-                                <div>
-                                    <p class="text-sm font-medium text-yellow-400">Disconnect Google dulu</p>
-                                    <p class="text-xs text-surface-500">Untuk ganti platform dari Blogger, kamu harus disconnect Google terlebih dahulu.</p>
-                                </div>
-                            </div>
-                            <div class="flex gap-3">
-                                <button type="button" onclick="disconnectAndContinue()"
-                                        class="flex-1 py-2.5 px-4 bg-red-500 hover:bg-red-600 text-white text-sm font-medium rounded-xl transition-colors">
-                                    🔌 Disconnect Google
-                                </button>
-                                <button type="button" onclick="closeSwitchModal()"
-                                        class="py-2.5 px-4 bg-surface-700 hover:bg-surface-600 text-surface-300 text-sm rounded-xl transition-colors">
-                                    Batal
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- Step: Check active processes -->
-                        <div id="switch-step-check" class="hidden">
-                            <div class="flex items-center gap-3 mb-3">
-                                <div class="w-8 h-8 bg-yellow-500/20 rounded-lg flex items-center justify-center">⚠️</div>
-                                <div>
-                                    <p class="text-sm font-medium text-yellow-400">Masih ada proses berjalan</p>
-                                    <p class="text-xs text-surface-500">Batalkan semua proses sebelum ganti platform</p>
-                                </div>
-                            </div>
-                            <div id="active-list" class="space-y-2 mb-4 max-h-40 overflow-y-auto"></div>
-                            <div class="flex gap-3">
-                                <button type="button" onclick="cancelAndSwitch()"
-                                        class="flex-1 py-2.5 px-4 bg-red-500 hover:bg-red-600 text-white text-sm font-medium rounded-xl transition-colors">
-                                    Batalkan Semua & Ganti
-                                </button>
-                                <button type="button" onclick="closeSwitchModal()"
-                                        class="py-2.5 px-4 bg-surface-700 hover:bg-surface-600 text-surface-300 text-sm rounded-xl transition-colors">
-                                    Batal
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- Step: Select new platform -->
-                        <div id="switch-step-select" class="hidden">
-                            <p class="text-sm font-medium text-white mb-3">Pilih platform baru:</p>
-                            <div class="grid grid-cols-2 gap-3 mb-4">
-                                <button type="button" onclick="selectNewPlatform('blogger')"
-                                        class="new-platform-btn py-3 px-4 rounded-xl text-sm font-medium transition-all border-2 border-surface-700 bg-surface-800/50 text-surface-400 hover:border-surface-600"
-                                        data-platform="blogger">📰 Blogger</button>
-                                <button type="button" onclick="selectNewPlatform('wordpress')"
-                                        class="new-platform-btn py-3 px-4 rounded-xl text-sm font-medium transition-all border-2 border-surface-700 bg-surface-800/50 text-surface-400 hover:border-surface-600"
-                                        data-platform="wordpress">📝 WordPress</button>
-                            </div>
-                            <div id="new-blogger-fields" class="hidden space-y-3 mb-4">
-                                <select id="new-blog-select"
-                                        class="w-full px-4 py-3 bg-surface-800 border border-surface-700 rounded-xl text-white focus:border-primary-500 focus:outline-none">
-                                    <option value="">— Pilih blog —</option>
-                                    {% for blog in blogger_blogs %}
-                                    <option value="{{ blog.id }}" data-url="{{ blog.url }}">{{ blog.name }} ({{ blog.url }})</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                            <div id="new-wp-fields" class="hidden space-y-3 mb-4">
-                                <input type="url" id="new-wp-url" placeholder="https://yourblog.com"
-                                       class="w-full px-4 py-3 bg-surface-800 border border-surface-700 rounded-xl text-white focus:border-primary-500 focus:outline-none">
-                            </div>
-                            <div class="mb-4">
-                                <label class="block text-sm font-medium text-surface-300 mb-2">Bahasa</label>
-                                <select id="new-language"
-                                        class="w-full px-4 py-3 bg-surface-800 border border-surface-700 rounded-xl text-white focus:border-primary-500 focus:outline-none">
-                                    <option value="id">🇮🇩 Indonesia</option>
-                                    <option value="en">🇬🇧 English</option>
-                                </select>
-                            </div>
-                            <div class="flex gap-3">
-                                <button type="button" onclick="saveNewPlatform()"
-                                        class="flex-1 py-2.5 px-4 bg-cyan-500 hover:bg-cyan-600 text-white text-sm font-medium rounded-xl transition-colors">
-                                    Simpan
-                                </button>
-                                <button type="button" onclick="closeSwitchModal()"
-                                        class="py-2.5 px-4 bg-surface-700 hover:bg-surface-600 text-surface-300 text-sm rounded-xl transition-colors">
-                                    Batal
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- Loading -->
-                        <div id="switch-step-loading" class="hidden text-center py-4">
-                            <p class="text-surface-400 text-sm">Memproses...</p>
-                        </div>
-                    </div>
-                    {% endif %}
-
-                    <!-- Language -->
+                <!-- Blogger -->
+                <div id="blogger-fields" class="{% if config.get('platform', 'blogger') != 'blogger' %}hidden{% endif %} space-y-5">
                     <div>
-                        <label class="block text-sm font-medium text-surface-300 mb-2">Bahasa Artikel</label>
-                        <select name="language"
-                                class="w-full px-4 py-3 bg-surface-800 border border-surface-700 rounded-xl text-white focus:border-primary-500 focus:outline-none">
-                            <option value="id" {% if config.get('language', 'id') == 'id' %}selected{% endif %}>🇮🇩 Indonesia</option>
-                            <option value="en" {% if config.get('language', 'id') == 'en' %}selected{% endif %}>🇬🇧 English</option>
+                        <label class="block text-sm font-medium text-surface-300 mb-2">Blogger Blog</label>
+                        <select name="blog_id" class="w-full px-4 py-3 bg-surface-800 border border-surface-700 rounded-xl text-white focus:border-primary-500 focus:outline-none transition-colors">
+                            <option value="">— Pilih Blog —</option>
+                            {% for blog in blogger_blogs %}
+                            <option value="{{ blog.id }}">{{ blog.name }}</option>
+                            {% endfor %}
                         </select>
                     </div>
+                    <div class="p-4 bg-surface-800/50 border border-surface-700/30 rounded-xl">
+                        <p class="text-sm text-surface-400 mb-3">Koneksi Google diperlukan untuk Blogger</p>
+                        <a href="/connect/google"
+                           class="flex items-center justify-center gap-2 w-full py-3 px-4 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-xl transition-colors">
+                            <i data-lucide="link" class="w-4 h-4"></i> Hubungkan Google
+                        </a>
+                    </div>
                 </div>
 
-                <button type="submit" class="mt-6 w-full py-3 px-4 bg-cyan-500 hover:bg-cyan-600 text-white font-semibold rounded-xl transition-colors">
-                    💾 Simpan Blog
-                </button>
-            </form>
-        </div>
-        <!-- Google / Blogger -->
-        <div class="bg-surface-900/50 border border-surface-700/50 rounded-2xl p-6">
-            <div class="flex items-center gap-3 mb-6">
-                <div class="w-10 h-10 bg-red-500/10 rounded-xl flex items-center justify-center">🔗</div>
-                <div>
-                    <h2 class="text-lg font-semibold text-white">Google / Blogger</h2>
-                    <p class="text-sm text-surface-400">Connect your Google account to publish to Blogger</p>
-                </div>
-                {% if google_connected %}
-                <div class="ml-auto px-3 py-1 bg-green-500/20 text-green-400 text-xs font-medium rounded-full">✓ Connected</div>
-                {% else %}
-                <div class="ml-auto px-3 py-1 bg-surface-700 text-surface-400 text-xs font-medium rounded-full">○ Not connected</div>
-                {% endif %}
-            </div>
-
-            {% if google_status == 'opened' %}
-            <div class="mb-4 p-3 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-300 text-sm">
-                🌐 Google sign-in opened in your browser. Approve there, then
-                <a href="/settings" class="underline font-medium">refresh this page</a>.
-                {% if request.args.get('auth_url') %}
-                <br><span class="text-xs text-surface-400 mt-2 block">If browser didn't open, 
-                <a href="{{ request.args.get('auth_url') }}" target="_blank" class="underline font-medium text-blue-400">click here</a>.</span>
-                {% endif %}
-            </div>
-            {% elif google_status == 'connected' %}
-            <div class="mb-4 p-3 rounded-xl bg-green-500/10 border border-green-500/20 text-green-400 text-sm">✓ Google account connected.</div>
-            {% elif google_status == 'error' %}
-            <div class="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm">✗ Connection failed — please try again.</div>
-            {% elif google_status == 'noconfig' %}
-            <div class="mb-4 p-3 rounded-xl bg-surface-800 border border-surface-700 text-surface-400 text-sm">Google OAuth not configured. Only needed for Blogger.</div>
-            {% elif google_status == 'disconnected' %}
-            <div class="mb-4 p-3 rounded-xl bg-surface-800 border border-surface-700 text-surface-300 text-sm">Disconnected.</div>
-            {% endif %}
-
-            {% if google_connected %}
-            <form method="POST" action="/disconnect/google">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                <button type="submit" class="w-full py-3 px-4 bg-surface-800 hover:bg-surface-700 text-white font-semibold rounded-xl transition-colors">🔌 Disconnect</button>
-            </form>
-            {% elif google_configured %}
-            <a href="/connect/google" class="block w-full text-center py-3 px-4 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-xl transition-colors">🔗 Connect Google</a>
-            {% else %}
-            <a href="/connect/google" class="block w-full text-center py-3 px-4 bg-surface-800 hover:bg-surface-700 text-surface-300 font-semibold rounded-xl transition-colors opacity-70">🔗 Connect Google</a>
-            <p class="text-xs text-surface-500 mt-2">
-                Only needed for Blogger. WordPress users can skip this.
-            </p>
-            {% endif %}
-        </div>
-        <!-- WordPress -->
-        <div class="bg-surface-900/50 border border-surface-700/50 rounded-2xl p-6">
-            <div class="flex items-center gap-3 mb-6">
-                <div class="w-10 h-10 bg-blue-500/10 rounded-xl flex items-center justify-center">📝</div>
-                <div>
-                    <h2 class="text-lg font-semibold text-white">WordPress</h2>
-                <button onclick="openHelp('wordpress')" class="ml-2 text-surface-400 hover:text-white text-sm">❓ Help</button>
-                    <p class="text-sm text-surface-400">Connect your WordPress blog</p>
-                </div>
-                {% if config.get('wordpress', {}).get('connected') %}
-                <div class="ml-auto px-3 py-1 bg-green-500/20 text-green-400 text-xs font-medium rounded-full">
-                    ✓ Connected
-                </div>
-                {% else %}
-                <div class="ml-auto px-3 py-1 bg-surface-700 text-surface-400 text-xs font-medium rounded-full">
-                    ○ Not connected
-                </div>
-                {% endif %}
-            </div>
-            
-            <form method="POST" action="/settings">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                <div class="space-y-4">
+                <!-- WordPress -->
+                <div id="wordpress-fields" class="{% if config.get('platform', 'blogger') != 'wordpress' %}hidden{% endif %} space-y-5">
                     <div>
                         <label class="block text-sm font-medium text-surface-300 mb-2">Blog URL</label>
-                        <input type="url" name="wp_url" value="{{ config.get('wordpress', {}).get('url', '') }}" 
+                        <input type="url" name="wp_url"
+                               class="w-full px-4 py-3 bg-surface-800 border border-surface-700 rounded-xl text-white focus:border-primary-500 focus:outline-none transition-colors"
                                placeholder="https://yourblog.com"
-                               class="w-full px-4 py-3 bg-surface-800 border border-surface-700 rounded-xl text-white focus:border-primary-500 focus:outline-none">
+                               value="{{ config.get('wp_url', '') }}">
                     </div>
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-surface-300 mb-2">Username</label>
-                            <input type="text" name="wp_username" value="{{ config.get('wordpress', {}).get('username', '') }}" 
+                            <input type="text" name="wp_username"
+                                   class="w-full px-4 py-3 bg-surface-800 border border-surface-700 rounded-xl text-white focus:border-primary-500 focus:outline-none transition-colors"
                                    placeholder="admin"
-                                   class="w-full px-4 py-3 bg-surface-800 border border-surface-700 rounded-xl text-white focus:border-primary-500 focus:outline-none">
+                                   value="{{ config.get('wp_username', '') }}">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-surface-300 mb-2">App Password</label>
-                            <input type="password" name="wp_app_password" value="{{ config.get('wordpress', {}).get('app_password', '') }}" 
+                            <input type="password" name="wp_app_password"
+                                   class="w-full px-4 py-3 bg-surface-800 border border-surface-700 rounded-xl text-white focus:border-primary-500 focus:outline-none transition-colors"
                                    placeholder="xxxx xxxx"
-                                   class="w-full px-4 py-3 bg-surface-800 border border-surface-700 rounded-xl text-white focus:border-primary-500 focus:outline-none">
+                                   value="{{ config.get('wp_app_password', '') }}">
                         </div>
                     </div>
                     <p class="text-xs text-surface-500">Generate in WordPress → Users → Profile → Application Passwords</p>
                 </div>
-                
-                <div class="flex gap-3 mt-6">
-                    <button type="submit" class="flex-1 py-3 px-4 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-xl transition-colors">
-                        💾 Save
+
+                <!-- Language -->
+                <div class="mt-8">
+                    <label class="block text-sm font-medium text-surface-300 mb-3">Language</label>
+                    <div class="grid grid-cols-3 gap-3" data-pick="language">
+                        <input type="hidden" name="language" id="language_input" value="{{ config.get('language', 'id') }}">
+                        <button type="button" data-val="id"
+                                class="py-3 px-4 rounded-xl text-sm font-medium border-2 transition-all
+                                {% if config.get('language', 'id') == 'id' %}border-primary-500 bg-primary-500/10 text-primary-400{% else %}border-surface-700 bg-surface-800/50 text-surface-400 hover:border-surface-600{% endif %}">
+                            🇮🇩 Indonesia
+                        </button>
+                        <button type="button" data-val="en"
+                                class="py-3 px-4 rounded-xl text-sm font-medium border-2 transition-all
+                                {% if config.get('language', 'id') == 'en' %}border-primary-500 bg-primary-500/10 text-primary-400{% else %}border-surface-700 bg-surface-800/50 text-surface-400 hover:border-surface-600{% endif %}">
+                            🇬🇧 English
+                        </button>
+                        <button type="button" data-val="mixed"
+                                class="py-3 px-4 rounded-xl text-sm font-medium border-2 transition-all
+                                {% if config.get('language', 'id') == 'mixed' %}border-primary-500 bg-primary-500/10 text-primary-400{% else %}border-surface-700 bg-surface-800/50 text-surface-400 hover:border-surface-600{% endif %}">
+                            🌏 Mixed
+                        </button>
+                    </div>
+                </div>
+
+                <div class="mt-8 pt-6 border-t border-surface-800">
+                    <button type="submit"
+                            class="px-6 py-3 bg-primary-500 hover:bg-primary-600 text-white font-semibold rounded-xl transition-colors">
+                        Save Blog Settings
                     </button>
-                    <button type="button" onclick="testWordPress()" 
-                            class="py-3 px-6 bg-surface-800 hover:bg-surface-700 text-white font-semibold rounded-xl transition-colors">
-                        🧪 Test
-                    </button>
                 </div>
-            </form>
-            
-            <div id="wp-test-result" class="hidden mt-4"></div>
-        </div>
-        
-    </div>
-    <!-- Right Column -->
-    <div class="space-y-6">
-        <!-- AI Provider -->
-        <div class="bg-surface-900/50 border border-surface-700/50 rounded-2xl p-6">
-            <div class="flex items-center gap-3 mb-6">
-                <div class="w-10 h-10 bg-purple-500/10 rounded-xl flex items-center justify-center">🤖</div>
-                <div>
-                    <h2 class="text-lg font-semibold text-white">AI Provider</h2>
-                <button onclick="openHelp('ai-provider')" class="ml-2 text-surface-400 hover:text-white text-sm">❓ Help</button>
-                    <p class="text-sm text-surface-400">Configure your AI model settings</p>
-                </div>
-                {% if config.get('ai', {}).get('api_key') %}
-                <div class="ml-auto px-3 py-1 bg-green-500/20 text-green-400 text-xs font-medium rounded-full">
-                    ✓ Connected
-                </div>
-                {% else %}
-                <div class="ml-auto px-3 py-1 bg-yellow-500/20 text-yellow-400 text-xs font-medium rounded-full">
-                    ⚠ Not configured
-                </div>
-                {% endif %}
             </div>
-            
-            <form method="POST" action="/settings">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                <div class="space-y-4">
-                    <div>
-                        <label class="block text-sm font-medium text-surface-300 mb-2">Provider</label>
-                        <div class="grid grid-cols-3 gap-2">
-                            <button type="button" onclick="selectProvider('openai')"
-                                    class="py-3 px-4 rounded-xl text-sm font-medium transition-all border-2
-                                    {% if config.get('ai', {}).get('provider', 'openai') == 'openai' %}
-                                        border-primary-500 bg-primary-500/10 text-primary-400
-                                    {% else %}
-                                        border-surface-700 bg-surface-800/50 text-surface-400 hover:border-surface-600
-                                    {% endif %}"
-                                    data-provider="openai">
-                                🤖 OpenAI
-                            </button>
-                            <button type="button" onclick="selectProvider('deepseek')"
-                                    class="py-3 px-4 rounded-xl text-sm font-medium transition-all border-2
-                                    {% if config.get('ai', {}).get('provider') == 'deepseek' %}
-                                        border-primary-500 bg-primary-500/10 text-primary-400
-                                    {% else %}
-                                        border-surface-700 bg-surface-800/50 text-surface-400 hover:border-surface-600
-                                    {% endif %}"
-                                    data-provider="deepseek">
-                                🧠 DeepSeek
-                            </button>
-                            <button type="button" onclick="selectProvider('custom')"
-                                    class="py-3 px-4 rounded-xl text-sm font-medium transition-all border-2
-                                    {% if config.get('ai', {}).get('provider') == 'custom' %}
-                                        border-primary-500 bg-primary-500/10 text-primary-400
-                                    {% else %}
-                                        border-surface-700 bg-surface-800/50 text-surface-400 hover:border-surface-600
-                                    {% endif %}"
-                                    data-provider="custom">
-                                ⚡ Custom
-                            </button>
-                        </div>
+
+            <!-- ====== AI TAB ====== -->
+            <div x-show="activeTab === 'ai'" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-y-1" x-transition:enter-end="opacity-100 translate-y-0" style="display: none;">
+                <div class="mb-8">
+                    <h2 class="text-2xl font-bold text-white">AI Provider</h2>
+                    <p class="text-surface-400 mt-1">Configure your AI model settings</p>
+                </div>
+
+                <!-- Provider -->
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-surface-300 mb-3">Provider</label>
+                    <div class="grid grid-cols-3 gap-3" data-pick="provider">
                         <input type="hidden" name="provider" id="provider_input" value="{{ config.get('ai', {}).get('provider', 'openai') }}">
+                        <button type="button" data-val="openai"
+                                class="py-3.5 px-4 rounded-xl text-sm font-medium transition-all border-2
+                                {% if config.get('ai', {}).get('provider', 'openai') == 'openai' %}border-primary-500 bg-primary-500/10 text-primary-400{% else %}border-surface-700 bg-surface-800/50 text-surface-400 hover:border-surface-600{% endif %}">
+                            🤖 OpenAI
+                        </button>
+                        <button type="button" data-val="deepseek"
+                                class="py-3.5 px-4 rounded-xl text-sm font-medium transition-all border-2
+                                {% if config.get('ai', {}).get('provider', 'openai') == 'deepseek' %}border-primary-500 bg-primary-500/10 text-primary-400{% else %}border-surface-700 bg-surface-800/50 text-surface-400 hover:border-surface-600{% endif %}">
+                            🧠 DeepSeek
+                        </button>
+                        <button type="button" data-val="custom"
+                                class="py-3.5 px-4 rounded-xl text-sm font-medium transition-all border-2
+                                {% if config.get('ai', {}).get('provider', 'openai') == 'custom' %}border-primary-500 bg-primary-500/10 text-primary-400{% else %}border-surface-700 bg-surface-800/50 text-surface-400 hover:border-surface-600{% endif %}">
+                            ⚡ Custom
+                        </button>
                     </div>
-                    
-                    <div id="base_url_field" class="{% if config.get('ai', {}).get('provider', 'openai') != 'custom' %}hidden{% endif %}">
-                        <label class="block text-sm font-medium text-surface-300 mb-2">Base URL</label>
-                        <input type="url" name="base_url" value="{{ config.get('ai', {}).get('base_url', '') }}" 
-                               placeholder="https://api.openai.com/v1"
-                               class="w-full px-4 py-3 bg-surface-800 border border-surface-700 rounded-xl text-white focus:border-primary-500 focus:outline-none">
-                    </div>
-                    
+                </div>
+
+                <!-- Base URL -->
+                <div id="base_url_field" class="{% if config.get('ai', {}).get('provider', 'openai') != 'custom' %}hidden{% endif %} mb-5">
+                    <label class="block text-sm font-medium text-surface-300 mb-2">Base URL</label>
+                    <input type="url" name="base_url"
+                           class="w-full px-4 py-3 bg-surface-800 border border-surface-700 rounded-xl text-white focus:border-primary-500 focus:outline-none transition-colors"
+                           placeholder="https://api.openai.com/v1"
+                           value="{{ config.get('ai', {}).get('base_url', '') }}">
+                </div>
+
+                <!-- API Key + Model -->
+                <div class="grid grid-cols-2 gap-5 mb-5">
                     <div>
                         <label class="block text-sm font-medium text-surface-300 mb-2">API Key</label>
-                        <input type="password" name="api_key" value="{{ config.get('ai', {}).get('api_key', '') }}" 
+                        <input type="password" name="api_key"
+                               class="w-full px-4 py-3 bg-surface-800 border border-surface-700 rounded-xl text-white focus:border-primary-500 focus:outline-none transition-colors"
                                placeholder="sk-..."
-                               class="w-full px-4 py-3 bg-surface-800 border border-surface-700 rounded-xl text-white focus:border-primary-500 focus:outline-none">
+                               value="{{ config.get('ai', {}).get('api_key', '') }}">
                     </div>
-                    
                     <div>
                         <label class="block text-sm font-medium text-surface-300 mb-2">Model</label>
-                        <input type="text" name="model" value="{{ config.get('ai', {}).get('model', 'gpt-4') }}" 
+                        <input type="text" name="model"
+                               class="w-full px-4 py-3 bg-surface-800 border border-surface-700 rounded-xl text-white focus:border-primary-500 focus:outline-none transition-colors"
                                placeholder="gpt-4"
-                               class="w-full px-4 py-3 bg-surface-800 border border-surface-700 rounded-xl text-white focus:border-primary-500 focus:outline-none">
+                               value="{{ config.get('ai', {}).get('model', '') }}">
                     </div>
                 </div>
-                
-                <div class="flex gap-3 mt-6">
-                    <button type="submit" class="flex-1 py-3 px-4 bg-primary-500 hover:bg-primary-600 text-white font-semibold rounded-xl transition-colors">
-                        💾 Save
-                    </button>
-                    <button type="button" onclick="testAIConnection()" 
-                            class="py-3 px-6 bg-surface-800 hover:bg-surface-700 text-white font-semibold rounded-xl transition-colors">
-                        🧪 Test
-                    </button>
-                </div>
-            </form>
-            
-            <div id="ai-test-result" class="hidden mt-4"></div>
-        </div>
-                <!-- Voice Guide -->
-        <div class="bg-surface-900/50 border border-surface-700/50 rounded-2xl p-6">
-            <div class="flex items-center gap-3 mb-6">
-                <div class="w-10 h-10 bg-pink-500/10 rounded-xl flex items-center justify-center">🎙️</div>
-                <div>
-                    <h2 class="text-lg font-semibold text-white">Voice Guide</h2>
-                <button onclick="openHelp('voice-guide')" class="ml-2 text-surface-400 hover:text-white text-sm">❓ Help</button>
-                    <p class="text-sm text-surface-400">AI-generated writing style</p>
-                </div>
-            </div>
-            
-            <div class="space-y-4">
-                <div>
-                    <label class="block text-sm font-medium text-surface-300 mb-2">Blog URL</label>
-                    <input type="url" id="voice_blog_url" placeholder="https://yourblog.com"
-                           class="w-full px-4 py-3 bg-surface-800 border border-surface-700 rounded-xl text-white focus:border-primary-500 focus:outline-none">
-                </div>
-                
-                <button onclick="generateVoiceGuide()" type="button" 
-                        class="w-full py-3 px-4 bg-pink-500 hover:bg-pink-600 text-white font-semibold rounded-xl transition-colors">
-                    🎙️ Generate Voice Guide
-                </button>
-                
-                <div id="voice_guide_result" class="hidden">
-                    <textarea id="voice_guide_content" rows="4"
-                              class="w-full px-4 py-3 bg-surface-800 border border-surface-700 rounded-xl text-white font-mono text-sm"></textarea>
-                    <button onclick="saveVoiceGuide()" type="button"
-                            class="mt-2 w-full py-2 px-4 bg-green-500 hover:bg-green-600 text-white font-medium rounded-xl">
-                        💾 Save
-                    </button>
-                </div>
-            </div>
-        </div>
-                <!-- Publishing (approval mode) -->
-        <div class="bg-surface-900/50 border border-surface-700/50 rounded-2xl p-6">
-            <div class="flex items-center gap-3 mb-6">
-                <div class="w-10 h-10 bg-yellow-500/10 rounded-xl flex items-center justify-center">✅</div>
-                <div>
-                    <h2 class="text-lg font-semibold text-white">Publishing</h2>
-                    <p class="text-sm text-surface-400">How much you approve before an article goes live</p>
-                </div>
-            </div>
-            
-            <div class="grid grid-cols-3 gap-3">
-                <button onclick="selectApproval('manual')"
-                        class="py-4 px-3 rounded-xl text-center transition-all border-2
-                        {% if config.get('approval_mode', 'soft') == 'manual' %}
-                            border-primary-500 bg-primary-500/10
-                        {% else %}
-                            border-surface-700 bg-surface-800/50 hover:border-surface-600
-                        {% endif %}"
-                        data-approval="manual">
-                    <div class="text-2xl mb-2">📝</div>
-                    <div class="text-sm font-medium {% if config.get('approval_mode', 'soft') == 'manual' %}text-primary-400{% else %}text-surface-400{% endif %}">Manual</div>
-                    <div class="text-xs text-surface-500 mt-1">Saved as draft — you click Publish</div>
-                </button>
-                
-                <button onclick="selectApproval('soft')"
-                        class="py-4 px-3 rounded-xl text-center transition-all border-2
-                        {% if config.get('approval_mode', 'soft') == 'soft' %}
-                            border-primary-500 bg-primary-500/10
-                        {% else %}
-                            border-surface-700 bg-surface-800/50 hover:border-surface-600
-                        {% endif %}"
-                        data-approval="soft">
-                    <div class="text-2xl mb-2">⚡</div>
-                    <div class="text-sm font-medium {% if config.get('approval_mode', 'soft') == 'soft' %}text-primary-400{% else %}text-surface-400{% endif %}">Soft</div>
-                    <div class="text-xs text-surface-500 mt-1">Auto-publish live if it passes the quality gate</div>
-                </button>
-                
-                <button onclick="selectApproval('full_auto')"
-                        class="py-4 px-3 rounded-xl text-center transition-all border-2
-                        {% if config.get('approval_mode', 'soft') == 'full_auto' %}
-                            border-primary-500 bg-primary-500/10
-                        {% else %}
-                            border-surface-700 bg-surface-800/50 hover:border-surface-600
-                        {% endif %}"
-                        data-approval="full_auto">
-                    <div class="text-2xl mb-2">🚀</div>
-                    <div class="text-sm font-medium {% if config.get('approval_mode', 'soft') == 'full_auto' %}text-primary-400{% else %}text-surface-400{% endif %}">Full Auto</div>
-                    <div class="text-xs text-surface-500 mt-1">Auto-publish live + rewrite &amp; retry if it fails</div>
-                </button>
-            </div>
-            <input type="hidden" name="approval_mode" id="approval_input" value="{{ config.get('approval_mode', 'soft') }}">
-            
-            <form method="POST" action="/settings" class="mt-4">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                <input type="hidden" name="approval_mode" id="approval_form_input" value="{{ config.get('approval_mode', 'soft') }}">
-                <button type="submit" class="w-full py-3 px-4 bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-400 font-semibold rounded-xl transition-colors">
-                    💾 Save Publishing
-                </button>
-            </form>
-        </div>        <!-- Pipeline Settings -->
-        <div class="bg-surface-900/50 border border-surface-700/50 rounded-2xl p-6">
-            <div class="flex items-center gap-3 mb-6">
-                <div class="w-10 h-10 bg-green-500/10 rounded-xl flex items-center justify-center">⚡</div>
-                <div>
-                    <h2 class="text-lg font-semibold text-white">Pipeline</h2>
-                    <p class="text-sm text-surface-400">Configure content pipeline</p>
-                </div>
-            </div>
-            
-            <form method="POST" action="/settings">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                <div class="space-y-4">
-                    <div>
-                        <label class="block text-sm font-medium text-surface-300 mb-2">WIP Limit</label>
-                        <input type="number" name="wip_limit" value="{{ config.get('pipeline', {}).get('wip_limit', 3) }}" min="1" max="10"
-                               class="w-full px-4 py-3 bg-surface-800 border border-surface-700 rounded-xl text-white focus:border-primary-500 focus:outline-none">
-                        <p class="text-xs text-surface-500 mt-1">Max articles in progress at once</p>
-                    </div>
 
-                    <p class="text-xs text-surface-500">
-                        Draft vs live is controlled by <span class="text-surface-300">Publishing</span> above.
-                    </p>
+                <!-- Test + Save -->
+                <div class="flex items-center gap-4 mt-8 pt-6 border-t border-surface-800">
+                    <button type="button" @click="testAI()"
+                            class="flex items-center gap-2 px-5 py-3 bg-surface-800 hover:bg-surface-700 text-surface-300 text-sm font-medium rounded-xl border border-surface-700/50 transition-colors"
+                            :disabled="aiTesting">
+                        <i data-lucide="zap" class="w-4 h-4"></i>
+                        <span x-text="aiTesting ? 'Testing...' : 'Test Connection'"></span>
+                    </button>
+                    <button type="submit"
+                            class="px-6 py-3 bg-primary-500 hover:bg-primary-600 text-white font-semibold rounded-xl transition-colors">
+                        Save AI Settings
+                    </button>
                 </div>
-                
-                <button type="submit" class="mt-6 w-full py-3 px-4 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-xl transition-colors">
-                    💾 Save Pipeline Settings
-                </button>
-            </form>
-        </div>
+
+                <!-- AI Test Result -->
+                <div x-show="aiResult" x-transition class="mt-4 p-4 rounded-xl"
+                     :class="aiResult?.success ? 'bg-green-500/10 border border-green-500/20' : 'bg-red-500/10 border border-red-500/20'">
+                    <p class="text-sm font-medium"
+                       :class="aiResult?.success ? 'text-green-400' : 'text-red-400'"
+                       x-text="aiResult?.success ? '✓ Connection successful' : '✗ ' + (aiResult?.error || 'Connection failed')"></p>
+                    <template x-if="aiResult?.success && aiResult?.model">
+                        <p class="text-xs text-surface-400 mt-1" x-text="'Model: ' + aiResult.model"></p>
+                    </template>
+                </div>
+            </div>
+
+            <!-- ====== PUBLISH TAB ====== -->
+            <div x-show="activeTab === 'publish'" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-y-1" x-transition:enter-end="opacity-100 translate-y-0" style="display: none;">
+                <div class="mb-8">
+                    <h2 class="text-2xl font-bold text-white">Publishing</h2>
+                    <p class="text-surface-400 mt-1">How articles get published</p>
+                </div>
+
+                <div class="grid grid-cols-3 gap-4" data-pick="approval_mode">
+                    <input type="hidden" name="approval_mode" id="approval_input" value="{{ config.get('approval_mode', 'auto') }}">
+
+                    <button type="button" data-val="manual"
+                            class="flex flex-col items-center gap-3 p-6 rounded-xl transition-all border-2
+                            {% if config.get('approval_mode', 'auto') == 'manual' %}border-primary-500 bg-primary-500/10 text-primary-400{% else %}border-surface-700 bg-surface-800/50 text-surface-400 hover:border-surface-600{% endif %}">
+                        <div class="w-12 h-12 rounded-xl flex items-center justify-center
+                            {% if config.get('approval_mode', 'auto') == 'manual' %}bg-primary-500/20{% else %}bg-surface-700/50{% endif %}">
+                            <i data-lucide="file-edit" class="w-6 h-6"></i>
+                        </div>
+                        <div class="text-center">
+                            <p class="text-sm font-semibold">Draft</p>
+                            <p class="text-xs text-surface-500 mt-1">Save as draft, you publish</p>
+                        </div>
+                    </button>
+
+                    <button type="button" data-val="auto"
+                            class="flex flex-col items-center gap-3 p-6 rounded-xl transition-all border-2
+                            {% if config.get('approval_mode', 'auto') == 'auto' %}border-primary-500 bg-primary-500/10 text-primary-400{% else %}border-surface-700 bg-surface-800/50 text-surface-400 hover:border-surface-600{% endif %}">
+                        <div class="w-12 h-12 rounded-xl flex items-center justify-center
+                            {% if config.get('approval_mode', 'auto') == 'auto' %}bg-primary-500/20{% else %}bg-surface-700/50{% endif %}">
+                            <i data-lucide="rocket" class="w-6 h-6"></i>
+                        </div>
+                        <div class="text-center">
+                            <p class="text-sm font-semibold">Auto-publish</p>
+                            <p class="text-xs text-surface-500 mt-1">Publish after quality gate</p>
+                        </div>
+                    </button>
+
+                    <button type="button" data-val="full_auto"
+                            class="flex flex-col items-center gap-3 p-6 rounded-xl transition-all border-2
+                            {% if config.get('approval_mode', 'auto') == 'full_auto' %}border-primary-500 bg-primary-500/10 text-primary-400{% else %}border-surface-700 bg-surface-800/50 text-surface-400 hover:border-surface-600{% endif %}">
+                        <div class="w-12 h-12 rounded-xl flex items-center justify-center
+                            {% if config.get('approval_mode', 'auto') == 'full_auto' %}bg-primary-500/20{% else %}bg-surface-700/50{% endif %}">
+                            <i data-lucide="zap" class="w-6 h-6"></i>
+                        </div>
+                        <div class="text-center">
+                            <p class="text-sm font-semibold">Full Auto</p>
+                            <p class="text-xs text-surface-500 mt-1">Auto-publish + auto-retry</p>
+                        </div>
+                    </button>
+                </div>
+
+                <div class="mt-8 pt-6 border-t border-surface-800">
+                    <button type="submit"
+                            class="px-6 py-3 bg-primary-500 hover:bg-primary-600 text-white font-semibold rounded-xl transition-colors">
+                        Save Publishing Settings
+                    </button>
+                </div>
+            </div>
+
+            <!-- ====== VOICE TAB ====== -->
+            <div x-show="activeTab === 'voice'" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-y-1" x-transition:enter-end="opacity-100 translate-y-0" style="display: none;">
+                <div class="mb-8">
+                    <h2 class="text-2xl font-bold text-white">Voice Guide</h2>
+                    <p class="text-surface-400 mt-1">AI-generated writing style from your blog</p>
+                </div>
+
+                <div class="flex gap-4 mb-6">
+                    <div class="flex-1">
+                        <label class="block text-sm font-medium text-surface-300 mb-2">Blog URL</label>
+                        <input type="url" id="voice_blog_url"
+                               class="w-full px-4 py-3 bg-surface-800 border border-surface-700 rounded-xl text-white focus:border-primary-500 focus:outline-none transition-colors"
+                               placeholder="https://yourblog.com"
+                               value="{{ config.get('domain', '') }}">
+                    </div>
+                    <div class="flex items-end">
+                        <button type="button" @click="generateVoiceGuide()"
+                                class="px-6 py-3 bg-pink-500 hover:bg-pink-600 text-white font-semibold rounded-xl transition-colors flex items-center gap-2"
+                                :disabled="voiceLoading">
+                            <i data-lucide="mic" class="w-4 h-4"></i>
+                            <span x-text="voiceLoading ? 'Generating...' : 'Generate'"></span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Voice Result -->
+                <div x-show="voiceResult" x-transition class="p-4 rounded-xl"
+                     :class="voiceResult?.success ? 'bg-green-500/10 border border-green-500/20' : 'bg-red-500/10 border border-red-500/20'">
+                    <p class="text-sm font-medium"
+                       :class="voiceResult?.success ? 'text-green-400' : 'text-red-400'"
+                       x-text="voiceResult?.success ? '✓ Voice guide generated' : '✗ ' + (voiceResult?.error || 'Generation failed')"></p>
+                </div>
+
+                <div class="mt-8 pt-6 border-t border-surface-800">
+                    <p class="text-sm text-surface-500">Voice guide helps AI match your blog's writing style</p>
+                </div>
+            </div>
+
+        </form>
     </div>
 </div>
 
 <script>
-function selectProvider(provider) {
-    document.getElementById('provider_input').value = provider;
-    document.querySelectorAll('[data-provider]').forEach(btn => {
-        if (btn.dataset.provider === provider) {
-            btn.className = btn.className.replace('border-surface-700 bg-surface-800/50', 'border-primary-500 bg-primary-500/10');
-            btn.className = btn.className.replace('text-surface-400', 'text-primary-400');
-        } else {
-            btn.className = btn.className.replace('border-primary-500 bg-primary-500/10', 'border-surface-700 bg-surface-800/50');
-            btn.className = btn.className.replace('text-primary-400', 'text-surface-400');
-        }
-    });
-    
-    // Show/hide base URL field
-    const baseUrlField = document.getElementById('base_url_field');
-    if (provider === 'custom') {
-        baseUrlField.classList.remove('hidden');
-    } else {
-        baseUrlField.classList.add('hidden');
-    }
-}
+function settingsPage() {
+    return {
+        activeTab: 'blog',
+        aiTesting: false,
+        aiResult: null,
+        voiceLoading: false,
+        voiceResult: null,
 
-// Handle data-pick button groups (language, etc.)
-document.addEventListener('DOMContentLoaded', function() {
-    document.querySelectorAll('[data-pick]').forEach(function(group) {
-        var inputId = group.id ? group.id + '_input' : null;
-        // Find hidden input by convention: data-pick="language" → #language_input
-        var pickName = group.getAttribute('data-pick');
-        var hiddenInput = document.getElementById(pickName + '_input');
-        
-        group.querySelectorAll('[data-val]').forEach(function(btn) {
-            btn.addEventListener('click', function() {
-                var val = this.getAttribute('data-val');
-                if (hiddenInput) hiddenInput.value = val;
-                
-                // Update visual state
-                group.querySelectorAll('[data-val]').forEach(function(b) {
-                    b.className = b.className.replace('border-primary-500 bg-primary-500/10 text-primary-400', 'border-surface-700 bg-surface-800/50 text-surface-400');
-                });
-                this.className = this.className.replace('border-surface-700 bg-surface-800/50 text-surface-400', 'border-primary-500 bg-primary-500/10 text-primary-400');
+        init() {
+            // Listen for platform changes
+            document.getElementById('platform-picker').addEventListener('click', () => {
+                setTimeout(() => this.updateVisibility(), 10);
             });
-        });
-    });
-});
-
-function updateDomainFromBlog(select) {
-    var option = select.options[select.selectedIndex];
-    var url = option.getAttribute('data-url') || '';
-    // Extract domain from URL (e.g., https://www.bagasunix.com/ → bagasunix.com)
-    if (url) {
-        try {
-            var hostname = new URL(url).hostname;
-            hostname = hostname.replace(/^www\./, '');
-            document.getElementById('blog_domain_input').value = hostname;
-        } catch(e) {}
-    }
-}
-
-function selectPlatform(platform) {
-    document.getElementById('platform_input').value = platform;
-    document.querySelectorAll('[data-platform]').forEach(btn => {
-        if (btn.dataset.platform === platform) {
-            btn.className = btn.className.replace('border-surface-700 bg-surface-800/50', 'border-primary-500 bg-primary-500/10');
-            btn.className = btn.className.replace('text-surface-400', 'text-primary-400');
-        } else {
-            btn.className = btn.className.replace('border-primary-500 bg-primary-500/10', 'border-surface-700 bg-surface-800/50');
-            btn.className = btn.className.replace('text-primary-400', 'text-surface-400');
-        }
-    });
-    const bid = document.getElementById('blogger_id_field');
-    if (platform === 'blogger') { bid.classList.remove('hidden'); } else { bid.classList.add('hidden'); }
-}
-
-function selectApproval(mode) {
-    document.getElementById('approval_input').value = mode;
-    document.getElementById('approval_form_input').value = mode;
-    document.querySelectorAll('[data-approval]').forEach(btn => {
-        if (btn.dataset.approval === mode) {
-            btn.className = btn.className.replace('border-surface-700 bg-surface-800/50', 'border-primary-500 bg-primary-500/10');
-            btn.className = btn.className.replace('text-surface-400', 'text-primary-400');
-        } else {
-            btn.className = btn.className.replace('border-primary-500 bg-primary-500/10', 'border-surface-700 bg-surface-800/50');
-            btn.className = btn.className.replace('text-primary-400', 'text-surface-400');
-        }
-    });
-}
-
-function testAIConnection() {
-    const resultDiv = document.getElementById('ai-test-result');
-    resultDiv.className = 'mt-4 p-4 rounded-xl bg-surface-800';
-    resultDiv.innerHTML = '<p class="text-surface-400">Testing connection...</p>';
-    resultDiv.classList.remove('hidden');
-    
-    fetch('/api/ai/test', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            provider: document.getElementById('provider_input').value,
-            base_url: (document.querySelector('[name="base_url"]') || {}).value || '',
-            model: (document.querySelector('[name="model"]') || {}).value || '',
-            api_key: (document.querySelector('[name="api_key"]') || {}).value || ''
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            resultDiv.className = 'mt-4 p-4 rounded-xl bg-green-500/10 border border-green-500/20';
-            resultDiv.innerHTML = '<p class="text-green-400 font-medium">✓ Connected</p><p class="text-sm text-surface-400 mt-1">' + data.provider + ' / ' + data.model + '</p>';
-        } else {
-            resultDiv.className = 'mt-4 p-4 rounded-xl bg-red-500/10 border border-red-500/20';
-            resultDiv.innerHTML = '<p class="text-red-400 font-medium">✗ Failed</p><p class="text-sm text-red-300 mt-1">' + (data.error || 'Unknown error') + '</p>';
-        }
-    })
-    .catch(error => {
-        resultDiv.className = 'mt-4 p-4 rounded-xl bg-red-500/10 border border-red-500/20';
-        resultDiv.innerHTML = '<p class="text-red-400 font-medium">✗ Network error</p>';
-    });
-}
-
-function testWordPress() {
-    const resultDiv = document.getElementById('wp-test-result');
-    resultDiv.className = 'mt-4 p-4 rounded-xl bg-surface-800';
-    resultDiv.innerHTML = '<p class="text-surface-400">Testing connection...</p>';
-    resultDiv.classList.remove('hidden');
-    
-    fetch('/api/wordpress/test', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            base_url: document.querySelector('[name="wp_url"]').value,
-            username: document.querySelector('[name="wp_username"]').value,
-            app_password: document.querySelector('[name="wp_app_password"]').value
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            resultDiv.className = 'mt-4 p-4 rounded-xl bg-green-500/10 border border-green-500/20';
-            resultDiv.innerHTML = '<p class="text-green-400 font-medium">✓ Connected</p><p class="text-sm text-surface-400 mt-1">' + data.site_name + '</p>';
-        } else {
-            resultDiv.className = 'mt-4 p-4 rounded-xl bg-red-500/10 border border-red-500/20';
-            resultDiv.innerHTML = '<p class="text-red-400 font-medium">✗ Failed</p><p class="text-sm text-red-300 mt-1">' + (data.error || 'Unknown error') + '</p>';
-        }
-    })
-    .catch(error => {
-        resultDiv.className = 'mt-4 p-4 rounded-xl bg-red-500/10 border border-red-500/20';
-        resultDiv.innerHTML = '<p class="text-red-400 font-medium">✗ Network error</p>';
-    });
-}
-
-function generateVoiceGuide() {
-    const blogUrl = document.getElementById('voice_blog_url').value;
-    if (!blogUrl) {
-        alert('Please enter a blog URL');
-        return;
-    }
-    
-    const resultDiv = document.getElementById('voice_guide_result');
-    resultDiv.innerHTML = '<p class="text-surface-400 text-center py-4">Generating...</p>';
-    resultDiv.classList.remove('hidden');
-    
-    fetch('/api/voice-guide/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ blog_id: 1, blog_url: blogUrl })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            document.getElementById('voice_guide_content').value = JSON.stringify(data.voice_guide, null, 2);
-        } else {
-            resultDiv.innerHTML = '<p class="text-red-400 text-center py-4">' + data.error + '</p>';
-        }
-    });
-}
-
-function saveVoiceGuide() {
-    const content = document.getElementById('voice_guide_content').value;
-    if (!content) return;
-    
-    try {
-        const guide = JSON.parse(content);
-        fetch('/api/voice-guide/1', {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(guide)
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) alert('Voice guide saved!');
-        });
-    } catch (e) {
-        alert('Invalid JSON');
-    }
-}
-
-// Switch Platform Modal
-let selectedNewPlatform = '';
-
-function openSwitchPlatform() {
-    const modal = document.getElementById('switch-modal');
-    modal.classList.remove('hidden');
-
-    // Hide all steps first
-    document.getElementById('switch-step-disconnect').classList.add('hidden');
-    document.getElementById('switch-step-check').classList.add('hidden');
-    document.getElementById('switch-step-select').classList.add('hidden');
-    document.getElementById('switch-step-loading').classList.add('hidden');
-
-    // Check if Google connected (must disconnect first for Blogger)
-    const googleConnected = {{ 'true' if google_connected else 'false' }};
-    const currentPlatform = '{{ config.get("platform", "blogger") }}';
-
-    if (googleConnected && currentPlatform === 'blogger') {
-        document.getElementById('switch-step-disconnect').classList.remove('hidden');
-        return;
-    }
-
-    // Check active processes
-    fetch('/api/blogs/check-active?key={{ session.get("license_key", "") }}')
-        .then(r => r.json())
-        .then(data => {
-            if (data.has_active) {
-                showActiveProcesses(data);
-            } else {
-                showPlatformSelect();
-            }
-        })
-        .catch(() => showPlatformSelect());
-}
-
-function showActiveProcesses(data) {
-    document.getElementById('switch-step-disconnect').classList.add('hidden');
-    document.getElementById('switch-step-check').classList.remove('hidden');
-    document.getElementById('switch-step-select').classList.add('hidden');
-    document.getElementById('switch-step-loading').classList.add('hidden');
-
-    const list = document.getElementById('active-list');
-    list.innerHTML = '';
-
-    if (data.articles && data.articles.length > 0) {
-        data.articles.forEach(a => {
-            list.innerHTML += '<div class="p-2 bg-surface-700/50 rounded-lg text-sm"><span class="text-surface-300">' + a.title + '</span> <span class="text-xs text-surface-500">(' + a.stage + ')</span></div>';
-        });
-    }
-    if (data.jobs && data.jobs.length > 0) {
-        data.jobs.forEach(j => {
-            list.innerHTML += '<div class="p-2 bg-surface-700/50 rounded-lg text-sm"><span class="text-surface-300">' + j.job_type + '</span> <span class="text-xs text-surface-500">(' + j.status + ')</span></div>';
-        });
-    }
-    if (data.pipelines && data.pipelines.length > 0) {
-        data.pipelines.forEach(p => {
-            list.innerHTML += '<div class="p-2 bg-surface-700/50 rounded-lg text-sm"><span class="text-surface-300">Pipeline</span> <span class="text-xs text-surface-500">(' + p.stage + ')</span></div>';
-        });
-    }
-}
-
-function showPlatformSelect() {
-    document.getElementById('switch-step-disconnect').classList.add('hidden');
-    document.getElementById('switch-step-check').classList.add('hidden');
-    document.getElementById('switch-step-select').classList.remove('hidden');
-    document.getElementById('switch-step-loading').classList.add('hidden');
-}
-
-function closeSwitchModal() {
-    document.getElementById('switch-modal').classList.add('hidden');
-    selectedNewPlatform = '';
-    document.querySelectorAll('.new-platform-btn').forEach(btn => {
-        btn.className = btn.className.replace('border-primary-500 bg-primary-500/10 text-primary-400', 'border-surface-700 bg-surface-800/50 text-surface-400');
-    });
-    document.getElementById('new-blogger-fields').classList.add('hidden');
-    document.getElementById('new-wp-fields').classList.add('hidden');
-}
-
-function selectNewPlatform(platform) {
-    selectedNewPlatform = platform;
-    document.querySelectorAll('.new-platform-btn').forEach(btn => {
-        if (btn.dataset.platform === platform) {
-            btn.className = btn.className.replace('border-surface-700 bg-surface-800/50 text-surface-400', 'border-primary-500 bg-primary-500/10 text-primary-400');
-        } else {
-            btn.className = btn.className.replace('border-primary-500 bg-primary-500/10 text-primary-400', 'border-surface-700 bg-surface-800/50 text-surface-400');
-        }
-    });
-    document.getElementById('new-blogger-fields').classList.toggle('hidden', platform !== 'blogger');
-    document.getElementById('new-wp-fields').classList.toggle('hidden', platform !== 'wordpress');
-}
-
-function cancelAndSwitch() {
-    document.getElementById('switch-step-disconnect').classList.add('hidden');
-    document.getElementById('switch-step-check').classList.add('hidden');
-    document.getElementById('switch-step-loading').classList.remove('hidden');
-
-    fetch('/api/blogs/cancel-active', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ license_key: '{{ session.get("license_key", "") }}' })
-    })
-    .then(r => r.json())
-    .then(data => {
-        if (data.success) {
-            showPlatformSelect();
-        } else {
-            alert('Gagal membatalkan: ' + (data.error || 'Unknown error'));
-            closeSwitchModal();
-        }
-    })
-    .catch(() => {
-        alert('Network error');
-        closeSwitchModal();
-    });
-}
-
-function disconnectAndContinue() {
-    document.getElementById('switch-step-disconnect').classList.add('hidden');
-    document.getElementById('switch-step-loading').classList.remove('hidden');
-
-    fetch('/disconnect/google', {
-        method: 'POST',
-        headers: { 
-            'Content-Type': 'application/x-www-form-urlencoded',
-            'X-Requested-With': 'XMLHttpRequest'
+            // Listen for provider changes
+            document.querySelector('[data-pick="provider"]').addEventListener('click', () => {
+                setTimeout(() => this.updateBaseUrl(), 10);
+            });
         },
-        body: 'csrf_token={{ csrf_token() }}'
-    })
-    .then(r => r.json())
-    .then(data => {
-        if (data.success) {
-            fetch('/api/blogs/check-active?key={{ session.get("license_key", "") }}')
-                .then(r => r.json())
-                .then(activeData => {
-                    document.getElementById('switch-step-loading').classList.add('hidden');
-                    if (activeData.has_active) {
-                        showActiveProcesses(activeData);
-                    } else {
-                        showPlatformSelect();
-                    }
-                })
-                .catch(() => {
-                    document.getElementById('switch-step-loading').classList.add('hidden');
-                    showPlatformSelect();
+
+        updateVisibility() {
+            const platform = document.getElementById('platform_input').value;
+            document.getElementById('blogger-fields').classList.toggle('hidden', platform !== 'blogger');
+            document.getElementById('wordpress-fields').classList.toggle('hidden', platform !== 'wordpress');
+        },
+
+        updateBaseUrl() {
+            const provider = document.getElementById('provider_input').value;
+            document.getElementById('base_url_field').classList.toggle('hidden', provider !== 'custom');
+        },
+
+        async testAI() {
+            this.aiTesting = true;
+            this.aiResult = null;
+            try {
+                const resp = await fetch('/api/ai/test', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'same-origin',
+                    body: JSON.stringify({
+                        provider: document.querySelector('[name="provider"]').value,
+                        api_key: document.querySelector('[name="api_key"]').value,
+                        model: document.querySelector('[name="model"]').value,
+                        base_url: document.querySelector('[name="base_url"]')?.value || ''
+                    })
                 });
-        } else {
-            alert('Gagal disconnect: ' + (data.error || 'Unknown error'));
-            closeSwitchModal();
+                this.aiResult = await resp.json();
+            } catch (e) {
+                this.aiResult = { success: false, error: 'Network error' };
+            }
+            this.aiTesting = false;
+        },
+
+        async generateVoiceGuide() {
+            const blogUrl = document.getElementById('voice_blog_url').value;
+            if (!blogUrl) {
+                this.voiceResult = { success: false, error: 'Please enter a blog URL' };
+                return;
+            }
+            this.voiceLoading = true;
+            this.voiceResult = null;
+            try {
+                const resp = await fetch('/api/voice-guide/generate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'same-origin',
+                    body: JSON.stringify({ blog_url: blogUrl })
+                });
+                this.voiceResult = await resp.json();
+            } catch (e) {
+                this.voiceResult = { success: false, error: 'Network error' };
+            }
+            this.voiceLoading = false;
         }
-    })
-    .catch(() => {
-        alert('Network error');
-        closeSwitchModal();
-    });
-}
-
-function saveNewPlatform() {
-    if (!selectedNewPlatform) {
-        alert('Pilih platform dulu');
-        return;
-    }
-
-    let domain = '';
-    let blogId = '';
-
-    if (selectedNewPlatform === 'blogger') {
-        const select = document.getElementById('new-blog-select');
-        if (!select.value) {
-            alert('Pilih blog dulu');
-            return;
-        }
-        blogId = select.value;
-        const option = select.options[select.selectedIndex];
-        const url = option.getAttribute('data-url') || '';
-        if (url) {
-            try { domain = new URL(url).hostname.replace(/^www\./, ''); } catch(e) {}
-        }
-    } else {
-        domain = document.getElementById('new-wp-url').value;
-        if (!domain) {
-            alert('Masukkan WordPress URL dulu');
-            return;
-        }
-    }
-
-    const language = document.getElementById('new-language').value;
-
-    document.getElementById('switch-step-select').classList.add('hidden');
-    document.getElementById('switch-step-loading').classList.remove('hidden');
-
-    fetch('/api/blogs/switch-platform', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            license_key: '{{ session.get("license_key", "") }}',
-            platform: selectedNewPlatform,
-            domain: domain,
-            blog_id: blogId
-        })
-    })
-    .then(r => r.json())
-    .then(data => {
-        if (data.success) {
-            fetch('/settings', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: 'csrf_token={{ csrf_token() }}&language=' + language + '&platform=' + selectedNewPlatform
-            }).then(() => {
-                window.location.reload();
-            });
-        } else {
-            alert('Gagal: ' + (data.message || data.error || 'Unknown error'));
-            showPlatformSelect();
-        }
-    })
-    .catch(() => {
-        alert('Network error');
-        showPlatformSelect();
-    });
+    };
 }
 </script>
 {% endblock %}

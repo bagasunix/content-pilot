@@ -95,7 +95,7 @@ class TelegramNotifier:
 def load_notifier(config_path: Optional[str] = None) -> TelegramNotifier:
     """Load notifier dari config"""
     if config_path is None:
-        config_path = str(Path.home() / "Project/blog-lifecycle-pro/workspace/config.yaml")
+        config_path = str(Path.home() / "Project/content-pilot/workspace/config.yaml")
     
     try:
         import yaml
