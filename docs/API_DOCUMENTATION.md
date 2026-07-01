@@ -156,6 +156,116 @@ curl -H "X-API-Key: your-admin-key" https://api.contentpilot.dev/api/stats
 
 ---
 
+## 📝 Blog Management
+
+### Check Active Processes
+
+```bash
+curl -X GET "https://api.contentpilot.dev/api/blogs/check-active?key=SB-XXXX-XXXX-XXXX"
+```
+
+**Response:**
+```json
+{
+  "has_active": true,
+  "articles": [
+    {"id": 1, "title": "Article Title", "stage": "writing", "created_at": "2026-07-01 10:00:00"}
+  ],
+  "jobs": [
+    {"id": 1, "job_type": "suggestion", "status": "pending", "created_at": "2026-07-01 10:00:00"}
+  ],
+  "pipelines": [
+    {"id": 1, "article_id": 1, "stage": "researching", "started_at": "2026-07-01 10:00:00"}
+  ],
+  "total_active": 3
+}
+```
+
+### Cancel Active Processes
+
+```bash
+curl -X POST https://api.contentpilot.dev/api/blogs/cancel-active \
+  -H "Content-Type: application/json" \
+  -d '{"license_key": "SB-XXXX-XXXX-XXXX"}'
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "cancelled_articles": 2,
+  "cancelled_jobs": 1,
+  "cancelled_pipelines": 1,
+  "total_cancelled": 4
+}
+```
+
+### Switch Platform
+
+```bash
+curl -X POST https://api.contentpilot.dev/api/blogs/switch-platform \
+  -H "Content-Type: application/json" \
+  -d '{"license_key": "SB-XXXX-XXXX-XXXX", "platform": "wordpress", "domain": "myblog.com", "blog_id": ""}'
+```
+
+**Response (success):**
+```json
+{
+  "success": true,
+  "platform": "wordpress"
+}
+```
+
+**Response (has active processes):**
+```json
+{
+  "error": "has_active_processes",
+  "message": "Masih ada artikel dalam proses. Batalkan dulu."
+}
+```
+
+### Check Blog Status
+
+```bash
+curl -X GET "https://api.contentpilot.dev/api/blogs/check?key=SB-XXXX-XXXX-XXXX"
+```
+
+**Response:**
+```json
+{
+  "connected": true,
+  "blog": {
+    "id": 1,
+    "domain": "myblog.com",
+    "blog_id": "1234567890",
+    "platform": "blogger"
+  }
+}
+```
+
+### List User Blogs
+
+```bash
+curl -X GET "https://api.contentpilot.dev/api/blogs/list?key=SB-XXXX-XXXX-XXXX"
+```
+
+**Response:**
+```json
+{
+  "blogs": [
+    {
+      "id": 1,
+      "domain": "myblog.com",
+      "blog_id": "1234567890",
+      "platform": "blogger",
+      "created_at": "2026-07-01 10:00:00"
+    }
+  ]
+}
+```
+
+---
+
 ## ⚠️ Rate Limits
 
 | Endpoint | Limit |

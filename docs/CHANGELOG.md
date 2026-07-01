@@ -1,5 +1,31 @@
 # ContentPilot — Changelog
 
+## 2026-07-01 — Settings Page & Platform Switching
+
+### Added
+- **Server endpoints for platform switching**:
+  - `/api/blogs/check-active` — check active articles, jobs, and pipelines
+  - `/api/blogs/cancel-active` — cancel all active processes
+  - `/api/blogs/switch-platform` — switch platform with safety checks (no active processes)
+- **"Ganti Platform" button** — in Blogger section, allows switching between Blogger/WordPress
+  - Step-by-step modal: Disconnect Google → Check active processes → Select new platform
+  - Safety checks: must disconnect Google first, must cancel active processes
+  - Language selector included in platform switch flow
+- **Blog lock mechanism** — once blog is saved to server DB, platform is locked
+  - Server-side validation via `/api/blogs/check`
+  - Anti-cheat: detects mismatch between local config and server DB
+
+### Fixed
+- **Blogger dropdown logic** — when Google connected, always show dropdown or saved info (not manual input)
+  - If `blogger_blogs` empty but `config.blog_id` exists → show saved info
+  - If Google not connected → show manual input (fresh start only)
+- **Settings page structure** — preserved original card layout (Blog, Google/Blogger, WordPress separate)
+
+### Updated
+- **web/app.py** — added 3 new server endpoints + route handler updates
+- **web/templates/settings.html** — added switch platform modal + JavaScript functions
+- **.gitignore** — added `web/workspace/` (local only, contains symlinks and credentials)
+
 ## 2026-06-30 — UI & Pagination Update
 
 ### Added
