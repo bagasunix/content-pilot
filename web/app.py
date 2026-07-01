@@ -350,12 +350,41 @@ def settings():
                 blogger_blogs = result["blogs"]
         except Exception:
             pass
-    
+
+    # Check server DB for saved blog (anti-cheat: validate local config vs server)
+    server_blog = None
+    try:
+        license_key = session.get('license_key', '')
+        blog_check = server_request("GET", f"/api/blogs/check?key={license_key}")
+        if blog_check and blog_check.get("connected") and blog_check.get("blog"):
+            server_blog = blog_check["blog"]
+    except Exception:
+        pass
+
+    # Detect mismatch: local config says one blog, server DB says another
+    blog_mismatch = False
+    if server_blog and config.get('blog_id'):
+        if str(server_blog.get('blog_id', '')) != str(config.get('blog_id', '')):
+            blog_mismatch = True
+
+    # Check active processes for platform switch
+    active_processes = {"has_active": False, "articles": [], "jobs": [], "pipelines": [], "total_active": 0}
+    try:
+        license_key = session.get('license_key', '')
+        active_check = server_request("GET", f"/api/blogs/check-active?key={license_key}")
+        if active_check and not active_check.get("error"):
+            active_processes = active_check
+    except Exception:
+        pass
+
     return render_template('settings.html', license=license_data, config=config, schedule=schedule,
                            google_connected=google_connected(),
                            google_configured=bool(load_google_client()[0]),
                            google_status=request.args.get('google'),
-                           blogger_blogs=blogger_blogs)
+                           blogger_blogs=blogger_blogs,
+                           server_blog=server_blog,
+                           blog_mismatch=blog_mismatch,
+                           active_processes=active_processes)
 
 @app.route('/settings/save-schedule', methods=['POST'])
 def save_schedule():
@@ -995,6 +1024,10 @@ def disconnect_google():
         pass
     
     session.pop('blogger_connected', None)
+    
+    # Return JSON if called via AJAX fetch, otherwise redirect
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return jsonify({"success": True})
     return redirect(url_for('settings', google='disconnected'))
 
 @app.route('/monitor')

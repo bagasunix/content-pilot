@@ -62,3 +62,6 @@ build/
 workspace/credentials.json
 workspace/token.json
 workspace/.license
+
+# Client workspace (symlink, local only)
+web/workspace/
